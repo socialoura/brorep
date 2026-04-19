@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createOrder, getOrderByPaymentIntent, scheduleFollowUpEmails, addLoyaltyPoints } from "@/lib/db";
+import { createOrder, getOrderByPaymentIntent, addLoyaltyPoints } from "@/lib/db";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { sendDiscordOrderNotification } from "@/lib/discord";
 
@@ -81,20 +81,6 @@ export async function POST(req: NextRequest) {
       });
     } catch (discordErr) {
       console.error("Failed to send Discord notification:", discordErr);
-    }
-
-    // Schedule follow-up email sequence (J+1, J+3, J+7)
-    if (orderId && email) {
-      try {
-        await scheduleFollowUpEmails({
-          orderId,
-          email,
-          username: meta.username || "",
-          platform: meta.platform || "tiktok",
-        });
-      } catch (scheduleErr) {
-        console.error("Failed to schedule follow-up emails:", scheduleErr);
-      }
     }
 
     // Credit loyalty points (1€ = 10 pts, so cents / 10)

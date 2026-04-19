@@ -166,43 +166,6 @@ export async function updateOrderStatus(stripePaymentIntentId: string, status: s
   await sql`UPDATE orders SET status = ${status} WHERE stripe_payment_intent_id = ${stripePaymentIntentId}`;
 }
 
-export async function scheduleFollowUpEmails(params: {
-  orderId: number;
-  email: string;
-  username: string;
-  platform: string;
-}) {
-  const { orderId, email, username, platform } = params;
-  const now = new Date();
-
-  const schedule = [
-    { template: "day1", delayHours: 24 },
-    { template: "day3", delayHours: 72 },
-    { template: "day7", delayHours: 168 },
-  ];
-
-  for (const s of schedule) {
-    const sendAt = new Date(now.getTime() + s.delayHours * 60 * 60 * 1000);
-    await sql`
-      INSERT INTO scheduled_emails (order_id, email, username, platform, template, send_at)
-      VALUES (${orderId}, ${email}, ${username}, ${platform}, ${s.template}, ${sendAt.toISOString()})
-    `;
-  }
-}
-
-export async function getDueEmails() {
-  return await sql`
-    SELECT * FROM scheduled_emails
-    WHERE sent = false AND send_at <= NOW()
-    ORDER BY send_at ASC
-    LIMIT 50
-  `;
-}
-
-export async function markEmailSent(id: number) {
-  await sql`UPDATE scheduled_emails SET sent = true WHERE id = ${id}`;
-}
-
 export async function getOrderByPaymentIntent(piId: string) {
   const rows = await sql`SELECT * FROM orders WHERE stripe_payment_intent_id = ${piId} LIMIT 1`;
   return rows[0] || null;
