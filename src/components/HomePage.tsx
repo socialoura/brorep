@@ -228,12 +228,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Link to YouTube */}
-            <div style={{ marginTop: "32px" }}>
-              <a href="/youtube" style={{ fontSize: "12px", color: "rgb(107, 117, 111)", textDecoration: "underline" }}>
-                Tu cherches YouTube ? C&apos;est par ici
-              </a>
-            </div>
           </div>
         );
 
