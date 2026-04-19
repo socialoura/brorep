@@ -40,7 +40,7 @@ function YouTubeLogo() {
 
 const steps = [
   {
-    label: "Connexion au profil",
+    label: "L'IA se connecte au profil",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "rgb(0, 255, 76)" }}>
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
@@ -63,7 +63,7 @@ const steps = [
     ),
   },
   {
-    label: "Analyse de l'engagement",
+    label: "L'IA analyse l'engagement",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 3v16a2 2 0 0 0 2 2h16" />
@@ -336,7 +336,7 @@ export default function ScanLoading({
               color: "rgb(255, 255, 255)",
             }}
           >
-            Analyse de{" "}
+            L&apos;IA analyse{" "}
             <span style={{ color: "rgb(0, 255, 76)" }}>@{username}</span>
           </h2>
           <p
@@ -529,7 +529,7 @@ export default function ScanLoading({
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Analyse sécurisée
+              Analyse IA sécurisée
             </span>
           </div>
         </div>

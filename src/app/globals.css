@@ -187,7 +187,8 @@ body {
   padding: 8px 10px;
   font-size: 12px;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 1;
+  justify-content: center;
 }
 @media (min-width: 400px) {
   .service-tab-btn {

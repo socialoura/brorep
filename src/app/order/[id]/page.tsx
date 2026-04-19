@@ -236,9 +236,9 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
         </div>
 
         {/* CTA */}
-        <div style={{ textAlign: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
           <a
-            href="/"
+            href="/?reset=1"
             style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "14px 32px", borderRadius: "14px", border: "none",
@@ -249,6 +249,12 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
             }}
           >
             🚀 Relance un boost
+          </a>
+          <a
+            href="/orders"
+            style={{ fontSize: "12px", color: "rgb(169,181,174)", textDecoration: "underline" }}
+          >
+            Voir toutes mes commandes
           </a>
         </div>
       </div>

@@ -15,17 +15,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fanovaly — Analyse & croissance pour TikTok et Instagram",
-  description: "Analyse ton profil TikTok ou Instagram en 30 secondes. Découvre ton potentiel de croissance et obtiens des recommandations personnalisées.",
-  keywords: ["analyse profil", "croissance tiktok", "croissance instagram", "audit réseaux sociaux", "fanovaly"],
+  title: "Fanovaly — IA d'analyse & croissance pour TikTok et Instagram",
+  description: "Notre IA analyse ton profil TikTok ou Instagram en 30 secondes. Stratégie de croissance personnalisée, résultats rapides.",
+  keywords: ["ia analyse profil", "croissance tiktok", "croissance instagram", "audit ia réseaux sociaux", "fanovaly", "intelligence artificielle social media"],
   authors: [{ name: "Fanovaly" }],
   icons: {
     icon: "/favicon.jpg",
   },
   metadataBase: new URL("https://fanovaly.com"),
   openGraph: {
-    title: "Fanovaly — Analyse & croissance pour TikTok et Instagram",
-    description: "Analyse gratuite de ton profil en 30 secondes. Découvre ton potentiel de croissance.",
+    title: "Fanovaly — IA d'analyse & croissance pour TikTok et Instagram",
+    description: "Notre IA analyse ton profil en 30s et te propose une stratégie de croissance personnalisée.",
     url: "https://fanovaly.com",
     siteName: "Fanovaly",
     locale: "fr_FR",
@@ -33,8 +33,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fanovaly — Analyse & croissance pour TikTok et Instagram",
-    description: "Analyse gratuite de ton profil en 30 secondes. Découvre ton potentiel de croissance.",
+    title: "Fanovaly — IA d'analyse & croissance pour TikTok et Instagram",
+    description: "Notre IA analyse ton profil en 30s et te propose une stratégie de croissance personnalisée.",
   },
   robots: {
     index: true,

@@ -34,9 +34,9 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
     }
   }, []);
 
-  // Fetch promo code once
+  // Fetch promo code once (only if we have a valid order)
   useEffect(() => {
-    if (fetched.current) return;
+    if (fetched.current || !orderId) return;
     fetched.current = true;
     fetch("/api/generate-promo", { method: "POST" })
       .then((r) => r.json())
@@ -44,7 +44,7 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
         if (data.code) setPromo(data);
       })
       .catch(() => {});
-  }, []);
+  }, [orderId]);
 
   // Countdown timer
   useEffect(() => {
@@ -187,11 +187,24 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
         </a>
       )}
 
+      {/* All orders link */}
+      <a
+        href="/orders"
+        style={{
+          marginTop: "4px",
+          fontSize: "12px",
+          color: "rgb(169, 181, 174)",
+          textDecoration: "underline",
+        }}
+      >
+        Voir toutes mes commandes
+      </a>
+
       {/* New analysis button */}
       <button
         onClick={onReset}
         style={{
-          marginTop: orderId ? "4px" : "8px",
+          marginTop: "4px",
           padding: "12px 28px",
           borderRadius: "12px",
           border: "1px solid rgba(0, 210, 106, 0.2)",

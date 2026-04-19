@@ -21,6 +21,71 @@ import SuccessPage from "@/components/SuccessPage";
 
 type Step = "hero" | "platform" | "username" | "scanning" | "results" | "shop" | "pickPosts" | "payment" | "success";
 
+const PROGRESS_STEPS = [
+  { key: "platform", label: "Plateforme" },
+  { key: "username", label: "Profil" },
+  { key: "shop", label: "Services" },
+  { key: "payment", label: "Paiement" },
+] as const;
+
+const STEP_TO_PROGRESS: Record<string, number> = {
+  platform: 0,
+  username: 1,
+  scanning: 1,
+  results: 1,
+  shop: 2,
+  pickPosts: 2,
+  payment: 3,
+};
+
+function StepProgress({ step }: { step: Step }) {
+  const currentIndex = STEP_TO_PROGRESS[step];
+  if (currentIndex === undefined) return null;
+
+  const green = "rgb(0, 255, 76)";
+  const greenDim = "rgb(0, 210, 106)";
+  const progressPercent = (currentIndex / (PROGRESS_STEPS.length - 1)) * 100;
+
+  return (
+    <div style={{ width: "100%", maxWidth: "360px", marginBottom: "28px" }}>
+      <div style={{ position: "relative", display: "flex", justifyContent: "space-between" }}>
+        {/* Background line */}
+        <div style={{ position: "absolute", top: "11px", left: "20px", right: "20px", height: "2px", background: "rgba(255,255,255,0.06)", borderRadius: "1px" }} />
+        {/* Progress line */}
+        <div style={{ position: "absolute", top: "11px", left: "20px", height: "2px", background: green, borderRadius: "1px", width: `calc(${progressPercent}% - 40px * ${progressPercent / 100})`, transition: "width 0.4s ease" }} />
+
+        {PROGRESS_STEPS.map((s, i) => {
+          const done = i < currentIndex;
+          const active = i === currentIndex;
+          return (
+            <div key={s.key} style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}>
+              <div style={{
+                width: "24px", height: "24px", borderRadius: "50%",
+                background: done ? green : active ? "rgba(0,255,76,0.15)" : "rgba(255,255,255,0.06)",
+                border: active ? `2px solid ${green}` : done ? `2px solid ${green}` : "2px solid rgba(255,255,255,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: active ? "0 0 10px rgba(0,255,76,0.25)" : "none",
+                transition: "all 0.3s",
+              }}>
+                {done ? (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  <span style={{ fontSize: "10px", fontWeight: 800, color: active ? green : "rgb(107,117,111)" }}>{i + 1}</span>
+                )}
+              </div>
+              <span style={{ marginTop: "6px", fontSize: "10px", fontWeight: 600, color: active ? green : done ? greenDim : "rgb(107,117,111)", whiteSpace: "nowrap" }}>
+                {s.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function loadSession<T>(key: string, fallback: T): T {
   try {
     const raw = sessionStorage.getItem(key);
@@ -45,6 +110,15 @@ export default function HomePage() {
 
   // Restore from sessionStorage after hydration (client-only)
   useEffect(() => {
+    // If ?reset=1 is in the URL, clear session and start fresh
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "1") {
+      try { sessionStorage.clear(); } catch {}
+      window.history.replaceState({}, "", "/");
+      setHydrated(true);
+      return;
+    }
+
     setStep(loadSession<Step>("br_step", "hero"));
     setPlatform(loadSession("br_platform", "tiktok"));
     setUsername(loadSession("br_username", ""));
@@ -55,7 +129,12 @@ export default function HomePage() {
   }, []);
 
   // Persist state changes to sessionStorage (only after hydration)
-  useEffect(() => { if (hydrated) saveSession("br_step", step); }, [step, hydrated]);
+  useEffect(() => {
+    if (hydrated) {
+      saveSession("br_step", step);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [step, hydrated]);
   useEffect(() => { if (hydrated) saveSession("br_platform", platform); }, [platform, hydrated]);
   useEffect(() => { if (hydrated) saveSession("br_username", username); }, [username, hydrated]);
   useEffect(() => { if (hydrated) saveSession("br_scanData", scanData); }, [scanData, hydrated]);
@@ -70,6 +149,7 @@ export default function HomePage() {
     if (step === "shop" && !scanData) setStep("hero");
     if (step === "pickPosts" && cart.length === 0) setStep("shop");
     if (step === "payment" && cart.length === 0) setStep("hero");
+    if (step === "success" && !orderId && cart.length === 0) setStep("hero");
   }, [hydrated]);
 
   function renderContent() {
@@ -81,19 +161,19 @@ export default function HomePage() {
             <StatusBadge />
             <div className="flex flex-col items-center gap-2">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] text-white uppercase">
-                Analyse ton profil
+                Notre IA analyse
               </h1>
               <h2
                 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] uppercase"
                 style={{ color: "#22c55e", textShadow: "0 0 40px rgba(34,197,94,0.35)" }}
               >
-                en 30 secondes
+                ton profil en 30s
               </h2>
             </div>
             <p className="text-base sm:text-lg text-gray-400 max-w-md leading-relaxed">
-              Découvre pourquoi ton compte ne décolle pas
+              Notre IA scanne ton profil et te propose
               <br />
-              <span className="text-gray-500">(et comment le corriger)</span>
+              <span className="text-gray-500">une stratégie de croissance personnalisée</span>
             </p>
             <div className="mt-2">
               <CTAButton onClick={() => { posthog?.capture("cta_clicked"); setStep("platform"); }} />
@@ -103,7 +183,7 @@ export default function HomePage() {
               <div className="flex items-center gap-1.5 text-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot" />
                 <span className="text-green-400 font-semibold">20% plus</span>
-                <span className="text-gray-500">de profils analysés qu&apos;hier</span>
+                <span className="text-gray-500">de profils analysés par notre IA qu&apos;hier</span>
               </div>
             </div>
 
@@ -112,9 +192,9 @@ export default function HomePage() {
               <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(0, 210, 106)", marginBottom: "16px" }}>Comment ça marche</p>
               <div className="grid-steps">
                 {[
-                  { num: "1", title: "Scan ton profil", desc: "Entre ton @ et on analyse tout en 30 secondes." },
-                  { num: "2", title: "Choisis ta stratégie", desc: "On te propose un plan adapté à ton profil." },
-                  { num: "3", title: "Vois les résultats", desc: "Croissance visible, directement sur ton compte." },
+                  { num: "1", title: "L'IA scanne ton profil", desc: "Entre ton @ et notre IA analyse tes stats, posts et engagement en 30 secondes." },
+                  { num: "2", title: "Stratégie personnalisée", desc: "L'IA te recommande un plan sur mesure adapté à ton profil et tes objectifs." },
+                  { num: "3", title: "Croissance automatique", desc: "Résultats visibles rapidement, directement sur ton compte." },
                 ].map((s) => (
                   <div key={s.num} style={{ padding: "20px 14px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", textAlign: "center" }}>
                     <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "rgba(0, 210, 106, 0.1)", border: "1px solid rgba(0, 210, 106, 0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px auto", fontSize: "13px", fontWeight: 800, color: "rgb(0, 210, 106)" }}>{s.num}</div>
@@ -130,10 +210,10 @@ export default function HomePage() {
               <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(0, 210, 106)", marginBottom: "16px" }}>Questions fréquentes</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {[
-                  { q: "Est-ce que c'est sûr pour mon compte ?", a: "Oui. Notre approche respecte les algorithmes des plateformes. Aucun mot de passe requis, aucun accès à ton compte." },
-                  { q: "En combien de temps je vois des résultats ?", a: "Les premiers résultats sont visibles en quelques minutes. Selon la stratégie choisie, tout est finalisé sous 24h." },
-                  { q: "Et si je ne suis pas satisfait ?", a: "On s'engage à t'accompagner. Notre équipe est joignable à support@fanovaly.com pour toute question." },
-                  { q: "Les résultats sont-ils durables ?", a: "On mise sur une croissance progressive et stable. En cas de variation, on ajuste gratuitement pendant 30 jours." },
+                  { q: "Comment l'IA analyse mon profil ?", a: "Notre IA scanne tes stats, ton taux d'engagement, tes derniers posts et ton audience pour identifier les axes de croissance les plus efficaces." },
+                  { q: "Est-ce que c'est sûr pour mon compte ?", a: "Oui. L'IA analyse ton profil sans aucun accès à ton compte. Aucun mot de passe requis, aucune connexion à tes réseaux." },
+                  { q: "En combien de temps je vois des résultats ?", a: "L'analyse IA prend 30 secondes. Les premiers résultats de la stratégie sont visibles en quelques minutes, tout est finalisé sous 24h." },
+                  { q: "Les résultats sont-ils durables ?", a: "L'IA recommande une croissance progressive et naturelle. En cas de variation, on ajuste gratuitement pendant 30 jours." },
                 ].map((faq) => (
                   <details key={faq.q} onClick={() => posthog?.capture("faq_opened", { question: faq.q })} style={{ borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", overflow: "hidden" }}>
                     <summary style={{ padding: "14px 16px", fontSize: "13px", fontWeight: 600, color: "#fff", cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -255,10 +335,11 @@ export default function HomePage() {
       <AnimatedBackground />
       <div className="relative z-10">
         <div
-          className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 text-center"
+          className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 text-center py-12"
           style={{ opacity: 1 }}
         >
           <div key={step} className="step-fade-in" style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <StepProgress step={step} />
             {renderContent()}
           </div>
         </div>

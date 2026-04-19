@@ -144,7 +144,7 @@ function EmailInput({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 /* ----- Express Checkout (Apple Pay / Google Pay native button) ----- */
-function ExpressCheckout({ onSuccess }: { onSuccess: (orderId?: number) => void }) {
+function ExpressCheckout({ email, onSuccess }: { email: string; onSuccess: (orderId?: number) => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [expressError, setExpressError] = useState<string | null>(null);
@@ -155,7 +155,7 @@ function ExpressCheckout({ onSuccess }: { onSuccess: (orderId?: number) => void 
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
-      confirmParams: { return_url: window.location.origin + "?payment=success" },
+      confirmParams: { return_url: window.location.origin + "?payment=success", receipt_email: email },
       redirect: "if_required",
     });
 
@@ -240,38 +240,48 @@ function PayForm({
     <form onSubmit={handleSubmit} style={{ width: "100%" }}>
       <CartRecap cart={cart} discount={discount} promoPercent={promoPercent} finalTotal={finalTotal} />
 
-      {/* Native Apple Pay / Google Pay button */}
-      <ExpressCheckout onSuccess={onSuccess} />
-
-      {/* Separator */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "0 0 16px 0" }}>
-        <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
-        <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>ou payer par carte</span>
-        <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
-      </div>
-
-      <PromoCodeInput onValidated={(code, pct) => { setPromoPercent(pct); posthog.capture("promo_code_applied", { promo_code: code, discount_percent: pct }); onPromoApplied(code); }} />
+      {/* Email first — required for all payment methods */}
       <EmailInput value={email} onChange={setEmail} />
+      <PromoCodeInput onValidated={(code, pct) => { setPromoPercent(pct); posthog.capture("promo_code_applied", { promo_code: code, discount_percent: pct }); onPromoApplied(code); }} />
       <LoyaltyBanner email={email} onRedeemed={(cents) => { setLoyaltyDiscountCents(cents); posthog.capture("loyalty_redeemed", { points_used: cents, discount_cents: cents }); onLoyaltyRedeemed(cents); }} />
 
-      <div style={{ marginBottom: "20px" }}><PaymentElement options={{ layout: "tabs", wallets: { applePay: "never", googlePay: "never" } }} /></div>
+      {/* Payment methods — only shown when email is valid */}
+      {emailValid ? (
+        <>
+          {/* Native Apple Pay / Google Pay button */}
+          <ExpressCheckout email={email} onSuccess={onSuccess} />
 
-      {error && <p style={{ fontSize: "13px", color: "#ef4444", margin: "0 0 16px 0", textAlign: "center" }}>{error}</p>}
+          {/* Separator */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "0 0 16px 0" }}>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+            <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>ou payer par carte</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+          </div>
 
-      <button type="submit" disabled={!stripe || loading}
-        style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px 0", borderRadius: "14px", border: "none", cursor: loading ? "wait" : "pointer", fontWeight: 700, fontSize: "15px", fontFamily: "inherit", color: "#000", background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))", boxShadow: "0 10px 30px rgba(0, 255, 76, 0.25)", opacity: loading ? 0.7 : 1, transition: "all 0.2s" }}>
-        {loading ? (
-          <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="31.4" strokeLinecap="round" /></svg>
-            Paiement en cours...
-          </span>
-        ) : (
-          <>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
-            Payer {finalTotal.toFixed(2)}&euro;
-          </>
-        )}
-      </button>
+          <div style={{ marginBottom: "20px" }}><PaymentElement options={{ layout: "tabs", wallets: { applePay: "never", googlePay: "never" } }} /></div>
+
+          {error && <p style={{ fontSize: "13px", color: "#ef4444", margin: "0 0 16px 0", textAlign: "center" }}>{error}</p>}
+
+          <button type="submit" disabled={!stripe || loading}
+            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px 0", borderRadius: "14px", border: "none", cursor: loading ? "wait" : "pointer", fontWeight: 700, fontSize: "15px", fontFamily: "inherit", color: "#000", background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))", boxShadow: "0 10px 30px rgba(0, 255, 76, 0.25)", opacity: loading ? 0.7 : 1, transition: "all 0.2s" }}>
+            {loading ? (
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="31.4" strokeLinecap="round" /></svg>
+                Paiement en cours...
+              </span>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
+                Payer {finalTotal.toFixed(2)}&euro;
+              </>
+            )}
+          </button>
+        </>
+      ) : (
+        <p style={{ fontSize: "13px", color: "rgb(107, 117, 111)", textAlign: "center", margin: "16px 0" }}>
+          Entre ton e-mail ci-dessus pour accéder au paiement
+        </p>
+      )}
 
       <button type="button" onClick={onBack}
         style={{ width: "100%", marginTop: "12px", fontSize: "12px", color: "rgb(107, 117, 111)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}>

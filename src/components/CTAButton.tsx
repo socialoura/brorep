@@ -59,7 +59,7 @@ export default function CTAButton({ onClick }: { onClick?: () => void }) {
       </span>
 
       <span style={{ position: "relative", zIndex: 1 }}>
-        Lancer l&apos;analyse →
+        Lancer l&apos;IA →
       </span>
 
       <style>{`
