@@ -21,11 +21,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Payment not confirmed" }, { status: 400 });
     }
 
-    // Parse order data from metadata
+    // Parse order data from metadata (compact format from Stripe 500-char limit)
     const meta = pi.metadata;
-    const cart = meta.cart ? JSON.parse(meta.cart) : [];
-    const postAssignments = meta.postAssignments ? JSON.parse(meta.postAssignments) : null;
+    const username = meta.username || "";
+    const platform = meta.platform || "";
     const email = meta.email || pi.receipt_email;
+
+    // Cart: compact {s,l,q,p} → full {service,label,qty,price}
+    const rawCart = meta.cart ? JSON.parse(meta.cart) : [];
+    const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; service?: string; label?: string; qty?: number; price?: number }) =>
+      c.service ? c : { service: c.s, label: c.l, qty: c.q, price: c.p }
+    );
+
+    // PostAssignments: compact {id,l,v} → full {postId,postUrl,imageUrl,likes,views}
+    function buildPostUrl(plat: string, user: string, postId: string): string {
+      if (plat === "tiktok") return `https://www.tiktok.com/@${user}/video/${postId}`;
+      if (plat === "instagram") return `https://www.instagram.com/p/${postId}/`;
+      return "";
+    }
+    const rawPosts = meta.postAssignments ? JSON.parse(meta.postAssignments) : null;
+    const postAssignments = rawPosts ? rawPosts.map((pa: { id?: string; l?: number; v?: number; postId?: string; likes?: boolean; views?: boolean }) =>
+      pa.postId ? pa : { postId: pa.id, postUrl: buildPostUrl(platform, username, pa.id || ""), imageUrl: "", likes: !!pa.l, views: !!pa.v }
+    ) : null;
 
     // Check if order already exists (idempotency — prevent duplicates on retry)
     let orderId: number | null = null;
@@ -42,8 +59,8 @@ export async function POST(req: NextRequest) {
       orderId = await createOrder({
         stripePaymentIntentId: pi.id,
         email: email || "",
-        username: meta.username || "",
-        platform: meta.platform || "",
+        username,
+        platform,
         cart,
         postAssignments,
         totalCents: pi.amount,
@@ -59,8 +76,8 @@ export async function POST(req: NextRequest) {
       try {
         await sendOrderConfirmationEmail({
           to: email,
-          username: meta.username || "",
-          platform: meta.platform || "tiktok",
+          username,
+          platform: platform || "tiktok",
           cart,
           totalCents: pi.amount,
           orderId: orderId || undefined,
@@ -73,8 +90,8 @@ export async function POST(req: NextRequest) {
     // Send Discord notification
     try {
       await sendDiscordOrderNotification({
-        username: meta.username || "",
-        platform: meta.platform || "tiktok",
+        username,
+        platform: platform || "tiktok",
         email: email || "",
         cart,
         totalCents: pi.amount,
