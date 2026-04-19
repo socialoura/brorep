@@ -133,6 +133,13 @@ export default function HomePage() {
     if (hydrated) {
       saveSession("br_step", step);
       window.scrollTo({ top: 0, behavior: "instant" });
+      // Reset mobile zoom (iOS auto-zooms on small font inputs)
+      const vp = document.querySelector('meta[name="viewport"]');
+      if (vp) {
+        vp.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover");
+      }
+      // Blur any focused input to dismiss keyboard & zoom
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     }
   }, [step, hydrated]);
   useEffect(() => { if (hydrated) saveSession("br_platform", platform); }, [platform, hydrated]);
