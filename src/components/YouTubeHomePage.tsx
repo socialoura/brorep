@@ -217,6 +217,7 @@ export default function YouTubeHomePage() {
         return scanData ? (
           <PostPicker
             profile={scanData}
+            platform="youtube"
             cart={cart}
             onConfirm={(assignments) => {
               setPostAssignments(assignments);

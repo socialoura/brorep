@@ -284,6 +284,7 @@ export default function HomePage() {
         return scanData ? (
           <PostPicker
             profile={scanData}
+            platform={platform}
             cart={cart}
             onConfirm={(assignments) => {
               setPostAssignments(assignments);

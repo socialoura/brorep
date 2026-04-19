@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 type Tab = "analytics" | "orders" | "pricing" | "combos";
 
@@ -288,7 +288,8 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {orders.map((o) => (
-                  <tr key={o.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                  <React.Fragment key={o.id}>
+                  <tr style={{ borderBottom: Array.isArray(o.post_assignments) && o.post_assignments.length > 0 ? "none" : "1px solid rgba(255,255,255,0.03)" }}>
                     <td style={{ padding: "8px", color: "rgb(107,117,111)" }}>#{o.id}</td>
                     <td style={{ padding: "8px" }}>{new Date(o.created_at).toLocaleDateString("fr-FR")}</td>
                     <td style={{ padding: "8px", fontWeight: 600 }}>@{o.username}</td>
@@ -335,6 +336,38 @@ export default function AdminPage() {
                       </div>
                     </td>
                   </tr>
+                  {Array.isArray(o.post_assignments) && o.post_assignments.length > 0 && (
+                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                      <td colSpan={8} style={{ padding: "4px 8px 10px 8px" }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 700, color: "rgb(107,117,111)", textTransform: "uppercase", marginRight: "4px" }}>Posts:</span>
+                          {(o.post_assignments as { postId: string; postUrl?: string; imageUrl?: string; likes: boolean; views: boolean }[]).map((pa, i) => (
+                            <a
+                              key={i}
+                              href={pa.postUrl || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "inline-flex", alignItems: "center", gap: "4px",
+                                padding: "3px 8px", borderRadius: "6px",
+                                fontSize: "10px", fontWeight: 600,
+                                backgroundColor: "rgba(0,180,53,0.06)",
+                                border: "1px solid rgba(0,210,106,0.15)",
+                                color: pa.postUrl ? green : "rgb(169,181,174)",
+                                textDecoration: "none",
+                              }}
+                            >
+                              🔗 {pa.postId.slice(0, 12)}{pa.postId.length > 12 ? "…" : ""}
+                              <span style={{ color: "rgb(107,117,111)" }}>
+                                {[pa.likes && "♥", pa.views && "👁"].filter(Boolean).join("")}
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

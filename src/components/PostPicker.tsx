@@ -12,17 +12,27 @@ function fmtN(n: number): string {
 
 export interface PostAssignment {
   postId: string;
+  postUrl: string;
+  imageUrl: string;
   likes: boolean;
   views: boolean;
 }
 
+function buildPostUrl(platform: string, username: string, postId: string): string {
+  if (platform === "tiktok") return `https://www.tiktok.com/@${username}/video/${postId}`;
+  if (platform === "instagram") return `https://www.instagram.com/p/${postId}/`;
+  return "";
+}
+
 export default function PostPicker({
   profile,
+  platform,
   cart,
   onConfirm,
   onBack,
 }: {
   profile: ScanResult;
+  platform: string;
   cart: CartItem[];
   onConfirm: (assignments: PostAssignment[]) => void;
   onBack: () => void;
@@ -50,11 +60,16 @@ export default function PostPicker({
   }
 
   function handleConfirm() {
-    const assignments: PostAssignment[] = Array.from(selected).map((postId) => ({
-      postId,
-      likes: hasLikes,
-      views: hasViews,
-    }));
+    const assignments: PostAssignment[] = Array.from(selected).map((postId) => {
+      const post = profile.posts.find((p) => p.id === postId);
+      return {
+        postId,
+        postUrl: post ? buildPostUrl(platform, profile.username, postId) : "",
+        imageUrl: post?.imageUrl || "",
+        likes: hasLikes,
+        views: hasViews,
+      };
+    });
     onConfirm(assignments);
   }
 
