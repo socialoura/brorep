@@ -1,0 +1,80 @@
+"use client";
+
+const avatars = [
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=64&h=64&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=64&h=64&fit=crop&crop=face",
+];
+
+const avatarStyle: React.CSSProperties = {
+  width: "32px",
+  height: "32px",
+  borderRadius: "9999px",
+  border: "2px solid rgb(3, 8, 6)",
+  objectFit: "cover",
+  boxShadow: "0 0 8px rgba(0, 0, 0, 0.5)",
+};
+
+export default function SocialProof() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "10px 20px",
+        borderRadius: "16px",
+        border: "1px solid rgba(0, 255, 76, 0.2)",
+        backgroundColor: "rgba(14, 21, 18, 0.9)",
+      }}
+    >
+      {/* Avatar stack */}
+      <div style={{ display: "flex" }}>
+        {avatars.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            loading="lazy"
+            style={{
+              ...avatarStyle,
+              marginLeft: i === 0 ? 0 : "-10px",
+              zIndex: avatars.length - i,
+              position: "relative",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Text */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <p
+          style={{
+            fontSize: "14px",
+            fontWeight: 700,
+            color: "rgb(232, 247, 237)",
+            margin: 0,
+            lineHeight: 1.4,
+          }}
+        >
+          +12 955{" "}
+          <span style={{ fontWeight: 400, color: "rgb(169, 181, 174)" }}>
+            profils analysés
+          </span>
+        </p>
+        <p
+          style={{
+            fontSize: "12px",
+            color: "rgb(169, 181, 174)",
+            margin: 0,
+            lineHeight: 1.4,
+          }}
+        >
+          ce mois-ci
+        </p>
+      </div>
+    </div>
+  );
+}

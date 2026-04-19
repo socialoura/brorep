@@ -1,26 +1,264 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: #050505;
+  --color-foreground: #ffffff;
+  --color-green-brand: #2ecc40;
+  --color-green-dark: #1a8f2d;
+  --color-green-glow: #22c55e;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #050505;
+  color: #ffffff;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Green radial glow behind the center */
+.hero-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 600px;
+  background: radial-gradient(ellipse at center, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.03) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Pulsing dot animation */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Shine sweep animation */
+@keyframes shine-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+.cta-shine-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  animation: shine-sweep 3s ease-in-out infinite;
+}
+
+/* Background animations */
+@keyframes bgPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+@keyframes particleFade {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(10px, -10px); }
+  66% { transform: translate(-10px, 10px); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.step-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+/* Safe area for notched devices */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Responsive grids ── */
+.grid-posts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+@media (min-width: 480px) {
+  .grid-posts {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.grid-packs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  width: 100%;
+}
+@media (min-width: 400px) {
+  .grid-packs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Hero "Comment ça marche" grid: 1 col mobile → 3 col desktop ── */
+.grid-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+}
+@media (min-width: 480px) {
+  .grid-steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+/* ── Platform cards: stack on narrow, side-by-side on wide ── */
+.platform-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 448px;
+  justify-content: center;
+}
+@media (min-width: 420px) {
+  .platform-cards {
+    flex-direction: row;
+    gap: 20px;
+  }
+}
+
+/* ── Platform card inner padding: tighter on mobile ── */
+.platform-card {
+  padding: 28px 16px;
+}
+@media (min-width: 420px) {
+  .platform-card {
+    padding: 40px 24px;
+  }
+}
+
+/* ── Service tabs: scrollable on small screens ── */
+.service-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  width: 100%;
+}
+.service-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Service tab buttons: shrink text on mobile ── */
+.service-tab-btn {
+  padding: 8px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (min-width: 400px) {
+  .service-tab-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* ── Stats cards in ProfileConfirm ── */
+.stats-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+.stat-card {
+  padding: 14px 16px;
+  min-width: 0;
+  flex: 1 1 100px;
+  max-width: 160px;
+}
+@media (min-width: 420px) {
+  .stat-card {
+    padding: 16px 24px;
+  }
+}
+
+/* ── Checkout wrapper ── */
+.checkout-wrap {
+  width: 100%;
+  max-width: 440px;
+  padding: 0 12px;
+}
+@media (min-width: 480px) {
+  .checkout-wrap {
+    padding: 0 16px;
+  }
+}
+
+/* ── CTA buttons: full-width on mobile ── */
+.cta-primary {
+  width: 100%;
+  max-width: 340px;
+  justify-content: center;
+}
+@media (min-width: 480px) {
+  .cta-primary {
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* ── Promo code row ── */
+.promo-row {
+  display: flex;
+  gap: 8px;
+}
+.promo-row input {
+  min-width: 0;
+}
+
+/* ── Success page promo code font ── */
+.promo-code-text {
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+@media (min-width: 400px) {
+  .promo-code-text {
+    font-size: 28px;
+    letter-spacing: 3px;
+  }
 }
