@@ -37,6 +37,7 @@ export async function initDb() {
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ`;
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_usd NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'eur'`;
+  await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS name_en VARCHAR(100) DEFAULT ''`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS loyalty (
@@ -216,17 +217,18 @@ export async function getAllCombos() {
   return await sql`SELECT * FROM combo_packs ORDER BY created_at DESC`;
 }
 
-export async function createCombo(params: { name: string; items: unknown; discountPercent: number }) {
+export async function createCombo(params: { name: string; nameEn?: string; items: unknown; discountPercent: number }) {
   const result = await sql`
-    INSERT INTO combo_packs (name, items, discount_percent)
-    VALUES (${params.name}, ${JSON.stringify(params.items)}, ${params.discountPercent})
+    INSERT INTO combo_packs (name, name_en, items, discount_percent)
+    VALUES (${params.name}, ${params.nameEn || ''}, ${JSON.stringify(params.items)}, ${params.discountPercent})
     RETURNING id
   `;
   return result[0].id;
 }
 
-export async function updateCombo(id: number, params: { name?: string; items?: unknown; discountPercent?: number; active?: boolean }) {
+export async function updateCombo(id: number, params: { name?: string; nameEn?: string; items?: unknown; discountPercent?: number; active?: boolean }) {
   if (params.name !== undefined) await sql`UPDATE combo_packs SET name = ${params.name} WHERE id = ${id}`;
+  if (params.nameEn !== undefined) await sql`UPDATE combo_packs SET name_en = ${params.nameEn} WHERE id = ${id}`;
   if (params.items !== undefined) await sql`UPDATE combo_packs SET items = ${JSON.stringify(params.items)} WHERE id = ${id}`;
   if (params.discountPercent !== undefined) await sql`UPDATE combo_packs SET discount_percent = ${params.discountPercent} WHERE id = ${id}`;
   if (params.active !== undefined) await sql`UPDATE combo_packs SET active = ${params.active} WHERE id = ${id}`;

@@ -148,6 +148,7 @@ interface ComboItem {
 interface ComboPack {
   id: number;
   name: string;
+  name_en?: string;
   items: ComboItem[];
   discount_percent: number;
 }
@@ -173,7 +174,7 @@ export default function ServiceSelect({
   onBack: () => void;
   platform?: string;
 }) {
-  const { t, currency } = useTranslation();
+  const { t, lang, currency } = useTranslation();
   const isYouTube = platform === "youtube";
   // Theme colors
   const accent = isYouTube ? "rgb(255, 0, 0)" : "rgb(0, 255, 76)";
@@ -373,7 +374,7 @@ export default function ServiceSelect({
                     -{combo.discount_percent}%
                   </span>
 
-                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#fff" }}>{combo.name}</p>
+                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#fff" }}>{lang === "en" && combo.name_en ? combo.name_en : combo.name}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                     {comboItems.map((item, i) => (
                       <span key={i} style={{ padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, backgroundColor: "rgba(255,255,255,0.04)", color: "rgb(169, 181, 174)", border: "1px solid rgba(255,255,255,0.06)" }}>

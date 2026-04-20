@@ -14,7 +14,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const pricing = await sql`SELECT id, service, qty, price, COALESCE(price_usd, 0) as price_usd, active, created_at FROM pricing ORDER BY service, qty`;
+  let pricing;
+  try {
+    pricing = await sql`SELECT id, service, qty, price, COALESCE(price_usd, 0) as price_usd, active, created_at FROM pricing ORDER BY service, qty`;
+  } catch {
+    pricing = await sql`SELECT id, service, qty, price, 0 as price_usd, active, created_at FROM pricing ORDER BY service, qty`;
+  }
   return NextResponse.json({ pricing });
 }
 
@@ -31,17 +36,26 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  if (price !== undefined) {
-    await sql`UPDATE pricing SET price = ${price} WHERE id = ${id}`;
-  }
+  try {
+    if (price !== undefined) {
+      await sql`UPDATE pricing SET price = ${price} WHERE id = ${id}`;
+    }
 
-  if (price_usd !== undefined) {
-    await sql`UPDATE pricing SET price_usd = ${price_usd} WHERE id = ${id}`;
-  }
+    if (price_usd !== undefined) {
+      try {
+        await sql`UPDATE pricing SET price_usd = ${price_usd} WHERE id = ${id}`;
+      } catch (e) {
+        console.warn("price_usd column may not exist yet, run /api/init-db:", e);
+      }
+    }
 
-  if (active !== undefined) {
-    await sql`UPDATE pricing SET active = ${active} WHERE id = ${id}`;
-  }
+    if (active !== undefined) {
+      await sql`UPDATE pricing SET active = ${active} WHERE id = ${id}`;
+    }
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Pricing update error:", err);
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  }
 }

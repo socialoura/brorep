@@ -34,6 +34,7 @@ interface ComboItem {
 interface ComboPack {
   id: number;
   name: string;
+  name_en?: string;
   items: ComboItem[];
   discount_percent: number;
   active: boolean;
@@ -66,7 +67,7 @@ export default function AdminPage() {
   const [editPrice, setEditPrice] = useState("");
   const [editPriceUsd, setEditPriceUsd] = useState("");
   const [combos, setCombos] = useState<ComboPack[]>([]);
-  const [newCombo, setNewCombo] = useState({ name: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
+  const [newCombo, setNewCombo] = useState({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
 
@@ -574,10 +575,16 @@ export default function AdminPage() {
             <p style={{ margin: "0 0 12px 0", fontSize: "13px", fontWeight: 600, color: "#fff" }}>Nouveau combo</p>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
               <input
-                placeholder="Nom (ex: Pack Croissance)"
+                placeholder="Nom FR (ex: Pack Croissance)"
                 value={newCombo.name}
                 onChange={(e) => setNewCombo({ ...newCombo, name: e.target.value })}
-                style={{ flex: 1, minWidth: "160px", padding: "8px 12px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", fontFamily: "inherit", outline: "none" }}
+                style={{ flex: 1, minWidth: "140px", padding: "8px 12px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", fontFamily: "inherit", outline: "none" }}
+              />
+              <input
+                placeholder="Name EN (ex: Growth Pack)"
+                value={newCombo.nameEn}
+                onChange={(e) => setNewCombo({ ...newCombo, nameEn: e.target.value })}
+                style={{ flex: 1, minWidth: "140px", padding: "8px 12px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", fontFamily: "inherit", outline: "none" }}
               />
               <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <span style={{ fontSize: "12px", color: "rgb(107,117,111)" }}>-</span>
@@ -641,9 +648,9 @@ export default function AdminPage() {
                   await fetch("/api/admin/combos", {
                     method: "POST",
                     headers,
-                    body: JSON.stringify({ name: newCombo.name, items, discountPercent: Number(newCombo.discount) || 20 }),
+                    body: JSON.stringify({ name: newCombo.name, nameEn: newCombo.nameEn, items, discountPercent: Number(newCombo.discount) || 20 }),
                   });
-                  setNewCombo({ name: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
+                  setNewCombo({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
                   fetchCombos();
                 }}
                 style={{ padding: "6px 16px", borderRadius: "8px", border: "none", backgroundColor: green, color: "#000", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
@@ -665,7 +672,10 @@ export default function AdminPage() {
                 opacity: combo.active ? 1 : 0.5,
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                  <p style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>{combo.name}</p>
+                  <div>
+                    <p style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>{combo.name}</p>
+                    {combo.name_en && <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>EN: {combo.name_en}</p>}
+                  </div>
                   <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 700, backgroundColor: "rgba(0,255,76,0.1)", color: green, border: "1px solid rgba(0,255,76,0.2)" }}>-{combo.discount_percent}%</span>
                 </div>
                 <div style={{ marginBottom: "10px" }}>
