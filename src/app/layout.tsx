@@ -16,17 +16,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fanovaly — IA d'analyse & croissance pour TikTok et Instagram",
-  description: "Notre IA analyse ton profil TikTok ou Instagram en 30 secondes. Stratégie de croissance personnalisée, résultats rapides.",
-  keywords: ["ia analyse profil", "croissance tiktok", "croissance instagram", "audit ia réseaux sociaux", "fanovaly", "intelligence artificielle social media"],
+  title: "Fanovaly — Analyse IA & stratégie de croissance réseaux sociaux",
+  description: "Notre intelligence artificielle analyse ton profil en 30 secondes et te propose une stratégie de croissance personnalisée pour développer ton audience sur TikTok et Instagram.",
+  keywords: ["analyse profil ia", "stratégie réseaux sociaux", "optimisation contenu", "développer audience tiktok", "croissance instagram", "audit profil", "fanovaly", "intelligence artificielle social media"],
   authors: [{ name: "Fanovaly" }],
   icons: {
     icon: "/favicon.jpg",
   },
   metadataBase: new URL("https://fanovaly.com"),
   openGraph: {
-    title: "Fanovaly — IA d'analyse & croissance pour TikTok et Instagram",
-    description: "Notre IA analyse ton profil en 30s et te propose une stratégie de croissance personnalisée.",
+    title: "Fanovaly — Analyse IA & stratégie de croissance réseaux sociaux",
+    description: "Notre IA analyse ton profil en 30s et crée un plan de croissance sur mesure pour développer ton audience.",
     url: "https://fanovaly.com",
     siteName: "Fanovaly",
     locale: "fr_FR",
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fanovaly — IA d'analyse & croissance pour TikTok et Instagram",
-    description: "Notre IA analyse ton profil en 30s et te propose une stratégie de croissance personnalisée.",
+    title: "Fanovaly — Analyse IA & stratégie de croissance réseaux sociaux",
+    description: "Notre IA analyse ton profil en 30s et crée un plan de croissance sur mesure pour développer ton audience.",
   },
   robots: {
     index: true,
