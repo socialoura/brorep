@@ -126,7 +126,9 @@ export default function YouTubeVideoPreview({
       >
         {[
           { label: t("ytPreview.views"), value: fmt(video.viewCount), icon: "👁" },
-          { label: t("ytPreview.likes"), value: fmt(video.likeCount), icon: "♥" },
+          ...(video.likeCount > 0
+            ? [{ label: t("ytPreview.likes"), value: fmt(video.likeCount), icon: "♥" }]
+            : []),
           ...(video.subscriberCount > 0
             ? [{ label: t("ytPreview.subscribers"), value: fmt(video.subscriberCount), icon: "👤" }]
             : [{ label: t("ytPreview.comments"), value: fmt(video.commentCount), icon: "💬" }]),

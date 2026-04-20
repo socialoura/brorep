@@ -66,6 +66,7 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editPrice, setEditPrice] = useState("");
   const [editPriceUsd, setEditPriceUsd] = useState("");
+  const [newPack, setNewPack] = useState({ service: "followers", qty: "", price: "", priceUsd: "" });
   const [combos, setCombos] = useState<ComboPack[]>([]);
   const [newCombo, setNewCombo] = useState({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
 
@@ -143,6 +144,27 @@ export default function AdminPage() {
       method: "PUT",
       headers,
       body: JSON.stringify({ id, active: !active }),
+    });
+    fetchPricing();
+  };
+
+  const createPack = async () => {
+    if (!newPack.qty || !newPack.price) return;
+    await fetch("/api/admin/pricing", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ service: newPack.service, qty: Number(newPack.qty), price: Number(newPack.price), price_usd: Number(newPack.priceUsd) || 0 }),
+    });
+    setNewPack({ service: newPack.service, qty: "", price: "", priceUsd: "" });
+    fetchPricing();
+  };
+
+  const deletePack = async (id: number) => {
+    if (!confirm("Supprimer ce pack ?")) return;
+    await fetch("/api/admin/pricing", {
+      method: "DELETE",
+      headers,
+      body: JSON.stringify({ id }),
     });
     fetchPricing();
   };
@@ -400,6 +422,60 @@ export default function AdminPage() {
       {/* Pricing Tab */}
       {tab === "pricing" && (
         <div>
+          {/* Add new pack */}
+          <div style={{ marginBottom: "24px", padding: "16px", borderRadius: "14px", border: "1px solid rgba(0,210,106,0.12)", backgroundColor: "rgba(0,180,53,0.03)" }}>
+            <p style={{ margin: "0 0 10px 0", fontSize: "13px", fontWeight: 600, color: "#fff" }}>Nouveau pack</p>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+              <select
+                value={newPack.service}
+                onChange={(e) => setNewPack({ ...newPack, service: e.target.value })}
+                style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit" }}
+              >
+                <option value="followers">Followers</option>
+                <option value="likes">Likes</option>
+                <option value="views">Views</option>
+                <option value="yt_subscribers">Abonnés YT</option>
+                <option value="yt_likes">Likes YT</option>
+                <option value="yt_views">Vues YT</option>
+              </select>
+              <input
+                type="number"
+                placeholder="Quantité"
+                value={newPack.qty}
+                onChange={(e) => setNewPack({ ...newPack, qty: e.target.value })}
+                style={{ width: "90px", padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", outline: "none" }}
+              />
+              <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+                <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>€</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Prix EUR"
+                  value={newPack.price}
+                  onChange={(e) => setNewPack({ ...newPack, price: e.target.value })}
+                  style={{ width: "80px", padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", outline: "none" }}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+                <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Prix USD"
+                  value={newPack.priceUsd}
+                  onChange={(e) => setNewPack({ ...newPack, priceUsd: e.target.value })}
+                  style={{ width: "80px", padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", outline: "none" }}
+                />
+              </div>
+              <button
+                onClick={createPack}
+                style={{ padding: "8px 18px", borderRadius: "8px", border: "none", backgroundColor: green, color: "#000", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Ajouter
+              </button>
+            </div>
+          </div>
+
           {/* TikTok / Instagram pricing */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
             <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: green }}>TikTok / Instagram</span>
@@ -468,12 +544,20 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                      <button
-                        onClick={() => toggleActive(item.id, item.active)}
-                        style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
-                      >
-                        {item.active ? "Désactiver" : "Activer"}
-                      </button>
+                      <div style={{ display: "flex", gap: "4px" }}>
+                        <button
+                          onClick={() => toggleActive(item.id, item.active)}
+                          style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
+                        >
+                          {item.active ? "Désactiver" : "Activer"}
+                        </button>
+                        <button
+                          onClick={() => deletePack(item.id)}
+                          style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.15)", backgroundColor: "transparent", color: "#ef4444", cursor: "pointer", fontFamily: "inherit" }}
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -550,12 +634,20 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                      <button
-                        onClick={() => toggleActive(item.id, item.active)}
-                        style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
-                      >
-                        {item.active ? "Désactiver" : "Activer"}
-                      </button>
+                      <div style={{ display: "flex", gap: "4px" }}>
+                        <button
+                          onClick={() => toggleActive(item.id, item.active)}
+                          style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
+                        >
+                          {item.active ? "Désactiver" : "Activer"}
+                        </button>
+                        <button
+                          onClick={() => deletePack(item.id)}
+                          style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.15)", backgroundColor: "transparent", color: "#ef4444", cursor: "pointer", fontFamily: "inherit" }}
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

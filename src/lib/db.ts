@@ -134,6 +134,35 @@ export async function initDb() {
       await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
     }
   }
+
+  // Seed YouTube packs if missing (for existing DBs that were created before YouTube support)
+  const ytCount = await sql`SELECT COUNT(*) as cnt FROM pricing WHERE service LIKE 'yt_%'`;
+  if (Number(ytCount[0].cnt) === 0) {
+    const ytPacks = [
+      { service: "yt_subscribers", qty: 100, price: 3.99, price_usd: 3.99 },
+      { service: "yt_subscribers", qty: 250, price: 7.99, price_usd: 7.99 },
+      { service: "yt_subscribers", qty: 500, price: 13.99, price_usd: 13.99 },
+      { service: "yt_subscribers", qty: 1000, price: 24.99, price_usd: 24.99 },
+      { service: "yt_subscribers", qty: 2500, price: 49.99, price_usd: 49.99 },
+      { service: "yt_subscribers", qty: 5000, price: 89.99, price_usd: 89.99 },
+      { service: "yt_likes", qty: 100, price: 2.49, price_usd: 2.49 },
+      { service: "yt_likes", qty: 250, price: 4.99, price_usd: 4.99 },
+      { service: "yt_likes", qty: 500, price: 8.99, price_usd: 8.99 },
+      { service: "yt_likes", qty: 1000, price: 14.99, price_usd: 14.99 },
+      { service: "yt_likes", qty: 2500, price: 29.99, price_usd: 29.99 },
+      { service: "yt_likes", qty: 5000, price: 54.99, price_usd: 54.99 },
+      { service: "yt_views", qty: 500, price: 2.49, price_usd: 2.49 },
+      { service: "yt_views", qty: 1000, price: 4.49, price_usd: 4.49 },
+      { service: "yt_views", qty: 2500, price: 9.99, price_usd: 9.99 },
+      { service: "yt_views", qty: 5000, price: 16.99, price_usd: 16.99 },
+      { service: "yt_views", qty: 10000, price: 29.99, price_usd: 29.99 },
+      { service: "yt_views", qty: 25000, price: 59.99, price_usd: 59.99 },
+      { service: "yt_views", qty: 50000, price: 99.99, price_usd: 99.99 },
+    ];
+    for (const p of ytPacks) {
+      await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
+    }
+  }
 }
 
 export async function createOrder(params: {

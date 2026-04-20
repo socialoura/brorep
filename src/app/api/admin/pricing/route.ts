@@ -23,6 +23,50 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ pricing });
 }
 
+// POST create a new pack
+export async function POST(req: NextRequest) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { service, qty, price, price_usd } = await req.json();
+  if (!service || !qty || price === undefined) {
+    return NextResponse.json({ error: "Missing fields (service, qty, price)" }, { status: 400 });
+  }
+
+  try {
+    const result = await sql`
+      INSERT INTO pricing (service, qty, price, price_usd)
+      VALUES (${service}, ${Number(qty)}, ${Number(price)}, ${Number(price_usd || 0)})
+      RETURNING id
+    `;
+    return NextResponse.json({ id: result[0].id });
+  } catch (err) {
+    console.error("Create pack error:", err);
+    return NextResponse.json({ error: "Create failed" }, { status: 500 });
+  }
+}
+
+// DELETE a pack
+export async function DELETE(req: NextRequest) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await req.json();
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
+
+  try {
+    await sql`DELETE FROM pricing WHERE id = ${id}`;
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Delete pack error:", err);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
+}
+
 // PUT update a price
 export async function PUT(req: NextRequest) {
   if (!checkAuth(req)) {
