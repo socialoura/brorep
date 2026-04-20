@@ -98,8 +98,8 @@ function YouTubeHomePageInner() {
       case "hero":
         return (
           <div className="flex flex-col items-center gap-8 px-6 w-full max-w-2xl text-center">
-            <FanovalyLogo />
-            <StatusBadge />
+            <FanovalyLogo variant="red" />
+            <StatusBadge variant="red" />
             <div className="flex flex-col items-center gap-2">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] text-white uppercase">
                 {t("yt.hero.title1")}
@@ -108,7 +108,7 @@ function YouTubeHomePageInner() {
                 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] uppercase"
                 style={{ color: "#FF0000", textShadow: "0 0 40px rgba(255,0,0,0.25)" }}
               >
-                YouTube
+                {t("yt.hero.title2")}
               </h2>
             </div>
             <p className="text-base sm:text-lg text-gray-400 max-w-md leading-relaxed">
@@ -145,7 +145,12 @@ function YouTubeHomePageInner() {
               </button>
             </div>
             <div className="mt-4 flex flex-col items-center gap-3">
-              <SocialProof />
+              <SocialProof variant="youtube" />
+              <div className="flex items-center gap-1.5 text-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-dot" />
+                <span className="text-red-400 font-semibold">{t("yt.hero.morePercent")}</span>
+                <span className="text-gray-500">{t("yt.hero.moreProfiles")}</span>
+              </div>
             </div>
 
             {/* Comment ça marche */}

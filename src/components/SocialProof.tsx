@@ -19,8 +19,9 @@ const avatarStyle: React.CSSProperties = {
   boxShadow: "0 0 8px rgba(0, 0, 0, 0.5)",
 };
 
-export default function SocialProof() {
+export default function SocialProof({ variant = "default" }: { variant?: "default" | "youtube" }) {
   const { t } = useTranslation();
+  const isYt = variant === "youtube";
   return (
     <div
       style={{
@@ -29,7 +30,7 @@ export default function SocialProof() {
         gap: "12px",
         padding: "10px 20px",
         borderRadius: "16px",
-        border: "1px solid rgba(0, 255, 76, 0.2)",
+        border: isYt ? "1px solid rgba(255, 50, 50, 0.2)" : "1px solid rgba(0, 255, 76, 0.2)",
         backgroundColor: "rgba(14, 21, 18, 0.9)",
       }}
     >
@@ -64,7 +65,7 @@ export default function SocialProof() {
         >
           +12 955{" "}
           <span style={{ fontWeight: 400, color: "rgb(169, 181, 174)" }}>
-            {t("social.profilesAnalyzed")}
+            {isYt ? t("social.videosAnalyzed") : t("social.profilesAnalyzed")}
           </span>
         </p>
         <p

@@ -2,8 +2,14 @@
 
 import { useTranslation } from "@/lib/i18n";
 
-export default function StatusBadge() {
+export default function StatusBadge({ variant = "green" }: { variant?: "green" | "red" }) {
   const { t } = useTranslation();
+  const isRed = variant === "red";
+  const borderColor = isRed ? "rgba(255, 50, 50, 0.3)" : "rgba(0, 255, 76, 0.3)";
+  const bgColor = isRed ? "rgba(200, 0, 0, 0.12)" : "rgba(0, 180, 53, 0.12)";
+  const shadowColor = isRed ? "rgba(200, 0, 0, 0.08)" : "rgba(0, 180, 53, 0.08)";
+  const dotColor = isRed ? "rgb(220, 40, 40)" : "rgb(0, 180, 53)";
+  const dotShadow = isRed ? "rgba(220, 40, 40, 0.5)" : "rgba(0, 180, 53, 0.5)";
   return (
     <div
       style={{
@@ -13,9 +19,9 @@ export default function StatusBadge() {
         gap: "10px",
         padding: "10px 20px",
         borderRadius: "9999px",
-        border: "1px solid rgba(0, 255, 76, 0.3)",
-        backgroundColor: "rgba(0, 180, 53, 0.12)",
-        boxShadow: "0 0 12px rgba(0, 180, 53, 0.08)",
+        border: `1px solid ${borderColor}`,
+        backgroundColor: bgColor,
+        boxShadow: `0 0 12px ${shadowColor}`,
         position: "relative",
         overflow: "hidden",
         zIndex: 10,
@@ -47,8 +53,8 @@ export default function StatusBadge() {
             width: "6px",
             height: "6px",
             borderRadius: "9999px",
-            backgroundColor: "rgb(0, 180, 53)",
-            boxShadow: "0 0 6px rgba(0, 180, 53, 0.5)",
+            backgroundColor: dotColor,
+            boxShadow: `0 0 6px ${dotShadow}`,
             animation: "badge-dot-pulse 2s ease-in-out infinite",
           }}
         />
