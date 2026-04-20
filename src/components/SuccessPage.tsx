@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 declare global {
   interface Window {
@@ -13,9 +14,14 @@ interface Props {
   orderId?: number;
   cart?: { price: number }[];
   onReset: () => void;
+  platform?: string;
 }
 
-export default function SuccessPage({ username, orderId, cart, onReset }: Props) {
+export default function SuccessPage({ username, orderId, cart, onReset, platform }: Props) {
+  const { t, href } = useTranslation();
+  const yt = platform === "youtube";
+  const accent = yt ? "rgb(255, 0, 0)" : "rgb(0, 255, 76)";
+  const accentMid = yt ? "rgb(204, 0, 0)" : "rgb(0, 210, 106)";
   const [promo, setPromo] = useState<{ code: string; percent: number; expiresAt: number } | null>(null);
   const [countdown, setCountdown] = useState("");
   const [copied, setCopied] = useState(false);
@@ -52,7 +58,7 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
     const update = () => {
       const diff = promo.expiresAt * 1000 - Date.now();
       if (diff <= 0) {
-        setCountdown("Expiré");
+        setCountdown(t("success.expired"));
         return;
       }
       const h = Math.floor(diff / 3600000);
@@ -72,20 +78,20 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const green = "rgb(0, 255, 76)";
+  const green = accent;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", padding: "0 16px", maxWidth: "440px", width: "100%" }}>
       {/* Check icon */}
-      <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: "rgba(0, 255, 76, 0.1)", border: "2px solid rgba(0, 255, 76, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: yt ? "rgba(255,0,0,0.1)" : "rgba(0, 255, 76, 0.1)", border: yt ? "2px solid rgba(255,0,0,0.3)" : "2px solid rgba(0, 255, 76, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </div>
 
-      <h2 style={{ fontSize: "24px", fontWeight: 700, color: "#fff", margin: 0 }}>Paiement réussi !</h2>
+      <h2 style={{ fontSize: "24px", fontWeight: 700, color: "#fff", margin: 0 }}>{t("success.title")}</h2>
       <p style={{ fontSize: "14px", color: "rgb(169, 181, 174)", margin: 0, maxWidth: "320px", lineHeight: 1.5 }}>
-        Ta commande pour <span style={{ color: green, fontWeight: 600 }}>@{username}</span> a été enregistrée. Tu recevras tes résultats très bientôt.
+        {t("success.orderRegistered")} <span style={{ color: green, fontWeight: 600 }}>@{username}</span> {t("success.orderRegistered2")}
       </p>
 
       {/* Promo code block */}
@@ -94,15 +100,15 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
           style={{
             marginTop: "8px",
             width: "100%",
-            background: "linear-gradient(135deg, rgba(0, 180, 53, 0.08), rgba(0, 255, 76, 0.03))",
-            border: "1px dashed rgba(0, 255, 76, 0.3)",
+            background: yt ? "linear-gradient(135deg, rgba(255,0,0,0.08), rgba(255,0,0,0.03))" : "linear-gradient(135deg, rgba(0, 180, 53, 0.08), rgba(0, 255, 76, 0.03))",
+            border: yt ? "1px dashed rgba(255,0,0,0.3)" : "1px dashed rgba(0, 255, 76, 0.3)",
             borderRadius: "16px",
             padding: "24px 20px",
             textAlign: "center",
           }}
         >
           <p style={{ margin: "0 0 4px 0", fontSize: "11px", fontWeight: 600, color: "rgb(169, 181, 174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            🎁 Cadeau pour ta prochaine commande
+            🎁 {t("success.giftTitle")}
           </p>
 
           {/* Code */}
@@ -112,8 +118,8 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
               margin: "12px 0",
               padding: "12px 24px",
               borderRadius: "12px",
-              border: "1px solid rgba(0, 255, 76, 0.3)",
-              backgroundColor: "rgba(0, 255, 76, 0.06)",
+              border: yt ? "1px solid rgba(255,0,0,0.3)" : "1px solid rgba(0, 255, 76, 0.3)",
+              backgroundColor: yt ? "rgba(255,0,0,0.06)" : "rgba(0, 255, 76, 0.06)",
               cursor: "pointer",
               transition: "all 0.2s",
             }}
@@ -124,7 +130,7 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
           </button>
 
           <p style={{ margin: "0 0 6px 0", fontSize: "15px", fontWeight: 600, color: "#fff" }}>
-            -{promo.percent}% sur ta prochaine commande
+            -{promo.percent}% {t("success.offNextOrder")}
           </p>
 
           {/* Countdown */}
@@ -133,13 +139,13 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
             <span style={{ fontSize: "13px", color: "rgb(169, 181, 174)" }}>
-              Expire dans <strong style={{ color: "#ffb800" }}>{countdown}</strong>
+              {t("success.expiresIn")} <strong style={{ color: "#ffb800" }}>{countdown}</strong>
             </span>
           </div>
 
           {/* Copy feedback */}
           <p style={{ margin: "8px 0 0 0", fontSize: "11px", color: copied ? green : "rgb(107, 117, 111)", transition: "color 0.2s" }}>
-            {copied ? "✓ Code copié !" : "Clique sur le code pour le copier"}
+            {copied ? `✓ ${t("success.codeCopied")}` : t("success.clickToCopy")}
           </p>
         </div>
       )}
@@ -151,21 +157,21 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
             style={{
               width: "20px",
               height: "20px",
-              border: "2px solid rgba(0, 210, 106, 0.2)",
-              borderTopColor: "rgb(0, 210, 106)",
+              border: yt ? "2px solid rgba(255,0,0,0.2)" : "2px solid rgba(0, 210, 106, 0.2)",
+              borderTopColor: accentMid,
               borderRadius: "50%",
               animation: "spin 0.8s linear infinite",
               margin: "0 auto 8px auto",
             }}
           />
-          <p style={{ fontSize: "12px", color: "rgb(107, 117, 111)", margin: 0 }}>Génération de ton code promo...</p>
+          <p style={{ fontSize: "12px", color: "rgb(107, 117, 111)", margin: 0 }}>{t("success.generatingPromo")}</p>
         </div>
       )}
 
       {/* Order tracking link */}
       {orderId && (
         <a
-          href={`/order/${orderId}`}
+          href={href(`/order/${orderId}`)}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -174,22 +180,22 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
             padding: "12px 28px",
             borderRadius: "12px",
             border: "none",
-            background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))",
-            color: "#000",
+            background: yt ? "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))" : "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))",
+            color: yt ? "#fff" : "#000",
             fontSize: "14px",
             fontWeight: 700,
             textDecoration: "none",
             fontFamily: "inherit",
-            boxShadow: "0 8px 24px rgba(0, 255, 76, 0.25)",
+            boxShadow: yt ? "0 8px 24px rgba(255,0,0,0.25)" : "0 8px 24px rgba(0, 255, 76, 0.25)",
           }}
         >
-          📦 Suivre ma commande
+          📦 {t("success.trackOrder")}
         </a>
       )}
 
       {/* All orders link */}
       <a
-        href="/orders"
+        href={href("/orders")}
         style={{
           marginTop: "4px",
           fontSize: "12px",
@@ -197,7 +203,7 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
           textDecoration: "underline",
         }}
       >
-        Voir toutes mes commandes
+        {t("success.viewAllOrders")}
       </a>
 
       {/* New analysis button */}
@@ -207,16 +213,16 @@ export default function SuccessPage({ username, orderId, cart, onReset }: Props)
           marginTop: "4px",
           padding: "12px 28px",
           borderRadius: "12px",
-          border: "1px solid rgba(0, 210, 106, 0.2)",
-          backgroundColor: "rgba(0, 180, 53, 0.08)",
-          color: green,
+          border: yt ? "1px solid rgba(255,0,0,0.2)" : "1px solid rgba(0, 210, 106, 0.2)",
+          backgroundColor: yt ? "rgba(255,0,0,0.08)" : "rgba(0, 180, 53, 0.08)",
+          color: accent,
           fontSize: "13px",
           fontWeight: 600,
           cursor: "pointer",
           fontFamily: "inherit",
         }}
       >
-        Nouvelle analyse
+        {t("success.newAnalysis")}
       </button>
     </div>
   );

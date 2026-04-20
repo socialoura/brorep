@@ -1,6 +1,7 @@
 "use client";
 
 import type { ScanResult } from "@/components/ScanLoading";
+import { useTranslation } from "@/lib/i18n";
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -19,6 +20,7 @@ export default function ProfileConfirm({
   onConfirm: () => void;
   onBack: () => void;
 }) {
+  const { t } = useTranslation();
   const platformName = platform === "tiktok" ? "TikTok" : platform === "youtube" ? "YouTube" : "Instagram";
   const green = "rgb(0, 210, 106)";
 
@@ -110,7 +112,7 @@ export default function ProfileConfirm({
           }}
         />
         <span style={{ fontSize: "11px", fontWeight: 500, color: "rgb(169, 181, 174)", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-          Profil {platformName} détecté
+          {t("profile.detected", { platform: platformName })}
         </span>
       </div>
 
@@ -136,7 +138,7 @@ export default function ProfileConfirm({
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
           <span style={{ fontSize: "20px", fontWeight: 700, color: "rgb(232, 247, 237)" }}>{fmt(data.followersCount)}</span>
-          <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Abonnés</span>
+          <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("profile.followers")}</span>
         </div>
 
         <div className="stat-card" style={cardStyle}>
@@ -144,13 +146,13 @@ export default function ProfileConfirm({
             <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" /><rect x="2" y="6" width="14" height="12" rx="2" />
           </svg>
           <span style={{ fontSize: "20px", fontWeight: 700, color: "rgb(232, 247, 237)" }}>{fmt(data.videoCount)}</span>
-          <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Vidéos</span>
+          <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("profile.videos")}</span>
         </div>
       </div>
 
       {/* Question */}
       <p style={{ fontSize: "15px", color: "rgb(169, 181, 174)", margin: "0 0 20px 0" }}>
-        C&apos;est bien ton compte ?
+        {t("profile.isThisYou")}
       </p>
 
       {/* CTA */}
@@ -178,7 +180,7 @@ export default function ProfileConfirm({
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" />
         </svg>
-        Oui, c&apos;est moi
+        {t("profile.confirm")}
       </button>
 
       {/* Back */}
@@ -198,7 +200,7 @@ export default function ProfileConfirm({
         onMouseEnter={(e) => { e.currentTarget.style.color = "rgb(169, 181, 174)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.color = "rgb(107, 117, 111)"; }}
       >
-        Non, revenir en arrière
+        {t("profile.goBack")}
       </button>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ScanResult } from "@/components/ScanLoading";
 import type { CartItem } from "@/components/ServiceSelect";
+import { useTranslation } from "@/lib/i18n";
 
 function fmtN(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -37,6 +38,7 @@ export default function PostPicker({
   onConfirm: (assignments: PostAssignment[]) => void;
   onBack: () => void;
 }) {
+  const { t } = useTranslation();
   const hasLikes = cart.some((c) => c.service === "likes");
   const hasViews = cart.some((c) => c.service === "views");
 
@@ -88,13 +90,13 @@ export default function PostPicker({
     >
       {/* Title */}
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0" }}>
-        Choisis tes <span style={{ color: "rgb(0, 255, 76)", textShadow: "0 0 20px rgba(0, 255, 76, 0.3)" }}>posts</span>
+        {t("posts.title")} <span style={{ color: "rgb(0, 255, 76)", textShadow: "0 0 20px rgba(0, 255, 76, 0.3)" }}>{t("posts.posts")}</span>
       </h2>
       <p style={{ fontSize: "13px", color: "rgb(169, 181, 174)", margin: "0 0 6px 0" }}>
-        Sur quels posts veux-tu recevoir tes {services} ?
+        {t("posts.whichPosts")} {services} ?
       </p>
       <p style={{ fontSize: "11px", color: "rgb(107, 117, 111)", margin: "0 0 20px 0" }}>
-        {selected.size} post{selected.size !== 1 ? "s" : ""} sélectionné{selected.size !== 1 ? "s" : ""} — les {services} seront répartis équitablement
+        {selected.size} post{selected.size !== 1 ? "s" : ""} {t("posts.selected")}{selected.size !== 1 ? "s" : ""} — {services} {t("posts.distributed")}
       </p>
 
       {/* Select all */}
@@ -114,13 +116,13 @@ export default function PostPicker({
           transition: "all 0.2s",
         }}
       >
-        {selected.size === profile.posts.length ? "Tout désélectionner" : "Tout sélectionner"}
+        {selected.size === profile.posts.length ? t("posts.deselectAll") : t("posts.selectAll")}
       </button>
 
       {/* Posts grid */}
       {profile.posts.length === 0 ? (
         <p style={{ fontSize: "13px", color: "rgb(107, 117, 111)", margin: "20px 0" }}>
-          Aucun post récupéré pour ce profil.
+          {t("posts.noPosts")}
         </p>
       ) : (
         <div
@@ -266,8 +268,8 @@ export default function PostPicker({
           <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
         </svg>
         {selected.size > 0
-          ? `Valider (${selected.size} post${selected.size > 1 ? "s" : ""})`
-          : "Sélectionne au moins un post"
+          ? `${t("posts.validate")} (${selected.size} post${selected.size > 1 ? "s" : ""})`
+          : t("posts.selectAtLeast")
         }
       </button>
 
@@ -288,7 +290,7 @@ export default function PostPicker({
         onMouseEnter={(e) => { e.currentTarget.style.color = "rgb(169, 181, 174)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.color = "rgb(107, 117, 111)"; }}
       >
-        Modifier mon panier
+        {t("posts.editCart")}
       </button>
     </div>
   );

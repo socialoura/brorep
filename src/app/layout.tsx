@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import PostHogProviderWrapper from "@/components/PostHogProvider";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -73,15 +74,7 @@ export default function RootLayout({
         <PostHogProviderWrapper>
           <div style={{ flex: 1 }}>{children}</div>
         </PostHogProviderWrapper>
-        <footer style={{ background: "#050505", borderTop: "1px solid rgba(255,255,255,0.04)", padding: "24px 20px", textAlign: "center" }}>
-          <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", marginBottom: "8px" }}>
-            <a href="/cgv" style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textDecoration: "none" }}>CGV</a>
-            <a href="/confidentialite" style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textDecoration: "none" }}>Confidentialité</a>
-            <a href="/mentions-legales" style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textDecoration: "none" }}>Mentions légales</a>
-            <a href="/remboursement" style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textDecoration: "none" }}>Remboursement</a>
-          </div>
-          <p style={{ margin: 0, fontSize: "10px", color: "rgb(80, 80, 80)" }}>© {new Date().getFullYear()} Fanovaly — Tous droits réservés</p>
-        </footer>
+        <Footer />
       </body>
     </html>
   );

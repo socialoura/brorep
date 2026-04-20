@@ -1,6 +1,9 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n";
+
 export default function StatusBadge() {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -58,7 +61,7 @@ export default function StatusBadge() {
             color: "rgb(169, 181, 174)",
           }}
         >
-          IA en cours
+          {t("status.aiRunning")}
         </span>
       </span>
 

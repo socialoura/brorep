@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, Suspense } from "react";
+import { useTranslation, fmtPrice } from "@/lib/i18n";
+import type { Currency } from "@/lib/i18n";
 
 interface OrderData {
   id: number;
@@ -12,6 +14,7 @@ interface OrderData {
   followersBefore: number;
   createdAt: string;
   deliveredAt: string | null;
+  currency?: string;
 }
 
 function fmtQty(n: number): string {
@@ -20,24 +23,25 @@ function fmtQty(n: number): string {
   return String(n);
 }
 
-const STATUS_STEPS = [
-  { key: "pending", label: "En attente" },
-  { key: "paid", label: "Confirmée" },
-  { key: "processing", label: "En cours" },
-  { key: "delivered", label: "Livrée" },
-];
-
-function getStepIndex(status: string): number {
-  const idx = STATUS_STEPS.findIndex((s) => s.key === status);
-  return idx >= 0 ? idx : 1;
-}
-
-export default function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t, lang, href } = useTranslation();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [followersNow, setFollowersNow] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
+
+  const STATUS_STEPS = [
+    { key: "pending", label: t("orderStatus.pending") },
+    { key: "paid", label: t("orderStatus.paid") },
+    { key: "processing", label: t("orderStatus.processing") },
+    { key: "delivered", label: t("orderStatus.delivered") },
+  ];
+
+  function getStepIndex(status: string): number {
+    const idx = STATUS_STEPS.findIndex((s) => s.key === status);
+    return idx >= 0 ? idx : 1;
+  }
 
   // Fetch order
   useEffect(() => {
@@ -47,7 +51,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
         if (data.error) setError(data.error);
         else setOrder(data);
       })
-      .catch(() => setError("Impossible de charger la commande"));
+      .catch(() => setError(t("orderDetail.loadError")));
   }, [id]);
 
   // Live re-scan followers
@@ -78,7 +82,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
         <div style={{ textAlign: "center", padding: "32px" }}>
           <p style={{ fontSize: "40px", marginBottom: "16px" }}>😕</p>
           <p style={{ fontSize: "16px", color: "#ef4444", fontWeight: 600 }}>{error}</p>
-          <a href="/" style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", color: greenDim, textDecoration: "underline" }}>Retour à l'accueil</a>
+          <a href={href("/")} style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", color: greenDim, textDecoration: "underline" }}>{t("orders.backHome")}</a>
         </div>
       </div>
     );
@@ -108,7 +112,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
           <h1 style={{ margin: "0 0 4px 0", fontSize: "24px", fontWeight: 800, color: "#fff" }}>
             Fan<span style={{ color: green }}>ovaly</span>
           </h1>
-          <p style={{ margin: 0, fontSize: "13px", color: "rgb(107,117,111)" }}>Suivi de commande #{order.id}</p>
+          <p style={{ margin: 0, fontSize: "13px", color: "rgb(107,117,111)" }}>{t("orderDetail.tracking")} #{order.id}</p>
         </div>
 
         {/* Status bar */}
@@ -148,14 +152,14 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
           {/* Status text */}
           <div style={{ textAlign: "center", padding: "8px 0 0 0" }}>
             <p style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#fff" }}>
-              {order.status === "delivered" ? "Commande livrée ✅" :
-               order.status === "processing" ? "En cours de traitement..." :
-               order.status === "paid" ? "Commande confirmée, traitement imminent" :
-               "En attente de confirmation"}
+              {order.status === "delivered" ? t("orderDetail.statusDelivered") :
+               order.status === "processing" ? t("orderDetail.statusProcessing") :
+               order.status === "paid" ? t("orderDetail.statusPaid") :
+               t("orderDetail.statusPending")}
             </p>
             {order.deliveredAt && (
               <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
-                Livrée le {new Date(order.deliveredAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+                {t("orderDetail.deliveredOn")} {new Date(order.deliveredAt).toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
               </p>
             )}
           </div>
@@ -165,13 +169,13 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
         {order.followersBefore > 0 && (
           <div style={{ background: "#0e1512", border: "1px solid rgba(0,210,106,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <p style={{ margin: "0 0 16px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center" }}>
-              📊 Évolution de @{order.username}
+              📊 {t("orderDetail.evolution")} @{order.username}
             </p>
 
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
               {/* Before */}
               <div style={{ flex: 1, textAlign: "center" }}>
-                <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "rgb(107,117,111)", textTransform: "uppercase" }}>Avant</p>
+                <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "rgb(107,117,111)", textTransform: "uppercase" }}>{t("orderDetail.before")}</p>
                 <p style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "rgb(169,181,174)" }}>
                   {fmtQty(order.followersBefore)}
                 </p>
@@ -187,7 +191,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
 
               {/* After */}
               <div style={{ flex: 1, textAlign: "center" }}>
-                <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "rgb(107,117,111)", textTransform: "uppercase" }}>Maintenant</p>
+                <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "rgb(107,117,111)", textTransform: "uppercase" }}>{t("orderDetail.now")}</p>
                 {scanning ? (
                   <div style={{ display: "flex", justifyContent: "center" }}>
                     <div style={{ width: "20px", height: "20px", border: "2px solid rgba(0,210,106,0.2)", borderTopColor: greenDim, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
@@ -208,7 +212,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
             {/* Gain bar */}
             {gain !== null && gain > 0 && (
               <div style={{ marginTop: "16px", padding: "12px", background: "rgba(0,255,76,0.06)", borderRadius: "10px", textAlign: "center" }}>
-                <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>+{fmtQty(gain)} followers</span>
+                <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>+{fmtQty(gain)} {t("orderDetail.followers")}</span>
                 <span style={{ fontSize: "12px", color: "rgb(169,181,174)", marginLeft: "8px" }}>(+{gainPercent}%)</span>
               </div>
             )}
@@ -218,27 +222,27 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
         {/* Cart recap */}
         <div style={{ background: "#0e1512", border: "1px solid rgba(0,210,106,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
           <p style={{ margin: "0 0 12px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Détail de la commande
+            {t("orderDetail.orderDetail")}
           </p>
           {Array.isArray(order.cart) && order.cart.map((item, i) => (
             <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: i < order.cart.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
               <span style={{ fontSize: "13px", color: "#e8f7ed" }}>{fmtQty(item.qty)} {item.label}</span>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: greenDim }}>{item.price.toFixed(2)}€</span>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: greenDim }}>{fmtPrice(item.price, (order.currency || "eur") as Currency)}</span>
             </div>
           ))}
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(0,210,106,0.1)" }}>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>Total</span>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>{(order.totalCents / 100).toFixed(2)}€</span>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{t("service.total")}</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>{fmtPrice(order.totalCents / 100, (order.currency || "eur") as Currency)}</span>
           </div>
           <p style={{ margin: "8px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
-            Commandé le {new Date(order.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            {t("orderDetail.orderedOn")} {new Date(order.createdAt).toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
 
         {/* CTA */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
           <a
-            href="/?reset=1"
+            href={href("/?reset=1")}
             style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "14px 32px", borderRadius: "14px", border: "none",
@@ -248,16 +252,24 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
               boxShadow: "0 10px 30px rgba(0,255,76,0.25)",
             }}
           >
-            🚀 Relance un boost
+            🚀 {t("orderDetail.relaunchBoost")}
           </a>
           <a
-            href="/orders"
+            href={href("/orders")}
             style={{ fontSize: "12px", color: "rgb(169,181,174)", textDecoration: "underline" }}
           >
-            Voir toutes mes commandes
+            {t("success.viewAllOrders")}
           </a>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense>
+      <OrderPageInner params={params} />
+    </Suspense>
   );
 }

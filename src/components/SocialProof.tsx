@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n";
+
 const avatars = [
   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face",
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=face",
@@ -18,6 +20,7 @@ const avatarStyle: React.CSSProperties = {
 };
 
 export default function SocialProof() {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -61,7 +64,7 @@ export default function SocialProof() {
         >
           +12 955{" "}
           <span style={{ fontWeight: 400, color: "rgb(169, 181, 174)" }}>
-            profils analysés
+            {t("social.profilesAnalyzed")}
           </span>
         </p>
         <p
@@ -72,7 +75,7 @@ export default function SocialProof() {
             lineHeight: 1.4,
           }}
         >
-          ce mois-ci
+          {t("social.thisMonth")}
         </p>
       </div>
     </div>

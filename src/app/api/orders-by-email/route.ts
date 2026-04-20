@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     const orders = await sql`
-      SELECT id, username, platform, cart, total_cents, status, followers_before, created_at, delivered_at
+      SELECT id, username, platform, cart, total_cents, status, followers_before, created_at, delivered_at, COALESCE(currency, 'eur') as currency
       FROM orders
       WHERE LOWER(email) = ${email.toLowerCase().trim()}
       ORDER BY created_at DESC

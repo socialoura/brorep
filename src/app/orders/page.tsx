@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useTranslation, fmtPrice } from "@/lib/i18n";
+import type { Currency } from "@/lib/i18n";
 
 interface OrderItem {
   id: number;
@@ -12,6 +14,7 @@ interface OrderItem {
   followers_before: number;
   created_at: string;
   delivered_at: string | null;
+  currency?: string;
 }
 
 function fmtQty(n: number): string {
@@ -20,14 +23,8 @@ function fmtQty(n: number): string {
   return String(n);
 }
 
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  pending: { label: "En attente", color: "rgb(169,181,174)" },
-  paid: { label: "Confirmée", color: "#ffb800" },
-  processing: { label: "En cours", color: "rgb(0,210,106)" },
-  delivered: { label: "Livrée", color: "rgb(0,255,76)" },
-};
-
-export default function OrdersPage() {
+function OrdersPageInner() {
+  const { t, lang, href } = useTranslation();
   const [email, setEmail] = useState("");
   const [orders, setOrders] = useState<OrderItem[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,6 +33,13 @@ export default function OrdersPage() {
 
   const green = "rgb(0, 255, 76)";
   const greenDim = "rgb(0, 210, 106)";
+
+  const STATUS_MAP: Record<string, { label: string; color: string }> = {
+    pending: { label: t("orderStatus.pending"), color: "rgb(169,181,174)" },
+    paid: { label: t("orderStatus.paid"), color: "#ffb800" },
+    processing: { label: t("orderStatus.processing"), color: "rgb(0,210,106)" },
+    delivered: { label: t("orderStatus.delivered"), color: "rgb(0,255,76)" },
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,7 +60,7 @@ export default function OrdersPage() {
         setOrders(data.orders);
       }
     } catch {
-      setError("Impossible de contacter le serveur");
+      setError(t("orders.serverError"));
     }
     setLoading(false);
   }
@@ -66,18 +70,18 @@ export default function OrdersPage() {
       <div style={{ maxWidth: "520px", margin: "0 auto", padding: "40px 20px" }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <a href="/" style={{ textDecoration: "none" }}>
+          <a href={href("/")} style={{ textDecoration: "none" }}>
             <h1 style={{ margin: "0 0 4px 0", fontSize: "24px", fontWeight: 800, color: "#fff" }}>
               Fan<span style={{ color: green }}>ovaly</span>
             </h1>
           </a>
-          <p style={{ margin: 0, fontSize: "13px", color: "rgb(107,117,111)" }}>Suivi de tes commandes</p>
+          <p style={{ margin: 0, fontSize: "13px", color: "rgb(107,117,111)" }}>{t("orders.subtitle")}</p>
         </div>
 
         {/* Email form */}
         <form onSubmit={handleSubmit} style={{ marginBottom: "32px" }}>
           <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "rgb(169,181,174)", marginBottom: "8px" }}>
-            Entre ton adresse e-mail pour retrouver tes commandes
+            {t("orders.emailLabel")}
           </label>
           <div style={{ display: "flex", gap: "8px" }}>
             <input
@@ -115,7 +119,7 @@ export default function OrdersPage() {
                 whiteSpace: "nowrap",
               }}
             >
-              {loading ? "..." : "Rechercher"}
+              {loading ? "..." : t("orders.search")}
             </button>
           </div>
           {error && <p style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>{error}</p>}
@@ -125,9 +129,9 @@ export default function OrdersPage() {
         {orders !== null && orders.length === 0 && (
           <div style={{ textAlign: "center", padding: "40px 0" }}>
             <p style={{ fontSize: "40px", marginBottom: "12px" }}>📭</p>
-            <p style={{ fontSize: "15px", fontWeight: 600, color: "#fff" }}>Aucune commande trouvée</p>
+            <p style={{ fontSize: "15px", fontWeight: 600, color: "#fff" }}>{t("orders.noOrders")}</p>
             <p style={{ fontSize: "13px", color: "rgb(107,117,111)", marginTop: "4px" }}>
-              Vérifie que c&apos;est bien l&apos;email utilisé lors du paiement.
+              {t("orders.checkEmail")}
             </p>
           </div>
         )}
@@ -135,7 +139,7 @@ export default function OrdersPage() {
         {orders !== null && orders.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <p style={{ fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px 0" }}>
-              {orders.length} commande{orders.length > 1 ? "s" : ""} trouvée{orders.length > 1 ? "s" : ""}
+              {orders.length} {orders.length > 1 ? t("orders.foundPlural") : t("orders.found")} {orders.length > 1 ? t("orders.foundPluralSuffix") : t("orders.foundSuffix")}
             </p>
 
             {orders.map((order) => {
@@ -143,7 +147,7 @@ export default function OrdersPage() {
               return (
                 <a
                   key={order.id}
-                  href={`/order/${order.id}`}
+                  href={href(`/order/${order.id}`)}
                   style={{
                     display: "block",
                     textDecoration: "none",
@@ -207,10 +211,10 @@ export default function OrdersPage() {
                   {/* Bottom row: total + date */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: "16px", fontWeight: 800, color: green }}>
-                      {(order.total_cents / 100).toFixed(2)}€
+                      {fmtPrice(order.total_cents / 100, (order.currency || "eur") as Currency)}
                     </span>
                     <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
-                      {new Date(order.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                      {new Date(order.created_at).toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   </div>
                 </a>
@@ -221,11 +225,19 @@ export default function OrdersPage() {
 
         {/* Back link */}
         <div style={{ textAlign: "center", marginTop: "32px" }}>
-          <a href="/" style={{ fontSize: "13px", color: greenDim, textDecoration: "underline" }}>
-            Retour à l&apos;accueil
+          <a href={href("/")} style={{ fontSize: "13px", color: greenDim, textDecoration: "underline" }}>
+            {t("orders.backHome")}
           </a>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense>
+      <OrdersPageInner />
+    </Suspense>
   );
 }

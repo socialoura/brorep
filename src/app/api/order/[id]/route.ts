@@ -27,5 +27,6 @@ export async function GET(
     followersBefore: order.followers_before || 0,
     createdAt: order.created_at,
     deliveredAt: order.delivered_at,
+    currency: order.currency || "eur",
   });
 }

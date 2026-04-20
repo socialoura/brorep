@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { usePostHog } from "posthog-js/react";
 import FanovalyLogo from "@/components/FanovalyLogo";
 import SocialProof from "@/components/SocialProof";
@@ -18,14 +18,22 @@ import PostPicker from "@/components/PostPicker";
 import type { PostAssignment } from "@/components/PostPicker";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
+import { useTranslation } from "@/lib/i18n";
 
 type Step = "hero" | "platform" | "username" | "scanning" | "results" | "shop" | "pickPosts" | "payment" | "success";
 
-const PROGRESS_STEPS = [
+const PROGRESS_STEPS_FR = [
   { key: "platform", label: "Plateforme" },
   { key: "username", label: "Profil" },
   { key: "shop", label: "Services" },
   { key: "payment", label: "Paiement" },
+] as const;
+
+const PROGRESS_STEPS_EN = [
+  { key: "platform", label: "Platform" },
+  { key: "username", label: "Profile" },
+  { key: "shop", label: "Services" },
+  { key: "payment", label: "Payment" },
 ] as const;
 
 const STEP_TO_PROGRESS: Record<string, number> = {
@@ -38,7 +46,8 @@ const STEP_TO_PROGRESS: Record<string, number> = {
   payment: 3,
 };
 
-function StepProgress({ step }: { step: Step }) {
+function StepProgress({ step, lang = "fr" }: { step: Step; lang?: string }) {
+  const PROGRESS_STEPS = lang === "en" ? PROGRESS_STEPS_EN : PROGRESS_STEPS_FR;
   const currentIndex = STEP_TO_PROGRESS[step];
   if (currentIndex === undefined) return null;
 
@@ -97,7 +106,7 @@ function saveSession(key: string, value: unknown) {
   try { sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* ignore */ }
 }
 
-export default function HomePage() {
+function HomePageInner() {
   const [step, setStep] = useState<Step>("hero");
   const [platform, setPlatform] = useState<string>("tiktok");
   const [username, setUsername] = useState<string>("");
@@ -107,6 +116,7 @@ export default function HomePage() {
   const [orderId, setOrderId] = useState<number | undefined>();
   const [hydrated, setHydrated] = useState(false);
   const posthog = usePostHog();
+  const { t, lang } = useTranslation();
 
   // Restore from sessionStorage after hydration (client-only)
   useEffect(() => {
@@ -168,19 +178,19 @@ export default function HomePage() {
             <StatusBadge />
             <div className="flex flex-col items-center gap-2">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] text-white uppercase">
-                Notre IA analyse
+                {t("hero.title1")}
               </h1>
               <h2
                 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] uppercase"
                 style={{ color: "#22c55e", textShadow: "0 0 40px rgba(34,197,94,0.35)" }}
               >
-                ton profil en 30s
+                {t("hero.title2")}
               </h2>
             </div>
             <p className="text-base sm:text-lg text-gray-400 max-w-md leading-relaxed">
-              Notre IA scanne ton profil et te propose
+              {t("hero.subtitle1")}
               <br />
-              <span className="text-gray-500">une stratégie de croissance personnalisée</span>
+              <span className="text-gray-500">{t("hero.subtitle2")}</span>
             </p>
             <div className="mt-2">
               <CTAButton onClick={() => { posthog?.capture("cta_clicked"); setStep("platform"); }} />
@@ -189,19 +199,19 @@ export default function HomePage() {
               <SocialProof />
               <div className="flex items-center gap-1.5 text-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot" />
-                <span className="text-green-400 font-semibold">20% plus</span>
-                <span className="text-gray-500">de profils analysés par notre IA qu&apos;hier</span>
+                <span className="text-green-400 font-semibold">{t("hero.morePercent")}</span>
+                <span className="text-gray-500">{t("hero.moreProfiles")}</span>
               </div>
             </div>
 
             {/* Comment ça marche */}
             <div style={{ width: "100%", maxWidth: "540px", marginTop: "48px" }}>
-              <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(0, 210, 106)", marginBottom: "16px" }}>Comment ça marche</p>
+              <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(0, 210, 106)", marginBottom: "16px" }}>{t("howItWorks.title")}</p>
               <div className="grid-steps">
                 {[
-                  { num: "1", title: "L'IA scanne ton profil", desc: "Entre ton @ et notre IA analyse tes stats, posts et engagement en 30 secondes." },
-                  { num: "2", title: "Stratégie personnalisée", desc: "L'IA te recommande un plan sur mesure adapté à ton profil et tes objectifs." },
-                  { num: "3", title: "Croissance automatique", desc: "Résultats visibles rapidement, directement sur ton compte." },
+                  { num: "1", title: t("howItWorks.step1.title"), desc: t("howItWorks.step1.desc") },
+                  { num: "2", title: t("howItWorks.step2.title"), desc: t("howItWorks.step2.desc") },
+                  { num: "3", title: t("howItWorks.step3.title"), desc: t("howItWorks.step3.desc") },
                 ].map((s) => (
                   <div key={s.num} style={{ padding: "20px 14px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", textAlign: "center" }}>
                     <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "rgba(0, 210, 106, 0.1)", border: "1px solid rgba(0, 210, 106, 0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px auto", fontSize: "13px", fontWeight: 800, color: "rgb(0, 210, 106)" }}>{s.num}</div>
@@ -214,13 +224,13 @@ export default function HomePage() {
 
             {/* FAQ */}
             <div style={{ width: "100%", maxWidth: "540px", marginTop: "40px" }}>
-              <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(0, 210, 106)", marginBottom: "16px" }}>Questions fréquentes</p>
+              <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(0, 210, 106)", marginBottom: "16px" }}>{t("faq.title")}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {[
-                  { q: "Comment l'IA analyse mon profil ?", a: "Notre IA scanne tes stats, ton taux d'engagement, tes derniers posts et ton audience pour identifier les axes de croissance les plus efficaces." },
-                  { q: "Est-ce que c'est sûr pour mon compte ?", a: "Oui. L'IA analyse ton profil sans aucun accès à ton compte. Aucun mot de passe requis, aucune connexion à tes réseaux." },
-                  { q: "En combien de temps je vois des résultats ?", a: "L'analyse IA prend 30 secondes. Les premiers résultats de la stratégie sont visibles en quelques minutes, tout est finalisé sous 24h." },
-                  { q: "Les résultats sont-ils durables ?", a: "L'IA recommande une croissance progressive et naturelle. En cas de variation, on ajuste gratuitement pendant 30 jours." },
+                  { q: t("faq.q1"), a: t("faq.a1") },
+                  { q: t("faq.q2"), a: t("faq.a2") },
+                  { q: t("faq.q3"), a: t("faq.a3") },
+                  { q: t("faq.q4"), a: t("faq.a4") },
                 ].map((faq) => (
                   <details key={faq.q} onClick={() => posthog?.capture("faq_opened", { question: faq.q })} style={{ borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", overflow: "hidden" }}>
                     <summary style={{ padding: "14px 16px", fontSize: "13px", fontWeight: 600, color: "#fff", cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -341,11 +351,19 @@ export default function HomePage() {
           style={{ opacity: 1 }}
         >
           <div key={step} className="step-fade-in" style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <StepProgress step={step} />
+            <StepProgress step={step} lang={lang} />
             {renderContent()}
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense>
+      <HomePageInner />
+    </Suspense>
   );
 }

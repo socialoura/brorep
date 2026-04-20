@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import posthog from "posthog-js";
 import type { ScanResult } from "@/components/ScanLoading";
+import { useTranslation, fmtPrice } from "@/lib/i18n";
 
 type ServiceType = "followers" | "likes" | "views" | "yt_subscribers" | "yt_likes" | "yt_views";
 
 interface Pack {
   qty: number;
   price: number;
+  priceUsd: number;
   popular?: boolean;
 }
 
@@ -17,6 +19,7 @@ export interface CartItem {
   label: string;
   qty: number;
   price: number;
+  priceUsd: number;
 }
 
 const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React.ReactNode; packs: Pack[] }>> = {
@@ -28,14 +31,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.99 },
-      { qty: 250, price: 5.99 },
-      { qty: 500, price: 9.99, popular: true },
-      { qty: 1000, price: 16.99 },
-      { qty: 2500, price: 34.99 },
-      { qty: 5000, price: 59.99 },
-      { qty: 10000, price: 99.99 },
-      { qty: 25000, price: 199.99 },
+      { qty: 100, price: 2.99, priceUsd: 2.99 },
+      { qty: 250, price: 5.99, priceUsd: 5.99 },
+      { qty: 500, price: 9.99, priceUsd: 9.99, popular: true },
+      { qty: 1000, price: 16.99, priceUsd: 16.99 },
+      { qty: 2500, price: 34.99, priceUsd: 34.99 },
+      { qty: 5000, price: 59.99, priceUsd: 59.99 },
+      { qty: 10000, price: 99.99, priceUsd: 99.99 },
+      { qty: 25000, price: 199.99, priceUsd: 199.99 },
     ],
   },
   likes: {
@@ -46,14 +49,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 1.99 },
-      { qty: 250, price: 3.99 },
-      { qty: 500, price: 6.99, popular: true },
-      { qty: 1000, price: 11.99 },
-      { qty: 2500, price: 24.99 },
-      { qty: 5000, price: 44.99 },
-      { qty: 10000, price: 79.99 },
-      { qty: 25000, price: 149.99 },
+      { qty: 100, price: 1.99, priceUsd: 1.99 },
+      { qty: 250, price: 3.99, priceUsd: 3.99 },
+      { qty: 500, price: 6.99, priceUsd: 6.99, popular: true },
+      { qty: 1000, price: 11.99, priceUsd: 11.99 },
+      { qty: 2500, price: 24.99, priceUsd: 24.99 },
+      { qty: 5000, price: 44.99, priceUsd: 44.99 },
+      { qty: 10000, price: 79.99, priceUsd: 79.99 },
+      { qty: 25000, price: 149.99, priceUsd: 149.99 },
     ],
   },
   views: {
@@ -64,14 +67,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 500, price: 1.99 },
-      { qty: 1000, price: 3.49 },
-      { qty: 2500, price: 7.99 },
-      { qty: 5000, price: 12.99, popular: true },
-      { qty: 10000, price: 22.99 },
-      { qty: 25000, price: 49.99 },
-      { qty: 50000, price: 89.99 },
-      { qty: 100000, price: 149.99 },
+      { qty: 500, price: 1.99, priceUsd: 1.99 },
+      { qty: 1000, price: 3.49, priceUsd: 3.49 },
+      { qty: 2500, price: 7.99, priceUsd: 7.99 },
+      { qty: 5000, price: 12.99, priceUsd: 12.99, popular: true },
+      { qty: 10000, price: 22.99, priceUsd: 22.99 },
+      { qty: 25000, price: 49.99, priceUsd: 49.99 },
+      { qty: 50000, price: 89.99, priceUsd: 89.99 },
+      { qty: 100000, price: 149.99, priceUsd: 149.99 },
     ],
   },
   yt_subscribers: {
@@ -82,12 +85,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 3.99 },
-      { qty: 250, price: 7.99 },
-      { qty: 500, price: 13.99, popular: true },
-      { qty: 1000, price: 24.99 },
-      { qty: 2500, price: 49.99 },
-      { qty: 5000, price: 89.99 },
+      { qty: 100, price: 3.99, priceUsd: 3.99 },
+      { qty: 250, price: 7.99, priceUsd: 7.99 },
+      { qty: 500, price: 13.99, priceUsd: 13.99, popular: true },
+      { qty: 1000, price: 24.99, priceUsd: 24.99 },
+      { qty: 2500, price: 49.99, priceUsd: 49.99 },
+      { qty: 5000, price: 89.99, priceUsd: 89.99 },
     ],
   },
   yt_likes: {
@@ -98,12 +101,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.49 },
-      { qty: 250, price: 4.99 },
-      { qty: 500, price: 8.99, popular: true },
-      { qty: 1000, price: 14.99 },
-      { qty: 2500, price: 29.99 },
-      { qty: 5000, price: 54.99 },
+      { qty: 100, price: 2.49, priceUsd: 2.49 },
+      { qty: 250, price: 4.99, priceUsd: 4.99 },
+      { qty: 500, price: 8.99, priceUsd: 8.99, popular: true },
+      { qty: 1000, price: 14.99, priceUsd: 14.99 },
+      { qty: 2500, price: 29.99, priceUsd: 29.99 },
+      { qty: 5000, price: 54.99, priceUsd: 54.99 },
     ],
   },
   yt_views: {
@@ -114,13 +117,13 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 500, price: 2.49 },
-      { qty: 1000, price: 4.49 },
-      { qty: 2500, price: 9.99 },
-      { qty: 5000, price: 16.99, popular: true },
-      { qty: 10000, price: 29.99 },
-      { qty: 25000, price: 59.99 },
-      { qty: 50000, price: 99.99 },
+      { qty: 500, price: 2.49, priceUsd: 2.49 },
+      { qty: 1000, price: 4.49, priceUsd: 4.49 },
+      { qty: 2500, price: 9.99, priceUsd: 9.99 },
+      { qty: 5000, price: 16.99, priceUsd: 16.99, popular: true },
+      { qty: 10000, price: 29.99, priceUsd: 29.99 },
+      { qty: 25000, price: 59.99, priceUsd: 59.99 },
+      { qty: 50000, price: 99.99, priceUsd: 99.99 },
     ],
   },
 };
@@ -170,7 +173,17 @@ export default function ServiceSelect({
   onBack: () => void;
   platform?: string;
 }) {
+  const { t, currency } = useTranslation();
   const isYouTube = platform === "youtube";
+  // Theme colors
+  const accent = isYouTube ? "rgb(255, 0, 0)" : "rgb(0, 255, 76)";
+  const accentMid = isYouTube ? "rgb(204, 0, 0)" : "rgb(0, 210, 106)";
+  const accentDark = isYouTube ? "rgb(153, 0, 0)" : "rgb(0, 180, 53)";
+  const accentBg = isYouTube ? "rgba(255, 0, 0, 0.05)" : "rgba(0, 180, 53, 0.05)";
+  const accentBorder = isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(0, 210, 106, 0.12)";
+  const accentBorderStrong = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(0, 210, 106, 0.2)";
+  const accentGlow = isYouTube ? "rgba(255, 0, 0, 0.25)" : "rgba(0, 255, 76, 0.25)";
+  const gradientBg = isYouTube ? "linear-gradient(135deg, rgb(153, 0, 0), rgb(255, 0, 0))" : "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))";
   const activeKeys = isYouTube ? YOUTUBE_KEYS : TIKTOK_KEYS;
   const [activeTab, setActiveTab] = useState<ServiceType>(activeKeys[0]);
   // One selected pack index per service type
@@ -196,7 +209,7 @@ export default function ServiceSelect({
           const svc = row.service as ServiceType;
           if (!SERVICE_KEYS.includes(svc)) continue;
           if (!grouped[svc]) grouped[svc] = [];
-          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price) });
+          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price), priceUsd: Number(row.price_usd || 0) });
         }
         setServices((prev) => {
           const next = { ...prev };
@@ -236,10 +249,10 @@ export default function ServiceSelect({
     .filter((k) => selections[k] !== undefined)
     .map((k) => {
       const pack = services[k]!.packs[selections[k]!];
-      return { service: k, label: services[k]!.label, qty: pack.qty, price: pack.price };
+      return { service: k, label: services[k]!.label, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
     });
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const total = cart.reduce((sum, item) => sum + (currency === "usd" ? item.priceUsd : item.price), 0);
 
   return (
     <div
@@ -260,8 +273,8 @@ export default function ServiceSelect({
           gap: "12px",
           padding: "10px 16px",
           borderRadius: "12px",
-          backgroundColor: "rgba(0, 180, 53, 0.05)",
-          border: "1px solid rgba(0, 210, 106, 0.12)",
+          backgroundColor: accentBg,
+          border: `1px solid ${accentBorder}`,
           marginBottom: "20px",
           width: "100%",
           maxWidth: "360px",
@@ -270,20 +283,19 @@ export default function ServiceSelect({
         <img
           src={profile.avatarUrl}
           alt={profile.username}
-          style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(0, 255, 76, 0.2)" }}
+          style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentBorderStrong}` }}
         />
         <div style={{ textAlign: "left" }}>
           <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff" }}>@{profile.username}</p>
-          <p style={{ margin: 0, fontSize: "11px", color: "rgb(107, 117, 111)" }}>{profile.followersCount.toLocaleString()} abonnés</p>
         </div>
       </div>
 
       {/* Title */}
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0" }}>
-        Compose ton <span style={{ color: "rgb(0, 255, 76)", textShadow: "0 0 20px rgba(0, 255, 76, 0.3)" }}>pack</span>
+        {t("service.composeTitle")} <span style={{ color: accent, textShadow: `0 0 20px ${isYouTube ? 'rgba(255,0,0,0.3)' : 'rgba(0,255,76,0.3)'}` }}>{t("service.pack")}</span>
       </h2>
       <p style={{ fontSize: "13px", color: "rgb(169, 181, 174)", margin: "0 0 20px 0" }}>
-        Choisis dans chaque catégorie — ou prends un combo
+        {t("service.composeSubtitle")}
       </p>
 
       {/* Combo packs */}
@@ -302,7 +314,7 @@ export default function ServiceSelect({
         </div>
       ) : combos.length === 0 ? (
         <div style={{ width: "100%", marginBottom: "20px", padding: "20px", borderRadius: "14px", border: "1px dashed rgba(255,255,255,0.06)", textAlign: "center" }}>
-          <p style={{ margin: 0, fontSize: "13px", color: "rgb(107, 117, 111)" }}>Nos packs combo arrivent bientôt !</p>
+          <p style={{ margin: 0, fontSize: "13px", color: "rgb(107, 117, 111)" }}>{t("service.combosSoon")}</p>
         </div>
       ) : (
         <div style={{ width: "100%", marginBottom: "20px" }}>
@@ -314,11 +326,11 @@ export default function ServiceSelect({
                   const svc = ci.service as ServiceType;
                   const pack = findClosestPack(svc, ci.qty, services);
                   if (!pack) return null;
-                  return { service: svc, label: services[svc]?.label ?? svc, qty: pack.qty, price: pack.price };
+                  return { service: svc, label: services[svc]?.label ?? svc, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
                 })
                 .filter(Boolean) as CartItem[];
 
-              const originalTotal = comboItems.reduce((s, i) => s + i.price, 0);
+              const originalTotal = comboItems.reduce((s, i) => s + (currency === "usd" ? i.priceUsd : i.price), 0);
               const discountedTotal = originalTotal * (1 - combo.discount_percent / 100);
 
               return (
@@ -328,6 +340,7 @@ export default function ServiceSelect({
                     const discountedItems = comboItems.map((item) => ({
                       ...item,
                       price: Number((item.price * (1 - combo.discount_percent / 100)).toFixed(2)),
+                      priceUsd: Number((item.priceUsd * (1 - combo.discount_percent / 100)).toFixed(2)),
                     }));
                     posthog.capture("combo_selected", { combo_name: combo.name, discount_percent: combo.discount_percent, total: discountedItems.reduce((s, i) => s + i.price, 0) });
                     onCheckout(discountedItems);
@@ -339,22 +352,22 @@ export default function ServiceSelect({
                     gap: "6px",
                     padding: "16px",
                     borderRadius: "14px",
-                    border: "1px solid rgba(0, 210, 106, 0.2)",
-                    background: "linear-gradient(135deg, rgba(0, 180, 53, 0.08), rgba(0, 255, 76, 0.02))",
+                    border: `1px solid ${accentBorderStrong}`,
+                    background: isYouTube ? "linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 0, 0, 0.02))" : "linear-gradient(135deg, rgba(0, 180, 53, 0.08), rgba(0, 255, 76, 0.02))",
                     cursor: "pointer",
                     fontFamily: "inherit",
                     textAlign: "left",
                     transition: "all 0.2s",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(0, 255, 76, 0.4)"; e.currentTarget.style.transform = "scale(1.02)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0, 210, 106, 0.2)"; e.currentTarget.style.transform = "scale(1)"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.4)" : "rgba(0, 255, 76, 0.4)"; e.currentTarget.style.transform = "scale(1.02)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(0, 210, 106, 0.2)"; e.currentTarget.style.transform = "scale(1)"; }}
                 >
                   {/* Discount badge */}
                   <span style={{
                     position: "absolute", top: "-8px", right: "10px",
                     padding: "3px 10px", borderRadius: "9999px",
                     fontSize: "10px", fontWeight: 800,
-                    background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))",
+                    background: gradientBg,
                     color: "#000", letterSpacing: "0.03em",
                   }}>
                     -{combo.discount_percent}%
@@ -369,8 +382,8 @@ export default function ServiceSelect({
                     ))}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "rgb(107, 117, 111)", textDecoration: "line-through" }}>{originalTotal.toFixed(2)}€</span>
-                    <span style={{ fontSize: "16px", fontWeight: 800, color: "rgb(0, 255, 76)" }}>{discountedTotal.toFixed(2)}€</span>
+                    <span style={{ fontSize: "12px", color: "rgb(107, 117, 111)", textDecoration: "line-through" }}>{fmtPrice(originalTotal, currency)}</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: accent }}>{fmtPrice(discountedTotal, currency)}</span>
                   </div>
                 </button>
               );
@@ -379,7 +392,7 @@ export default function ServiceSelect({
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "16px 0 0 0" }}>
             <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
-            <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>ou compose toi-même</span>
+            <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("service.orCompose")}</span>
             <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
           </div>
         </div>
@@ -406,8 +419,8 @@ export default function ServiceSelect({
                 fontFamily: "inherit",
                 fontWeight: 600,
                 color: isActive ? "#000" : "rgb(169, 181, 174)",
-                background: isActive ? "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))" : "transparent",
-                boxShadow: isActive ? "0 4px 16px rgba(0, 255, 76, 0.2)" : "none",
+                background: isActive ? gradientBg : "transparent",
+                boxShadow: isActive ? `0 4px 16px ${accentGlow}` : "none",
                 transition: "all 0.2s",
               }}
             >
@@ -419,11 +432,11 @@ export default function ServiceSelect({
                     width: "7px",
                     height: "7px",
                     borderRadius: "50%",
-                    backgroundColor: "rgb(0, 255, 76)",
+                    backgroundColor: accent,
                     position: "absolute",
                     top: "6px",
                     right: "6px",
-                    boxShadow: "0 0 4px rgba(0, 255, 76, 0.5)",
+                    boxShadow: `0 0 4px ${isYouTube ? 'rgba(255,0,0,0.5)' : 'rgba(0,255,76,0.5)'}`,
                   }}
                 />
               )}
@@ -450,9 +463,9 @@ export default function ServiceSelect({
                 borderRadius: "14px",
                 cursor: "pointer",
                 fontFamily: "inherit",
-                border: isSelected ? "2px solid rgb(0, 255, 76)" : "1px solid rgba(0, 210, 106, 0.12)",
-                backgroundColor: isSelected ? "rgba(0, 180, 53, 0.1)" : "rgba(255, 255, 255, 0.02)",
-                boxShadow: isSelected ? "0 0 20px rgba(0, 255, 76, 0.1), inset 0 0 20px rgba(0, 180, 53, 0.05)" : "none",
+                border: isSelected ? `2px solid ${accent}` : `1px solid ${accentBorder}`,
+                backgroundColor: isSelected ? (isYouTube ? "rgba(255, 0, 0, 0.1)" : "rgba(0, 180, 53, 0.1)") : "rgba(255, 255, 255, 0.02)",
+                boxShadow: isSelected ? (isYouTube ? "0 0 20px rgba(255,0,0,0.1), inset 0 0 20px rgba(255,0,0,0.05)" : "0 0 20px rgba(0, 255, 76, 0.1), inset 0 0 20px rgba(0, 180, 53, 0.05)") : "none",
                 transition: "all 0.2s",
               }}
             >
@@ -468,12 +481,12 @@ export default function ServiceSelect({
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.05em",
-                    background: "rgba(0, 255, 76, 0.12)",
-                    color: "rgb(0, 255, 76)",
-                    border: "1px solid rgba(0, 255, 76, 0.2)",
+                    background: isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(0, 255, 76, 0.12)",
+                    color: accent,
+                    border: `1px solid ${accentBorderStrong}`,
                   }}
                 >
-                  Top
+                  {t("service.top")}
                 </span>
               )}
               {isSelected && (
@@ -485,13 +498,13 @@ export default function ServiceSelect({
                     width: "16px",
                     height: "16px",
                     borderRadius: "50%",
-                    backgroundColor: "rgb(0, 255, 76)",
+                    backgroundColor: accent,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={isYouTube ? "#fff" : "#000"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
@@ -507,11 +520,11 @@ export default function ServiceSelect({
                   marginTop: "2px",
                   fontSize: "14px",
                   fontWeight: 700,
-                  color: isSelected ? "rgb(0, 210, 106)" : "rgb(169, 181, 174)",
+                  color: isSelected ? accentMid : "rgb(169, 181, 174)",
                   transition: "color 0.2s",
                 }}
               >
-                {pack.price.toFixed(2)}&euro;
+                {fmtPrice(currency === "usd" ? pack.priceUsd : pack.price, currency)}
               </span>
             </button>
           );
@@ -525,13 +538,13 @@ export default function ServiceSelect({
             width: "100%",
             padding: "12px 16px",
             borderRadius: "12px",
-            backgroundColor: "rgba(0, 180, 53, 0.06)",
-            border: "1px solid rgba(0, 210, 106, 0.15)",
+            backgroundColor: isYouTube ? "rgba(255, 0, 0, 0.06)" : "rgba(0, 180, 53, 0.06)",
+            border: `1px solid ${isYouTube ? 'rgba(255,0,0,0.15)' : 'rgba(0,210,106,0.15)'}`,
             marginBottom: "20px",
           }}
         >
           <p style={{ margin: "0 0 8px 0", fontSize: "11px", fontWeight: 600, color: "rgb(169, 181, 174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Ton panier
+            {t("service.yourCart")}
           </p>
           {cart.map((item, i) => (
             <div
@@ -546,8 +559,8 @@ export default function ServiceSelect({
               <span style={{ fontSize: "13px", color: "rgb(232, 247, 237)" }}>
                 {fmtQty(item.qty)} {item.label}
               </span>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "rgb(0, 210, 106)" }}>
-                {item.price.toFixed(2)}&euro;
+              <span style={{ fontSize: "13px", fontWeight: 600, color: accentMid }}>
+                {fmtPrice(currency === "usd" ? item.priceUsd : item.price, currency)}
               </span>
             </div>
           ))}
@@ -556,13 +569,13 @@ export default function ServiceSelect({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              borderTop: "1px solid rgba(0, 210, 106, 0.1)",
+              borderTop: `1px solid ${isYouTube ? 'rgba(255,0,0,0.1)' : 'rgba(0,210,106,0.1)'}`,
               marginTop: "8px",
               paddingTop: "8px",
             }}
           >
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>Total</span>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: "rgb(0, 255, 76)" }}>{total.toFixed(2)}&euro;</span>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{t("service.total")}</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: accent }}>{fmtPrice(total, currency)}</span>
           </div>
         </div>
       )}
@@ -582,9 +595,9 @@ export default function ServiceSelect({
           fontWeight: 700,
           fontSize: "14px",
           fontFamily: "inherit",
-          color: cart.length > 0 ? "#000" : "rgb(80, 80, 80)",
-          background: cart.length > 0 ? "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))" : "rgba(255, 255, 255, 0.06)",
-          boxShadow: cart.length > 0 ? "0 10px 30px rgba(0, 255, 76, 0.25)" : "none",
+          color: cart.length > 0 ? (isYouTube ? "#fff" : "#000") : "rgb(80, 80, 80)",
+          background: cart.length > 0 ? gradientBg : "rgba(255, 255, 255, 0.06)",
+          boxShadow: cart.length > 0 ? `0 10px 30px ${accentGlow}` : "none",
           transition: "all 0.2s",
           opacity: cart.length > 0 ? 1 : 0.5,
         }}
@@ -595,8 +608,8 @@ export default function ServiceSelect({
           <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
         </svg>
         {cart.length > 0
-          ? `Passer commande — ${total.toFixed(2)}\u20AC`
-          : "Sélectionne au moins un pack"
+          ? `${t("service.checkout")} \u2014 ${fmtPrice(total, currency)}`
+          : t("service.selectAtLeast")
         }
       </button>
 
@@ -617,7 +630,7 @@ export default function ServiceSelect({
         onMouseEnter={(e) => { e.currentTarget.style.color = "rgb(169, 181, 174)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.color = "rgb(107, 117, 111)"; }}
       >
-        Retour au profil
+        {t("service.backToProfile")}
       </button>
     </div>
   );

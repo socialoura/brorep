@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import posthog from "posthog-js";
+import { useTranslation } from "@/lib/i18n";
 
 function TikTokLogo() {
   return (
@@ -115,6 +116,7 @@ export default function ScanLoading({
   onComplete?: (data: ScanResult) => void;
   onError?: () => void;
 }) {
+  const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [scanError, setScanError] = useState<string | null>(null);
@@ -128,6 +130,13 @@ export default function ScanLoading({
   const isTikTok = platform === "tiktok";
   const isYouTube = platform === "youtube";
   const platformName = isTikTok ? "TikTok" : isYouTube ? "YouTube" : "Instagram";
+
+  const localSteps = [
+    { label: t("scan.step1"), icon: steps[0].icon, iconDone: steps[0].iconDone },
+    { label: t("scan.step2"), icon: steps[1].icon },
+    { label: t("scan.step3"), icon: steps[2].icon },
+    { label: t("scan.step4"), icon: steps[3].icon },
+  ];
 
   // Poll Instagram posts (up to 6 attempts, 1s apart — faster)
   const pollInstagramPosts = useCallback(async (profileData: ScanResult) => {
@@ -165,13 +174,13 @@ export default function ScanLoading({
         } else {
           apiErrorRef.current = true;
           const notFound = body.error === "User not found on TikTok" || body.error === "Chaîne YouTube introuvable";
-          const reason = notFound ? "Profil introuvable" : "Erreur lors du scan";
+          const reason = notFound ? t("scan.profileNotFound") : t("scan.scanError");
           posthog.capture("scan_failed", { platform, error_reason: reason });
           setScanError(reason);
         }
       } catch (err) {
         apiErrorRef.current = true;
-        const reason = err instanceof Error && err.name === "TimeoutError" ? "Le scan a pris trop de temps" : "Impossible de contacter le serveur";
+        const reason = err instanceof Error && err.name === "TimeoutError" ? t("scan.timeout") : t("scan.serverError");
         posthog.capture("scan_failed", { platform, error_reason: reason });
         setScanError(reason);
       }
@@ -187,13 +196,13 @@ export default function ScanLoading({
           posthog.capture("scan_completed", { platform, username, followers_count: withPosts.followersCount });
         } else {
           apiErrorRef.current = true;
-          const msg = body.error === "Ce compte est privé" ? "Ce compte est privé" : body.error === "not_found" ? "Profil introuvable" : "Erreur lors du scan";
+          const msg = body.error === "Ce compte est privé" ? t("scan.privateAccount") : body.error === "not_found" ? t("scan.profileNotFound") : t("scan.scanError");
           posthog.capture("scan_failed", { platform, error_reason: msg });
           setScanError(msg);
         }
       } catch (err) {
         apiErrorRef.current = true;
-        const reason = err instanceof Error && err.name === "TimeoutError" ? "Le scan a pris trop de temps" : "Impossible de contacter le serveur";
+        const reason = err instanceof Error && err.name === "TimeoutError" ? t("scan.timeout") : t("scan.serverError");
         posthog.capture("scan_failed", { platform, error_reason: reason });
         setScanError(reason);
       }
@@ -261,7 +270,7 @@ export default function ScanLoading({
     const timeout = setTimeout(() => {
       if (!apiDoneRef.current && !apiErrorRef.current) {
         apiErrorRef.current = true;
-        setScanError("Le scan a pris trop de temps");
+        setScanError(t("scan.timeout"));
       }
     }, 20000);
     return () => clearTimeout(timeout);
@@ -336,7 +345,7 @@ export default function ScanLoading({
               color: "rgb(255, 255, 255)",
             }}
           >
-            L&apos;IA analyse{" "}
+            {t("scan.title")}{" "}
             <span style={{ color: "rgb(0, 255, 76)" }}>@{username}</span>
           </h2>
           <p
@@ -346,7 +355,7 @@ export default function ScanLoading({
               marginTop: "4px",
             }}
           >
-            Scan {platformName} en cours…
+            {t("scan.subtitle", { platform: platformName })}
           </p>
         </div>
 
@@ -362,7 +371,7 @@ export default function ScanLoading({
             border: "1px solid rgba(255, 255, 255, 0.06)",
           }}
         >
-          {steps.map((step, i) => {
+          {localSteps.map((step, i) => {
             const isActive = i === activeStep;
             const isDone = i < activeStep;
             const isPending = i > activeStep;
@@ -504,7 +513,7 @@ export default function ScanLoading({
             }}
           >
             <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)" }}>
-              {progress}% complété
+              {progress}% {t("scan.completed")}
             </span>
             <span
               style={{
@@ -529,7 +538,7 @@ export default function ScanLoading({
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Analyse IA sécurisée
+              {t("scan.secure")}
             </span>
           </div>
         </div>
@@ -544,20 +553,20 @@ export default function ScanLoading({
             </svg>
           </div>
           <p style={{ margin: "0 0 4px 0", fontSize: "15px", fontWeight: 700, color: "#fff" }}>{scanError}</p>
-          <p style={{ margin: "0 0 16px 0", fontSize: "12px", color: "rgb(107, 117, 111)" }}>Vérifie le nom d&apos;utilisateur et réessaie</p>
+          <p style={{ margin: "0 0 16px 0", fontSize: "12px", color: "rgb(107, 117, 111)" }}>{t("scan.errorCheck")}</p>
           <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
             <button
               onClick={handleRetry}
               style={{ padding: "10px 24px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))", color: "#000", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
             >
-              Réessayer
+              {t("scan.retry")}
             </button>
             {onError && (
               <button
                 onClick={onError}
                 style={{ padding: "10px 24px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", background: "transparent", color: "rgb(169, 181, 174)", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
               >
-                Changer de pseudo
+                {t("scan.changeUsername")}
               </button>
             )}
           </div>

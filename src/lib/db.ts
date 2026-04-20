@@ -35,6 +35,8 @@ export async function initDb() {
   // Add columns if they don't exist (for existing DBs)
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS followers_before INTEGER DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_usd NUMERIC(8,2) DEFAULT 0`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'eur'`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS loyalty (
@@ -77,58 +79,58 @@ export async function initDb() {
   if (Number(existing[0].cnt) === 0) {
     const packs = [
       // Followers
-      { service: "followers", qty: 100, price: 2.99 },
-      { service: "followers", qty: 250, price: 5.99 },
-      { service: "followers", qty: 500, price: 9.99 },
-      { service: "followers", qty: 1000, price: 16.99 },
-      { service: "followers", qty: 2500, price: 34.99 },
-      { service: "followers", qty: 5000, price: 59.99 },
-      { service: "followers", qty: 10000, price: 99.99 },
-      { service: "followers", qty: 25000, price: 199.99 },
+      { service: "followers", qty: 100, price: 2.99, price_usd: 2.99 },
+      { service: "followers", qty: 250, price: 5.99, price_usd: 5.99 },
+      { service: "followers", qty: 500, price: 9.99, price_usd: 9.99 },
+      { service: "followers", qty: 1000, price: 16.99, price_usd: 16.99 },
+      { service: "followers", qty: 2500, price: 34.99, price_usd: 34.99 },
+      { service: "followers", qty: 5000, price: 59.99, price_usd: 59.99 },
+      { service: "followers", qty: 10000, price: 99.99, price_usd: 99.99 },
+      { service: "followers", qty: 25000, price: 199.99, price_usd: 199.99 },
       // Likes
-      { service: "likes", qty: 100, price: 1.99 },
-      { service: "likes", qty: 250, price: 3.99 },
-      { service: "likes", qty: 500, price: 6.99 },
-      { service: "likes", qty: 1000, price: 11.99 },
-      { service: "likes", qty: 2500, price: 24.99 },
-      { service: "likes", qty: 5000, price: 44.99 },
-      { service: "likes", qty: 10000, price: 79.99 },
-      { service: "likes", qty: 25000, price: 149.99 },
+      { service: "likes", qty: 100, price: 1.99, price_usd: 1.99 },
+      { service: "likes", qty: 250, price: 3.99, price_usd: 3.99 },
+      { service: "likes", qty: 500, price: 6.99, price_usd: 6.99 },
+      { service: "likes", qty: 1000, price: 11.99, price_usd: 11.99 },
+      { service: "likes", qty: 2500, price: 24.99, price_usd: 24.99 },
+      { service: "likes", qty: 5000, price: 44.99, price_usd: 44.99 },
+      { service: "likes", qty: 10000, price: 79.99, price_usd: 79.99 },
+      { service: "likes", qty: 25000, price: 149.99, price_usd: 149.99 },
       // Views
-      { service: "views", qty: 500, price: 1.99 },
-      { service: "views", qty: 1000, price: 3.49 },
-      { service: "views", qty: 2500, price: 7.99 },
-      { service: "views", qty: 5000, price: 12.99 },
-      { service: "views", qty: 10000, price: 22.99 },
-      { service: "views", qty: 25000, price: 49.99 },
-      { service: "views", qty: 50000, price: 89.99 },
-      { service: "views", qty: 100000, price: 149.99 },
+      { service: "views", qty: 500, price: 1.99, price_usd: 1.99 },
+      { service: "views", qty: 1000, price: 3.49, price_usd: 3.49 },
+      { service: "views", qty: 2500, price: 7.99, price_usd: 7.99 },
+      { service: "views", qty: 5000, price: 12.99, price_usd: 12.99 },
+      { service: "views", qty: 10000, price: 22.99, price_usd: 22.99 },
+      { service: "views", qty: 25000, price: 49.99, price_usd: 49.99 },
+      { service: "views", qty: 50000, price: 89.99, price_usd: 89.99 },
+      { service: "views", qty: 100000, price: 149.99, price_usd: 149.99 },
       // YouTube Subscribers
-      { service: "yt_subscribers", qty: 100, price: 3.99 },
-      { service: "yt_subscribers", qty: 250, price: 7.99 },
-      { service: "yt_subscribers", qty: 500, price: 13.99 },
-      { service: "yt_subscribers", qty: 1000, price: 24.99 },
-      { service: "yt_subscribers", qty: 2500, price: 49.99 },
-      { service: "yt_subscribers", qty: 5000, price: 89.99 },
+      { service: "yt_subscribers", qty: 100, price: 3.99, price_usd: 3.99 },
+      { service: "yt_subscribers", qty: 250, price: 7.99, price_usd: 7.99 },
+      { service: "yt_subscribers", qty: 500, price: 13.99, price_usd: 13.99 },
+      { service: "yt_subscribers", qty: 1000, price: 24.99, price_usd: 24.99 },
+      { service: "yt_subscribers", qty: 2500, price: 49.99, price_usd: 49.99 },
+      { service: "yt_subscribers", qty: 5000, price: 89.99, price_usd: 89.99 },
       // YouTube Likes
-      { service: "yt_likes", qty: 100, price: 2.49 },
-      { service: "yt_likes", qty: 250, price: 4.99 },
-      { service: "yt_likes", qty: 500, price: 8.99 },
-      { service: "yt_likes", qty: 1000, price: 14.99 },
-      { service: "yt_likes", qty: 2500, price: 29.99 },
-      { service: "yt_likes", qty: 5000, price: 54.99 },
+      { service: "yt_likes", qty: 100, price: 2.49, price_usd: 2.49 },
+      { service: "yt_likes", qty: 250, price: 4.99, price_usd: 4.99 },
+      { service: "yt_likes", qty: 500, price: 8.99, price_usd: 8.99 },
+      { service: "yt_likes", qty: 1000, price: 14.99, price_usd: 14.99 },
+      { service: "yt_likes", qty: 2500, price: 29.99, price_usd: 29.99 },
+      { service: "yt_likes", qty: 5000, price: 54.99, price_usd: 54.99 },
       // YouTube Views
-      { service: "yt_views", qty: 500, price: 2.49 },
-      { service: "yt_views", qty: 1000, price: 4.49 },
-      { service: "yt_views", qty: 2500, price: 9.99 },
-      { service: "yt_views", qty: 5000, price: 16.99 },
-      { service: "yt_views", qty: 10000, price: 29.99 },
-      { service: "yt_views", qty: 25000, price: 59.99 },
-      { service: "yt_views", qty: 50000, price: 99.99 },
+      { service: "yt_views", qty: 500, price: 2.49, price_usd: 2.49 },
+      { service: "yt_views", qty: 1000, price: 4.49, price_usd: 4.49 },
+      { service: "yt_views", qty: 2500, price: 9.99, price_usd: 9.99 },
+      { service: "yt_views", qty: 5000, price: 16.99, price_usd: 16.99 },
+      { service: "yt_views", qty: 10000, price: 29.99, price_usd: 29.99 },
+      { service: "yt_views", qty: 25000, price: 59.99, price_usd: 59.99 },
+      { service: "yt_views", qty: 50000, price: 99.99, price_usd: 99.99 },
     ];
 
     for (const p of packs) {
-      await sql`INSERT INTO pricing (service, qty, price) VALUES (${p.service}, ${p.qty}, ${p.price}) ON CONFLICT DO NOTHING`;
+      await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
     }
   }
 }
@@ -143,9 +145,10 @@ export async function createOrder(params: {
   totalCents: number;
   status?: string;
   followersBefore?: number;
+  currency?: string;
 }) {
   const result = await sql`
-    INSERT INTO orders (stripe_payment_intent_id, email, username, platform, cart, post_assignments, total_cents, status, followers_before)
+    INSERT INTO orders (stripe_payment_intent_id, email, username, platform, cart, post_assignments, total_cents, status, followers_before, currency)
     VALUES (
       ${params.stripePaymentIntentId},
       ${params.email},
@@ -155,7 +158,8 @@ export async function createOrder(params: {
       ${params.postAssignments ? JSON.stringify(params.postAssignments) : null},
       ${params.totalCents},
       ${params.status || "pending"},
-      ${params.followersBefore || 0}
+      ${params.followersBefore || 0},
+      ${params.currency || "eur"}
     )
     RETURNING id
   `;

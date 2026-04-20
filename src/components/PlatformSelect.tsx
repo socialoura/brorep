@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n";
+
 function TikTokIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: "100%", height: "100%" }}>
@@ -37,6 +39,7 @@ function TrendingUpIcon() {
 }
 
 export default function PlatformSelect({ onSelect }: { onSelect?: (platform: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -75,14 +78,14 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
           marginBottom: "8px",
         }}
       >
-        Où veux-tu booster ta{" "}
+        {t("platform.title1")}{" "}
         <span
           style={{
             color: "rgb(0, 255, 76)",
             textShadow: "0 0 20px rgba(0, 255, 76, 0.3)",
           }}
         >
-          croissance
+          {t("platform.title2")}
         </span>{" "}
         ?
       </h2>
@@ -96,7 +99,7 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
           maxWidth: "320px",
         }}
       >
-        Sélectionne la plateforme sur laquelle tu veux progresser
+        {t("platform.subtitle")}
       </p>
 
       {/* Platform cards */}
@@ -106,6 +109,7 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
           name="TikTok"
           icon={<TikTokIcon />}
           popular
+          popularLabel={t("platform.popular")}
           iconColor="rgb(232, 247, 237)"
           borderColor="rgba(0, 255, 76, 0.25)"
           glowShadow="0 0 20px rgba(0, 180, 53, 0.08)"
@@ -131,7 +135,7 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
           marginTop: "32px",
         }}
       >
-        Analyse disponible pour les deux plateformes
+        {t("platform.footer")}
       </p>
     </div>
   );
@@ -141,6 +145,7 @@ function PlatformCard({
   name,
   icon,
   popular,
+  popularLabel,
   iconColor,
   borderColor,
   glowShadow,
@@ -149,6 +154,7 @@ function PlatformCard({
   name: string;
   icon: React.ReactNode;
   popular?: boolean;
+  popularLabel?: string;
   iconColor: string;
   borderColor: string;
   glowShadow: string;
@@ -205,7 +211,7 @@ function PlatformCard({
             border: "1px solid rgba(0, 255, 76, 0.2)",
           }}
         >
-          Populaire
+          {popularLabel || "Popular"}
         </div>
       )}
 

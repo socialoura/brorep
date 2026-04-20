@@ -28,9 +28,11 @@ export async function POST(req: NextRequest) {
     const email = meta.email || pi.receipt_email;
 
     // Cart: compact {s,l,q,p} → full {service,label,qty,price}
+    const piCurrency = meta.currency || (pi.currency === "usd" ? "usd" : "eur");
+
     const rawCart = meta.cart ? JSON.parse(meta.cart) : [];
-    const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; service?: string; label?: string; qty?: number; price?: number }) =>
-      c.service ? c : { service: c.s, label: c.l, qty: c.q, price: c.p }
+    const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; pu?: number; service?: string; label?: string; qty?: number; price?: number; priceUsd?: number }) =>
+      c.service ? c : { service: c.s, label: c.l, qty: c.q, price: c.p, priceUsd: c.pu || c.p }
     );
 
     // PostAssignments: compact {id,l,v} → full {postId,postUrl,imageUrl,likes,views}
@@ -66,6 +68,7 @@ export async function POST(req: NextRequest) {
         totalCents: pi.amount,
         status: "paid",
         followersBefore: Number(meta.followersBefore) || 0,
+        currency: piCurrency,
       });
     } catch (dbErr) {
       console.error("DB order creation error:", dbErr);

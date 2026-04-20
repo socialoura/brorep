@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 export default function CTAButton({ onClick }: { onClick?: () => void }) {
   const [hovered, setHovered] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <button
@@ -59,7 +61,7 @@ export default function CTAButton({ onClick }: { onClick?: () => void }) {
       </span>
 
       <span style={{ position: "relative", zIndex: 1 }}>
-        Lancer l&apos;IA →
+        {t("cta.launch")}
       </span>
 
       <style>{`

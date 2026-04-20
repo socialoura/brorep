@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePostHog } from "posthog-js/react";
+import { useTranslation } from "@/lib/i18n";
 
 function TikTokIcon() {
   return (
@@ -51,6 +52,7 @@ export default function UsernameInput({ platform = "tiktok", onSubmit }: { platf
   const [focused, setFocused] = useState(false);
   const posthog = usePostHog();
 
+  const { t } = useTranslation();
   const isTikTok = platform === "tiktok";
   const isYouTube = platform === "youtube";
   const platformName = isTikTok ? "TikTok" : isYouTube ? "YouTube" : "Instagram";
@@ -92,7 +94,7 @@ export default function UsernameInput({ platform = "tiktok", onSubmit }: { platf
           marginBottom: "8px",
         }}
       >
-        Entre ton{" "}
+        {t("username.title1")}{" "}
         <span
           style={{
             color: "rgb(0, 255, 76)",
@@ -112,7 +114,7 @@ export default function UsernameInput({ platform = "tiktok", onSubmit }: { platf
           maxWidth: "320px",
         }}
       >
-        On va analyser {isYouTube ? "ta chaîne" : "ton profil"} {platformName}
+        {isYouTube ? t("username.subtitle.channel") : t("username.subtitle.profile")} {platformName}
       </p>
 
       {/* Form */}
@@ -142,7 +144,7 @@ export default function UsernameInput({ platform = "tiktok", onSubmit }: { platf
           <span style={{ fontSize: "14px", color: "rgb(107, 117, 111)" }}>@</span>
           <input
             type="text"
-            placeholder="ton nom d'utilisateur"
+            placeholder={t("username.placeholder")}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             onFocus={() => setFocused(true)}
@@ -190,7 +192,7 @@ export default function UsernameInput({ platform = "tiktok", onSubmit }: { platf
             (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
           }}
         >
-          Analyser mon profil
+          {t("username.submit")}
           <ArrowRightIcon />
         </button>
       </form>
@@ -203,7 +205,7 @@ export default function UsernameInput({ platform = "tiktok", onSubmit }: { platf
           marginTop: "32px",
         }}
       >
-        🔒 Tes données restent privées et sécurisées
+        {t("username.privacy")}
       </p>
     </div>
   );

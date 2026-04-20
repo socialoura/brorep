@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const pricing = await sql`SELECT * FROM pricing ORDER BY service, qty`;
+  const pricing = await sql`SELECT id, service, qty, price, COALESCE(price_usd, 0) as price_usd, active, created_at FROM pricing ORDER BY service, qty`;
   return NextResponse.json({ pricing });
 }
 
@@ -25,7 +25,7 @@ export async function PUT(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, price, active } = body;
+  const { id, price, price_usd, active } = body;
 
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -33,6 +33,10 @@ export async function PUT(req: NextRequest) {
 
   if (price !== undefined) {
     await sql`UPDATE pricing SET price = ${price} WHERE id = ${id}`;
+  }
+
+  if (price_usd !== undefined) {
+    await sql`UPDATE pricing SET price_usd = ${price_usd} WHERE id = ${id}`;
   }
 
   if (active !== undefined) {

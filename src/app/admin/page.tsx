@@ -22,6 +22,7 @@ interface PricingItem {
   service: string;
   qty: number;
   price: number;
+  price_usd: number;
   active: boolean;
 }
 
@@ -63,6 +64,7 @@ export default function AdminPage() {
   const [pricing, setPricing] = useState<PricingItem[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editPrice, setEditPrice] = useState("");
+  const [editPriceUsd, setEditPriceUsd] = useState("");
   const [combos, setCombos] = useState<ComboPack[]>([]);
   const [newCombo, setNewCombo] = useState({ name: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
 
@@ -125,11 +127,11 @@ export default function AdminPage() {
     if (tab === "combos") fetchCombos();
   }, [tab, authed, fetchAnalytics, fetchOrders, fetchPricing, fetchCombos]);
 
-  const updatePrice = async (id: number, newPrice: number) => {
+  const updatePrice = async (id: number, newPrice: number, newPriceUsd: number) => {
     await fetch("/api/admin/pricing", {
       method: "PUT",
       headers,
-      body: JSON.stringify({ id, price: newPrice }),
+      body: JSON.stringify({ id, price: newPrice, price_usd: newPriceUsd }),
     });
     setEditingId(null);
     fetchPricing();
@@ -397,6 +399,12 @@ export default function AdminPage() {
       {/* Pricing Tab */}
       {tab === "pricing" && (
         <div>
+          {/* TikTok / Instagram pricing */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: green }}>TikTok / Instagram</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(0,210,106,0.15)" }} />
+          </div>
+
           {(["followers", "likes", "views"] as const).map((service) => {
             const items = pricing.filter((p) => p.service === service);
             return (
@@ -421,27 +429,123 @@ export default function AdminPage() {
                       </div>
 
                       {editingId === item.id ? (
-                        <div style={{ display: "flex", gap: "4px", marginBottom: "8px" }}>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={editPrice}
-                            onChange={(e) => setEditPrice(e.target.value)}
-                            style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.3)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
-                          />
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "8px" }}>
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>€</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editPrice}
+                              onChange={(e) => setEditPrice(e.target.value)}
+                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.3)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
+                            />
+                          </div>
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editPriceUsd}
+                              onChange={(e) => setEditPriceUsd(e.target.value)}
+                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.3)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
+                            />
+                          </div>
                           <button
-                            onClick={() => updatePrice(item.id, Number(editPrice))}
-                            style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: green, color: "#000", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+                            onClick={() => updatePrice(item.id, Number(editPrice), Number(editPriceUsd))}
+                            style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: green, color: "#000", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}
                           >
                             OK
                           </button>
                         </div>
                       ) : (
                         <div
-                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); }}
-                          style={{ fontSize: "14px", fontWeight: 600, color: green, cursor: "pointer", marginBottom: "8px" }}
+                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); }}
+                          style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
                         >
-                          {Number(item.price).toFixed(2)}€
+                          <span style={{ color: green }}>{Number(item.price).toFixed(2)}€</span>
+                          <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => toggleActive(item.id, item.active)}
+                        style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
+                      >
+                        {item.active ? "Désactiver" : "Activer"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* YouTube pricing */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "32px 0 16px 0" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#FF0000" }}>YouTube</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,0,0,0.15)" }} />
+          </div>
+
+          {([["yt_subscribers", "Abonnés YT"], ["yt_likes", "Likes YT"], ["yt_views", "Vues YT"]] as const).map(([service, label]) => {
+            const items = pricing.filter((p) => p.service === service);
+            if (items.length === 0) return null;
+            return (
+              <div key={service} style={{ marginBottom: "28px" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#fff", marginBottom: "10px" }}>
+                  {label}
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "8px" }}>
+                  {items.map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        padding: "14px",
+                        borderRadius: "12px",
+                        border: `1px solid ${item.active ? "rgba(255,0,0,0.15)" : "rgba(255,255,255,0.06)"}`,
+                        backgroundColor: item.active ? "rgba(255,0,0,0.04)" : "rgba(255,255,255,0.02)",
+                        opacity: item.active ? 1 : 0.5,
+                      }}
+                    >
+                      <div style={{ fontSize: "16px", fontWeight: 700, color: "#e8f7ed", marginBottom: "4px" }}>
+                        {item.qty >= 1000 ? `${item.qty / 1000}K` : item.qty}
+                      </div>
+
+                      {editingId === item.id ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "8px" }}>
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>€</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editPrice}
+                              onChange={(e) => setEditPrice(e.target.value)}
+                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(255,0,0,0.3)", backgroundColor: "rgba(255,0,0,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
+                            />
+                          </div>
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editPriceUsd}
+                              onChange={(e) => setEditPriceUsd(e.target.value)}
+                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(255,0,0,0.3)", backgroundColor: "rgba(255,0,0,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
+                            />
+                          </div>
+                          <button
+                            onClick={() => updatePrice(item.id, Number(editPrice), Number(editPriceUsd))}
+                            style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "#FF0000", color: "#fff", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}
+                          >
+                            OK
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); }}
+                          style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
+                        >
+                          <span style={{ color: "#FF0000" }}>{Number(item.price).toFixed(2)}€</span>
+                          <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
                         </div>
                       )}
 
