@@ -23,19 +23,19 @@ const dict: Record<string, Record<Lang, string>> = {
   "status.aiRunning": { fr: "IA en cours", en: "AI running" },
 
   // ===== CTAButton =====
-  "cta.launch": { fr: "Lancer l'IA →", en: "Launch AI →" },
+  "cta.launch": { fr: "Lancer ma croissance →", en: "Start my growth →" },
 
   // ===== SocialProof =====
-  "social.profilesAnalyzed": { fr: "profils analysés", en: "profiles analyzed" },
+  "social.profilesAnalyzed": { fr: "créateurs actifs", en: "active creators" },
   "social.videosAnalyzed": { fr: "vidéos analysées", en: "videos analyzed" },
   "social.thisMonth": { fr: "ce mois-ci", en: "this month" },
 
   // ===== HomePage hero =====
-  "hero.title1": { fr: "Notre IA analyse", en: "Our AI analyzes" },
-  "hero.title2": { fr: "ton profil en 30s", en: "your profile in 30s" },
-  "hero.subtitle1": { fr: "Notre IA scanne ton profil et te propose", en: "Our AI scans your profile and suggests" },
-  "hero.subtitle2": { fr: "une stratégie de croissance personnalisée", en: "a personalized growth strategy" },
-  "hero.moreProfiles": { fr: "de profils analysés par notre IA qu'hier", en: "more profiles analyzed by our AI than yesterday" },
+  "hero.title1": { fr: "Accélère ta croissance", en: "Accelerate your growth" },
+  "hero.title2": { fr: "TikTok & Instagram", en: "TikTok & Instagram" },
+  "hero.subtitle1": { fr: "On s'occupe de ta visibilité pendant que", en: "We handle your visibility while" },
+  "hero.subtitle2": { fr: "tu te concentres sur ton contenu.", en: "you focus on your content." },
+  "hero.moreProfiles": { fr: "de créateurs actifs de plus qu'hier", en: "more active creators than yesterday" },
   "hero.morePercent": { fr: "20% plus", en: "20% more" },
 
   // ===== How it works =====
