@@ -7,6 +7,7 @@ interface OrderNotifParams {
   email: string;
   cart: { label: string; qty: number; price: number }[];
   totalCents: number;
+  currency?: string;
 }
 
 function fmtQty(n: number): string {
@@ -20,12 +21,13 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
     return;
   }
 
-  const { username, platform, email, cart, totalCents } = params;
+  const { username, platform, email, cart, totalCents, currency } = params;
+  const sym = currency === "usd" ? "$" : "€";
   const total = (totalCents / 100).toFixed(2);
-  const platformLabel = platform === "tiktok" ? "TikTok" : "Instagram";
+  const platformLabel = platform === "youtube" ? "YouTube" : platform === "tiktok" ? "TikTok" : "Instagram";
 
   const cartLines = cart
-    .map((item) => `> ${fmtQty(item.qty)} ${item.label} — ${item.price.toFixed(2)}€`)
+    .map((item) => `> ${fmtQty(item.qty)} ${item.label} — ${item.price.toFixed(2)}${sym}`)
     .join("\n");
 
   const embed = {
@@ -34,7 +36,7 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
     fields: [
       { name: "👤 Utilisateur", value: `@${username}`, inline: true },
       { name: "📱 Plateforme", value: platformLabel, inline: true },
-      { name: "💵 Total", value: `**${total}€**`, inline: true },
+      { name: "💵 Total", value: `**${total}${sym}**`, inline: true },
       { name: "📧 Email", value: email || "Non renseigné", inline: false },
       { name: "🛒 Panier", value: cartLines, inline: false },
     ],

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createOrder, getOrderByPaymentIntent, addLoyaltyPoints } from "@/lib/db";
+import { createOrder, getOrderByPaymentIntent, addLoyaltyPoints, sql } from "@/lib/db";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { sendDiscordOrderNotification } from "@/lib/discord";
+import { placeOrder as placeSmmOrder } from "@/lib/bulkfollows";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest) {
         email: email || "",
         cart,
         totalCents: pi.amount,
+        currency: piCurrency,
       });
     } catch (discordErr) {
       console.error("Failed to send Discord notification:", discordErr);
@@ -110,6 +112,81 @@ export async function POST(req: NextRequest) {
         if (pts > 0) await addLoyaltyPoints(email, pts);
       } catch (loyaltyErr) {
         console.error("Failed to credit loyalty points:", loyaltyErr);
+      }
+    }
+
+    // Auto-place BulkFollows SMM orders
+    if (orderId) {
+      try {
+        const globalToggle = await sql`SELECT value FROM smm_settings WHERE key = 'auto_order_enabled'`;
+        const autoEnabled = globalToggle[0]?.value === "true";
+
+        if (autoEnabled && process.env.BULKFOLLOWS_API_KEY) {
+          const smmConfig = await sql`SELECT * FROM smm_config WHERE enabled = true`;
+          const configMap: Record<string, number> = {};
+          for (const c of smmConfig) {
+            configMap[`${c.platform}:${c.service}`] = Number(c.bulkfollows_service_id);
+          }
+
+          const plat = platform || "tiktok";
+          const profileLink = plat === "youtube"
+            ? `https://www.youtube.com/@${username}`
+            : plat === "instagram"
+              ? `https://www.instagram.com/${username}`
+              : `https://www.tiktok.com/@${username}`;
+
+          // Build post URL map for likes/views from post assignments
+          const postUrlMap: Record<string, string> = {};
+          if (Array.isArray(postAssignments)) {
+            for (const pa of postAssignments as { postId: string; postUrl?: string; likes?: boolean; views?: boolean }[]) {
+              if (pa.postUrl) {
+                if (pa.likes) postUrlMap["likes"] = pa.postUrl;
+                if (pa.views) postUrlMap["views"] = pa.postUrl;
+              }
+            }
+          }
+
+          const smmResults: { service: string; qty: number; bulkfollows_order_id?: number; error?: string }[] = [];
+
+          for (const item of cart as { service: string; qty: number }[]) {
+            const svcId = configMap[`${plat}:${item.service}`];
+            if (!svcId) continue;
+
+            // Determine the correct link
+            const needsPostUrl = ["likes", "views", "yt_likes", "yt_views"].includes(item.service);
+            let link = profileLink;
+
+            if (needsPostUrl) {
+              // For YouTube, post assignments contain the video URL
+              if (plat === "youtube" && Array.isArray(postAssignments) && postAssignments.length > 0) {
+                const pa = (postAssignments as { postUrl?: string }[])[0];
+                if (pa?.postUrl) link = pa.postUrl;
+              } else if (postUrlMap[item.service]) {
+                link = postUrlMap[item.service];
+              }
+            }
+
+            try {
+              const result = await placeSmmOrder(svcId, link, item.qty);
+              smmResults.push({
+                service: item.service,
+                qty: item.qty,
+                bulkfollows_order_id: result.order,
+                error: result.error,
+              });
+            } catch (smmErr) {
+              console.error(`SMM order failed for ${item.service}:`, smmErr);
+              smmResults.push({ service: item.service, qty: item.qty, error: String(smmErr) });
+            }
+          }
+
+          // Store SMM order IDs on the order
+          if (smmResults.length > 0) {
+            await sql`UPDATE orders SET smm_orders = ${JSON.stringify(smmResults)}::jsonb WHERE id = ${orderId}`;
+          }
+        }
+      } catch (smmErr) {
+        console.error("BulkFollows auto-order error:", smmErr);
       }
     }
 

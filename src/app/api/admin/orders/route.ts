@@ -45,3 +45,17 @@ export async function PUT(req: NextRequest) {
   await updateOrderStatusById(id, status);
   return NextResponse.json({ success: true });
 }
+
+export async function PATCH(req: NextRequest) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id, cost_cents } = await req.json();
+  if (!id || cost_cents === undefined) {
+    return NextResponse.json({ error: "Missing id or cost_cents" }, { status: 400 });
+  }
+
+  await sql`UPDATE orders SET cost_cents = ${Number(cost_cents)} WHERE id = ${id}`;
+  return NextResponse.json({ success: true });
+}

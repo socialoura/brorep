@@ -52,12 +52,20 @@ export async function GET(req: NextRequest) {
   // Platform split
   const platforms = await sql`SELECT platform, COUNT(*) as count FROM orders GROUP BY platform`;
 
+  // Total cost
+  const totalCost = await sql`SELECT COALESCE(SUM(cost_cents), 0) as total FROM orders WHERE status IN ('paid', 'processing', 'delivered')`;
+
+  // Cost today
+  const costToday = await sql`SELECT COALESCE(SUM(cost_cents), 0) as total FROM orders WHERE status IN ('paid', 'processing', 'delivered') AND created_at >= CURRENT_DATE`;
+
   return NextResponse.json({
     totalOrders: Number(totalOrders[0].count),
     byStatus,
     totalRevenueCents: Number(revenue[0].total),
     ordersToday: Number(today[0].count),
     revenueTodayCents: Number(revenueToday[0].total),
+    totalCostCents: Number(totalCost[0].total),
+    costTodayCents: Number(costToday[0].total),
     last7Days,
     topServices,
     platforms,

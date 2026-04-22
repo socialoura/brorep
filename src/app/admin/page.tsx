@@ -2,7 +2,21 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 
-type Tab = "analytics" | "orders" | "pricing" | "combos";
+type Tab = "analytics" | "orders" | "pricing" | "combos" | "smm";
+
+interface SmmConfigItem {
+  id: number;
+  platform: string;
+  service: string;
+  bulkfollows_service_id: number;
+  enabled: boolean;
+}
+
+interface SmmData {
+  config: SmmConfigItem[];
+  settings: Record<string, string>;
+  balance: { balance?: string; currency?: string } | null;
+}
 
 interface Order {
   id: number;
@@ -13,6 +27,7 @@ interface Order {
   cart: { service: string; label: string; qty: number; price: number }[];
   post_assignments: unknown;
   total_cents: number;
+  cost_cents: number;
   status: string;
   created_at: string;
 }
@@ -44,8 +59,10 @@ interface Analytics {
   totalOrders: number;
   byStatus: { status: string; count: string }[];
   totalRevenueCents: number;
+  totalCostCents: number;
   ordersToday: number;
   revenueTodayCents: number;
+  costTodayCents: number;
   last7Days: { date: string; count: string; revenue: string }[];
   topServices: { service: string; count: string; revenue_cents: string }[];
   platforms: { platform: string; count: string }[];
@@ -69,6 +86,7 @@ export default function AdminPage() {
   const [newPack, setNewPack] = useState({ service: "followers", qty: "", price: "", priceUsd: "" });
   const [combos, setCombos] = useState<ComboPack[]>([]);
   const [newCombo, setNewCombo] = useState({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
+  const [smm, setSmm] = useState<SmmData | null>(null);
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
 
@@ -127,7 +145,15 @@ export default function AdminPage() {
     if (tab === "orders") fetchOrders(1);
     if (tab === "pricing") fetchPricing();
     if (tab === "combos") fetchCombos();
+    if (tab === "smm") fetchSmm();
   }, [tab, authed, fetchAnalytics, fetchOrders, fetchPricing, fetchCombos]);
+
+  const fetchSmm = async () => {
+    setLoading(true);
+    const res = await fetch("/api/admin/smm", { headers: { Authorization: `Bearer ${password}` } });
+    if (res.ok) setSmm(await res.json());
+    setLoading(false);
+  };
 
   const updatePrice = async (id: number, newPrice: number, newPriceUsd: number) => {
     await fetch("/api/admin/pricing", {
@@ -204,7 +230,7 @@ export default function AdminPage() {
           Admin <span style={{ color: green }}>Fanovaly</span>
         </h1>
         <div style={{ display: "flex", gap: "4px", padding: "4px", borderRadius: "10px", backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-          {(["analytics", "orders", "pricing", "combos"] as Tab[]).map((t) => (
+          {(["analytics", "orders", "pricing", "combos", "smm"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -220,7 +246,7 @@ export default function AdminPage() {
                 background: tab === t ? "linear-gradient(135deg, rgb(0,180,53), rgb(0,255,76))" : "transparent",
               }}
             >
-              {t === "analytics" ? "Analytics" : t === "orders" ? "Commandes" : t === "pricing" ? "Prix" : "Combos"}
+              {t === "analytics" ? "Analytics" : t === "orders" ? "Commandes" : t === "pricing" ? "Prix" : t === "combos" ? "Combos" : "SMM"}
             </button>
           ))}
         </div>
@@ -235,8 +261,12 @@ export default function AdminPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "28px" }}>
             <KpiCard label="Commandes totales" value={String(analytics.totalOrders)} />
             <KpiCard label="Revenu total" value={`${(analytics.totalRevenueCents / 100).toFixed(2)}€`} />
+            <KpiCard label="Coût total" value={`${(analytics.totalCostCents / 100).toFixed(2)}€`} />
+            <KpiCard label="Profit total" value={`${((analytics.totalRevenueCents - analytics.totalCostCents) / 100).toFixed(2)}€`} />
             <KpiCard label="Commandes aujourd'hui" value={String(analytics.ordersToday)} />
             <KpiCard label="Revenu aujourd'hui" value={`${(analytics.revenueTodayCents / 100).toFixed(2)}€`} />
+            <KpiCard label="Coût aujourd'hui" value={`${(analytics.costTodayCents / 100).toFixed(2)}€`} />
+            <KpiCard label="Profit aujourd'hui" value={`${((analytics.revenueTodayCents - analytics.costTodayCents) / 100).toFixed(2)}€`} />
           </div>
 
           {/* Status breakdown */}
@@ -308,6 +338,7 @@ export default function AdminPage() {
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Platform</th>
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Panier</th>
                   <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Total</th>
+                  <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Coût</th>
                   <th style={{ padding: "8px", textAlign: "center", color: "rgb(107,117,111)" }}>Statut</th>
                 </tr>
               </thead>
@@ -317,13 +348,56 @@ export default function AdminPage() {
                   <tr style={{ borderBottom: Array.isArray(o.post_assignments) && o.post_assignments.length > 0 ? "none" : "1px solid rgba(255,255,255,0.03)" }}>
                     <td style={{ padding: "8px", color: "rgb(107,117,111)" }}>#{o.id}</td>
                     <td style={{ padding: "8px" }}>{new Date(o.created_at).toLocaleDateString("fr-FR")}</td>
-                    <td style={{ padding: "8px", fontWeight: 600 }}>@{o.username}</td>
+                    <td style={{ padding: "8px", fontWeight: 600 }}>
+                      <a
+                        href={o.platform === "youtube" ? `https://www.youtube.com/@${o.username}` : o.platform === "instagram" ? `https://www.instagram.com/${o.username}` : `https://www.tiktok.com/@${o.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#22c55e", textDecoration: "none" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
+                      >
+                        @{o.username}
+                      </a>
+                    </td>
                     <td style={{ padding: "8px", color: "rgb(169,181,174)" }}>{o.email || "—"}</td>
                     <td style={{ padding: "8px" }}>{o.platform}</td>
                     <td style={{ padding: "8px", color: "rgb(169,181,174)" }}>
                       {Array.isArray(o.cart) ? o.cart.map((c) => `${c.qty} ${c.label}`).join(", ") : "—"}
                     </td>
                     <td style={{ padding: "8px", textAlign: "right", fontWeight: 600, color: green }}>{(o.total_cents / 100).toFixed(2)}€</td>
+                    <td style={{ padding: "8px", textAlign: "right" }}>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        defaultValue={o.cost_cents ? (o.cost_cents / 100).toFixed(2) : ""}
+                        placeholder="0.00"
+                        onBlur={async (e) => {
+                          const val = parseFloat(e.target.value);
+                          if (isNaN(val)) return;
+                          const cents = Math.round(val * 100);
+                          await fetch("/api/admin/orders", {
+                            method: "PATCH",
+                            headers,
+                            body: JSON.stringify({ id: o.id, cost_cents: cents }),
+                          });
+                          fetchOrders(ordersPage);
+                        }}
+                        onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+                        style={{
+                          width: "70px",
+                          padding: "3px 6px",
+                          borderRadius: "6px",
+                          border: "1px solid rgba(0,210,106,0.15)",
+                          backgroundColor: "rgba(0,180,53,0.04)",
+                          color: o.cost_cents ? "#ffb800" : "rgb(107,117,111)",
+                          fontSize: "11px",
+                          fontFamily: "inherit",
+                          textAlign: "right",
+                        }}
+                      />
+                    </td>
                     <td style={{ padding: "8px", textAlign: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
                         <span style={{
@@ -363,7 +437,7 @@ export default function AdminPage() {
                   </tr>
                   {Array.isArray(o.post_assignments) && o.post_assignments.length > 0 && (
                     <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                      <td colSpan={8} style={{ padding: "4px 8px 10px 8px" }}>
+                      <td colSpan={9} style={{ padding: "4px 8px 10px 8px" }}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
                           <span style={{ fontSize: "10px", fontWeight: 700, color: "rgb(107,117,111)", textTransform: "uppercase", marginRight: "4px" }}>Posts:</span>
                           {(o.post_assignments as { postId: string; postUrl?: string; imageUrl?: string; likes: boolean; views: boolean }[]).map((pa, i) => (
@@ -800,6 +874,84 @@ export default function AdminPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      {/* SMM Tab */}
+      {tab === "smm" && smm && (
+        <div>
+          {/* Balance */}
+          <div style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap", alignItems: "center" }}>
+            <KpiCard label="Solde BulkFollows" value={smm.balance ? `${Number(smm.balance.balance).toFixed(2)} ${smm.balance.currency || 'USD'}` : "—"} />
+            <div style={{ padding: "16px 20px", borderRadius: "14px", border: "1px solid rgba(0,210,106,0.12)", backgroundColor: "rgba(0,180,53,0.04)", display: "flex", alignItems: "center", gap: "12px" }}>
+              <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "rgb(169,181,174)" }}>Auto-commande</p>
+              <button
+                onClick={async () => {
+                  await fetch("/api/admin/smm", { method: "PUT", headers, body: JSON.stringify({ action: "toggle" }) });
+                  fetchSmm();
+                }}
+                style={{
+                  padding: "6px 16px", borderRadius: "8px", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "13px", fontWeight: 700,
+                  color: smm.settings.auto_order_enabled === "true" ? "#000" : "rgb(169,181,174)",
+                  background: smm.settings.auto_order_enabled === "true" ? "linear-gradient(135deg, rgb(0,180,53), rgb(0,255,76))" : "rgba(255,255,255,0.06)",
+                }}
+              >
+                {smm.settings.auto_order_enabled === "true" ? "ON" : "OFF"}
+              </button>
+            </div>
+          </div>
+
+          {/* Service mapping */}
+          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Mapping services → BulkFollows</h3>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(0,210,106,0.1)" }}>
+                  <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Plateforme</th>
+                  <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Service</th>
+                  <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>ID BulkFollows</th>
+                  <th style={{ padding: "8px", textAlign: "center", color: "rgb(107,117,111)" }}>Actif</th>
+                </tr>
+              </thead>
+              <tbody>
+                {smm.config.map((c) => (
+                  <tr key={c.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                    <td style={{ padding: "8px", fontWeight: 600 }}>{c.platform}</td>
+                    <td style={{ padding: "8px" }}>{c.service}</td>
+                    <td style={{ padding: "8px" }}>
+                      <input
+                        type="number"
+                        defaultValue={c.bulkfollows_service_id}
+                        onBlur={async (e) => {
+                          const val = parseInt(e.target.value);
+                          if (isNaN(val) || val === c.bulkfollows_service_id) return;
+                          await fetch("/api/admin/smm", { method: "PUT", headers, body: JSON.stringify({ action: "update_service", id: c.id, bulkfollows_service_id: val }) });
+                          fetchSmm();
+                        }}
+                        onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+                        style={{ width: "80px", padding: "3px 6px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.15)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit" }}
+                      />
+                    </td>
+                    <td style={{ padding: "8px", textAlign: "center" }}>
+                      <button
+                        onClick={async () => {
+                          await fetch("/api/admin/smm", { method: "PUT", headers, body: JSON.stringify({ action: "update_service", id: c.id, enabled: !c.enabled }) });
+                          fetchSmm();
+                        }}
+                        style={{
+                          padding: "3px 12px", borderRadius: "6px", border: "1px solid", cursor: "pointer", fontFamily: "inherit", fontSize: "11px", fontWeight: 600,
+                          borderColor: c.enabled ? "rgba(0,210,106,0.2)" : "rgba(239,68,68,0.2)",
+                          backgroundColor: c.enabled ? "rgba(0,180,53,0.1)" : "rgba(239,68,68,0.06)",
+                          color: c.enabled ? green : "#ef4444",
+                        }}
+                      >
+                        {c.enabled ? "ON" : "OFF"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

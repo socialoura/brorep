@@ -38,6 +38,51 @@ export async function initDb() {
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_usd NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'eur'`;
   await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS name_en VARCHAR(100) DEFAULT ''`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cost_cents INTEGER DEFAULT 0`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS smm_orders JSONB DEFAULT '[]'`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS smm_config (
+      id SERIAL PRIMARY KEY,
+      platform VARCHAR(20) NOT NULL,
+      service VARCHAR(30) NOT NULL,
+      bulkfollows_service_id INTEGER NOT NULL,
+      enabled BOOLEAN DEFAULT true,
+      UNIQUE(platform, service)
+    )
+  `;
+
+  // Global SMM toggle stored as a special row
+  await sql`
+    CREATE TABLE IF NOT EXISTS smm_settings (
+      key VARCHAR(50) PRIMARY KEY,
+      value VARCHAR(255) NOT NULL
+    )
+  `;
+  // Seed global toggle if missing
+  const smmToggle = await sql`SELECT key FROM smm_settings WHERE key = 'auto_order_enabled'`;
+  if (smmToggle.length === 0) {
+    await sql`INSERT INTO smm_settings (key, value) VALUES ('auto_order_enabled', 'true')`;
+  }
+
+  // Seed smm_config if empty
+  const smmCount = await sql`SELECT COUNT(*) as cnt FROM smm_config`;
+  if (Number(smmCount[0].cnt) === 0) {
+    const mappings = [
+      { platform: "tiktok", service: "followers", id: 14372 },
+      { platform: "tiktok", service: "likes", id: 14256 },
+      { platform: "tiktok", service: "views", id: 14563 },
+      { platform: "instagram", service: "followers", id: 14565 },
+      { platform: "instagram", service: "likes", id: 14517 },
+      { platform: "instagram", service: "views", id: 4996 },
+      { platform: "youtube", service: "yt_subscribers", id: 887 },
+      { platform: "youtube", service: "yt_likes", id: 14547 },
+      { platform: "youtube", service: "yt_views", id: 14370 },
+    ];
+    for (const m of mappings) {
+      await sql`INSERT INTO smm_config (platform, service, bulkfollows_service_id) VALUES (${m.platform}, ${m.service}, ${m.id}) ON CONFLICT DO NOTHING`;
+    }
+  }
 
   await sql`
     CREATE TABLE IF NOT EXISTS loyalty (
