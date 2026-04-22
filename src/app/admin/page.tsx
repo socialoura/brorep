@@ -28,6 +28,7 @@ interface Order {
   post_assignments: unknown;
   total_cents: number;
   cost_cents: number;
+  smm_orders: { service: string; qty: number; bulkfollows_order_id?: number; error?: string }[];
   status: string;
   created_at: string;
 }
@@ -339,6 +340,7 @@ export default function AdminPage() {
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Panier</th>
                   <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Total</th>
                   <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Coût</th>
+                  <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>SMM</th>
                   <th style={{ padding: "8px", textAlign: "center", color: "rgb(107,117,111)" }}>Statut</th>
                 </tr>
               </thead>
@@ -398,6 +400,19 @@ export default function AdminPage() {
                         }}
                       />
                     </td>
+                    <td style={{ padding: "8px" }}>
+                      {Array.isArray(o.smm_orders) && o.smm_orders.length > 0 ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                          {o.smm_orders.map((s, i) => (
+                            <span key={i} style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", backgroundColor: s.error ? "rgba(239,68,68,0.08)" : "rgba(0,180,53,0.08)", color: s.error ? "#ef4444" : green, border: `1px solid ${s.error ? "rgba(239,68,68,0.15)" : "rgba(0,210,106,0.15)"}` }}>
+                              {s.service} {s.qty} → {s.bulkfollows_order_id ? `#${s.bulkfollows_order_id}` : s.error || "—"}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ color: "rgb(107,117,111)", fontSize: "10px" }}>—</span>
+                      )}
+                    </td>
                     <td style={{ padding: "8px", textAlign: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
                         <span style={{
@@ -437,7 +452,7 @@ export default function AdminPage() {
                   </tr>
                   {Array.isArray(o.post_assignments) && o.post_assignments.length > 0 && (
                     <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                      <td colSpan={9} style={{ padding: "4px 8px 10px 8px" }}>
+                      <td colSpan={10} style={{ padding: "4px 8px 10px 8px" }}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
                           <span style={{ fontSize: "10px", fontWeight: 700, color: "rgb(107,117,111)", textTransform: "uppercase", marginRight: "4px" }}>Posts:</span>
                           {(o.post_assignments as { postId: string; postUrl?: string; imageUrl?: string; likes: boolean; views: boolean }[]).map((pa, i) => (
