@@ -196,6 +196,7 @@ export default function ServiceSelect({
   const [combos, setCombos] = useState<ComboPack[]>([]);
   const [combosLoading, setCombosLoading] = useState(true);
   const [selectedCombo, setSelectedCombo] = useState<{ id: number; items: CartItem[] } | null>(null);
+  const [usernameError, setUsernameError] = useState(false);
   const [services, setServices] = useState<Services>(DEFAULT_SERVICES as Services);
 
   useEffect(() => {
@@ -263,7 +264,21 @@ export default function ServiceSelect({
 
   const total = cart.reduce((sum, item) => sum + (currency === "usd" ? item.priceUsd : item.price), 0);
   const currentUsername = profile?.username || externalUsername || "";
-  const canCheckout = cart.length > 0 && currentUsername.trim().length >= 2;
+  const hasItems = cart.length > 0;
+  const hasUsername = currentUsername.trim().length >= 2;
+  const canCheckout = hasItems && hasUsername;
+
+  function handleCheckoutClick() {
+    if (!hasItems) return;
+    if (!hasUsername) {
+      setUsernameError(true);
+      setTimeout(() => setUsernameError(false), 2000);
+      const el = document.getElementById("username-input-section");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    onCheckout(cart);
+  }
 
   return (
     <div
@@ -446,11 +461,11 @@ export default function ServiceSelect({
 
       {/* Username input — after packs */}
       {!profile && (
-        <div style={{ width: "100%", maxWidth: "360px", marginBottom: "20px" }}>
+        <div id="username-input-section" style={{ width: "100%", maxWidth: "360px", marginBottom: "20px" }}>
           <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("service.usernameLabel")}
           </label>
-          <div style={{ display: "flex", alignItems: "center", gap: "0", borderRadius: "12px", border: `1px solid ${accentBorder}`, backgroundColor: accentBg, overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0", borderRadius: "12px", border: usernameError ? `1px solid #ef4444` : `1px solid ${accentBorder}`, backgroundColor: usernameError ? "rgba(239,68,68,0.05)" : accentBg, overflow: "hidden", transition: "all 0.3s", animation: usernameError ? "shake 0.4s ease-in-out" : "none" }}>
             <span style={{ padding: "0 0 0 14px", fontSize: "14px", color: "rgb(107,117,111)", fontWeight: 600, userSelect: "none" }}>@</span>
             <input
               type="text"
@@ -460,6 +475,11 @@ export default function ServiceSelect({
               style={{ flex: 1, padding: "12px 14px 12px 4px", border: "none", background: "transparent", color: "#fff", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
             />
           </div>
+          {usernameError && (
+            <p style={{ marginTop: "6px", fontSize: "12px", color: "#ef4444", fontWeight: 500 }}>
+              {t("service.usernameRequired")}
+            </p>
+          )}
         </div>
       )}
 
@@ -623,8 +643,8 @@ export default function ServiceSelect({
 
       {/* CTA */}
       <button
-        onClick={() => { if (canCheckout) onCheckout(cart); }}
-        disabled={!canCheckout}
+        onClick={handleCheckoutClick}
+        disabled={!hasItems}
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -632,17 +652,17 @@ export default function ServiceSelect({
           padding: "16px 36px",
           borderRadius: "14px",
           border: "none",
-          cursor: canCheckout ? "pointer" : "not-allowed",
+          cursor: hasItems ? "pointer" : "not-allowed",
           fontWeight: 700,
           fontSize: "16px",
           fontFamily: "inherit",
-          color: canCheckout ? (isYouTube ? "#fff" : "#000") : "rgb(80, 80, 80)",
-          background: canCheckout ? gradientBg : "rgba(255, 255, 255, 0.06)",
-          boxShadow: canCheckout ? `0 10px 30px ${accentGlow}` : "none",
+          color: hasItems ? (isYouTube ? "#fff" : "#000") : "rgb(80, 80, 80)",
+          background: hasItems ? gradientBg : "rgba(255, 255, 255, 0.06)",
+          boxShadow: hasItems ? `0 10px 30px ${accentGlow}` : "none",
           transition: "all 0.2s",
-          opacity: canCheckout ? 1 : 0.5,
+          opacity: hasItems ? 1 : 0.5,
         }}
-        onMouseEnter={(e) => { if (canCheckout) e.currentTarget.style.transform = "scale(1.03)"; }}
+        onMouseEnter={(e) => { if (hasItems) e.currentTarget.style.transform = "scale(1.03)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -698,19 +718,19 @@ export default function ServiceSelect({
           {cart.length > 0 && <span style={{ fontSize: "15px", fontWeight: 700, color: accent, marginLeft: "8px" }}>{fmtPrice(total, currency)}</span>}
         </div>
         <button
-          onClick={() => { if (canCheckout) onCheckout(cart); }}
-          disabled={!canCheckout}
+          onClick={handleCheckoutClick}
+          disabled={!hasItems}
           style={{
             padding: "10px 24px",
             borderRadius: "10px",
             border: "none",
-            cursor: canCheckout ? "pointer" : "not-allowed",
+            cursor: "pointer",
             fontWeight: 700,
             fontSize: "13px",
             fontFamily: "inherit",
             color: isYouTube ? "#fff" : "#000",
             background: gradientBg,
-            opacity: canCheckout ? 1 : 0.5,
+            opacity: hasItems ? 1 : 0.5,
           }}
         >
           {t("service.checkout")} &rarr;

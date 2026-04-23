@@ -118,6 +118,7 @@ const dict: Record<string, Record<Lang, string>> = {
   "service.total": { fr: "Total", en: "Total" },
   "service.checkout": { fr: "Payer", en: "Pay" },
   "service.emptyCart": { fr: "Choisis un pack", en: "Pick a pack" },
+  "service.usernameRequired": { fr: "Entre ton @username pour continuer", en: "Enter your @username to continue" },
   "service.selectAtLeast": { fr: "Sélectionne au moins un pack", en: "Select at least one pack" },
   "service.backToProfile": { fr: "Retour", en: "Back" },
   "service.usernamePlaceholder": { fr: "Ton nom d'utilisateur", en: "Your username" },
