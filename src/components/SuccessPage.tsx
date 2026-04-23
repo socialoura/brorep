@@ -20,8 +20,8 @@ interface Props {
 export default function SuccessPage({ username, orderId, cart, onReset, platform }: Props) {
   const { t, href } = useTranslation();
   const yt = platform === "youtube";
-  const accent = yt ? "rgb(255, 0, 0)" : "rgb(0, 255, 76)";
-  const accentMid = yt ? "rgb(204, 0, 0)" : "rgb(0, 210, 106)";
+  const accent = yt ? "rgb(255, 0, 0)" : "rgb(105, 201, 208)";
+  const accentMid = yt ? "rgb(204, 0, 0)" : "rgb(105, 201, 208)";
   const [promo, setPromo] = useState<{ code: string; percent: number; expiresAt: number } | null>(null);
   const [countdown, setCountdown] = useState("");
   const [copied, setCopied] = useState(false);
@@ -83,7 +83,7 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", padding: "0 16px", maxWidth: "440px", width: "100%" }}>
       {/* Check icon */}
-      <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: yt ? "rgba(255,0,0,0.1)" : "rgba(0, 255, 76, 0.1)", border: yt ? "2px solid rgba(255,0,0,0.3)" : "2px solid rgba(0, 255, 76, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: yt ? "rgba(255,0,0,0.1)" : "rgba(105, 201, 208, 0.1)", border: yt ? "2px solid rgba(255,0,0,0.3)" : "2px solid rgba(105, 201, 208, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
@@ -100,8 +100,8 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
           style={{
             marginTop: "8px",
             width: "100%",
-            background: yt ? "linear-gradient(135deg, rgba(255,0,0,0.08), rgba(255,0,0,0.03))" : "linear-gradient(135deg, rgba(0, 180, 53, 0.08), rgba(0, 255, 76, 0.03))",
-            border: yt ? "1px dashed rgba(255,0,0,0.3)" : "1px dashed rgba(0, 255, 76, 0.3)",
+            background: yt ? "linear-gradient(135deg, rgba(255,0,0,0.08), rgba(255,0,0,0.03))" : "linear-gradient(135deg, rgba(79, 179, 186, 0.08), rgba(105, 201, 208, 0.03))",
+            border: yt ? "1px dashed rgba(255,0,0,0.3)" : "1px dashed rgba(105, 201, 208, 0.3)",
             borderRadius: "16px",
             padding: "24px 20px",
             textAlign: "center",
@@ -118,8 +118,8 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
               margin: "12px 0",
               padding: "12px 24px",
               borderRadius: "12px",
-              border: yt ? "1px solid rgba(255,0,0,0.3)" : "1px solid rgba(0, 255, 76, 0.3)",
-              backgroundColor: yt ? "rgba(255,0,0,0.06)" : "rgba(0, 255, 76, 0.06)",
+              border: yt ? "1px solid rgba(255,0,0,0.3)" : "1px solid rgba(105, 201, 208, 0.3)",
+              backgroundColor: yt ? "rgba(255,0,0,0.06)" : "rgba(105, 201, 208, 0.06)",
               cursor: "pointer",
               transition: "all 0.2s",
             }}
@@ -157,7 +157,7 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
             style={{
               width: "20px",
               height: "20px",
-              border: yt ? "2px solid rgba(255,0,0,0.2)" : "2px solid rgba(0, 210, 106, 0.2)",
+              border: yt ? "2px solid rgba(255,0,0,0.2)" : "2px solid rgba(105, 201, 208, 0.2)",
               borderTopColor: accentMid,
               borderRadius: "50%",
               animation: "spin 0.8s linear infinite",
@@ -180,13 +180,13 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
             padding: "12px 28px",
             borderRadius: "12px",
             border: "none",
-            background: yt ? "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))" : "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))",
+            background: yt ? "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))",
             color: yt ? "#fff" : "#000",
             fontSize: "14px",
             fontWeight: 700,
             textDecoration: "none",
             fontFamily: "inherit",
-            boxShadow: yt ? "0 8px 24px rgba(255,0,0,0.25)" : "0 8px 24px rgba(0, 255, 76, 0.25)",
+            boxShadow: yt ? "0 8px 24px rgba(255,0,0,0.25)" : "0 8px 24px rgba(105, 201, 208, 0.25)",
           }}
         >
           📦 {t("success.trackOrder")}
@@ -213,8 +213,8 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
           marginTop: "4px",
           padding: "12px 28px",
           borderRadius: "12px",
-          border: yt ? "1px solid rgba(255,0,0,0.2)" : "1px solid rgba(0, 210, 106, 0.2)",
-          backgroundColor: yt ? "rgba(255,0,0,0.08)" : "rgba(0, 180, 53, 0.08)",
+          border: yt ? "1px solid rgba(255,0,0,0.2)" : "1px solid rgba(105, 201, 208, 0.2)",
+          backgroundColor: yt ? "rgba(255,0,0,0.08)" : "rgba(79, 179, 186, 0.08)",
           color: accent,
           fontSize: "13px",
           fontWeight: 600,

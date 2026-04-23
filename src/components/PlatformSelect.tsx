@@ -30,7 +30,7 @@ function TrendingUpIcon() {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ color: "rgb(0, 210, 106)" }}
+      style={{ color: "rgb(105, 201, 208)" }}
     >
       <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
       <polyline points="16 7 22 7 22 13" />
@@ -61,9 +61,9 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "rgba(0, 210, 106, 0.06)",
-          border: "1px solid rgba(0, 210, 106, 0.18)",
-          boxShadow: "0 0 24px rgba(0, 180, 53, 0.1)",
+          background: "rgba(105, 201, 208, 0.06)",
+          border: "1px solid rgba(105, 201, 208, 0.18)",
+          boxShadow: "0 0 24px rgba(79, 179, 186, 0.1)",
         }}
       >
         <TrendingUpIcon />
@@ -81,8 +81,8 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
         {t("platform.title1")}{" "}
         <span
           style={{
-            color: "rgb(0, 255, 76)",
-            textShadow: "0 0 20px rgba(0, 255, 76, 0.3)",
+            color: "rgb(105, 201, 208)",
+            textShadow: "0 0 20px rgba(105, 201, 208, 0.3)",
           }}
         >
           {t("platform.title2")}
@@ -111,8 +111,8 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
           popular
           popularLabel={t("platform.popular")}
           iconColor="rgb(232, 247, 237)"
-          borderColor="rgba(0, 255, 76, 0.25)"
-          glowShadow="0 0 20px rgba(0, 180, 53, 0.08)"
+          borderColor="rgba(105, 201, 208, 0.25)"
+          glowShadow="0 0 20px rgba(79, 179, 186, 0.08)"
           onClick={() => onSelect?.("tiktok")}
         />
 
@@ -121,7 +121,7 @@ export default function PlatformSelect({ onSelect }: { onSelect?: (platform: str
           name="Instagram"
           icon={<InstagramIcon />}
           iconColor="rgb(169, 181, 174)"
-          borderColor="rgba(0, 255, 76, 0.12)"
+          borderColor="rgba(105, 201, 208, 0.12)"
           glowShadow="none"
           onClick={() => onSelect?.("instagram")}
         />
@@ -183,9 +183,9 @@ function PlatformCard({
       onClick={onClick}
       onMouseEnter={(e) => {
         const el = e.currentTarget;
-        el.style.borderColor = "rgba(0, 255, 76, 0.4)";
+        el.style.borderColor = "rgba(105, 201, 208, 0.4)";
         el.style.boxShadow =
-          "rgba(0, 255, 76, 0.4) 0px 0px 0px 1px inset, rgba(0, 255, 76, 0.15) 0px 0px 30px";
+          "rgba(105, 201, 208, 0.4) 0px 0px 0px 1px inset, rgba(105, 201, 208, 0.15) 0px 0px 30px";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget;
@@ -206,9 +206,9 @@ function PlatformCard({
             fontWeight: 700,
             textTransform: "uppercase",
             letterSpacing: "0.05em",
-            background: "rgba(0, 255, 76, 0.12)",
-            color: "rgb(0, 255, 76)",
-            border: "1px solid rgba(0, 255, 76, 0.2)",
+            background: "rgba(105, 201, 208, 0.12)",
+            color: "rgb(105, 201, 208)",
+            border: "1px solid rgba(105, 201, 208, 0.2)",
           }}
         >
           {popularLabel || "Popular"}
@@ -223,7 +223,7 @@ function PlatformCard({
             zIndex: 10,
             color: iconColor,
             filter: popular
-              ? "drop-shadow(0 0 8px rgba(0, 255, 76, 0.15))"
+              ? "drop-shadow(0 0 8px rgba(105, 201, 208, 0.15))"
               : "none",
             transition: "0.3s",
             width: "56px",
@@ -239,7 +239,7 @@ function PlatformCard({
               inset: 0,
               filter: "blur(20px)",
               opacity: 0.3,
-              background: "rgba(0, 255, 76, 0.3)",
+              background: "rgba(105, 201, 208, 0.3)",
             }}
           />
         )}

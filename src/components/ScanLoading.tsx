@@ -43,12 +43,12 @@ const steps = [
   {
     label: "L'IA se connecte au profil",
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "rgb(0, 255, 76)" }}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "rgb(105, 201, 208)" }}>
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
     ),
     iconDone: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "rgb(0, 255, 76)" }}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "rgb(105, 201, 208)" }}>
         <path d="M20 6 9 17l-5-5" />
       </svg>
     ),
@@ -304,7 +304,7 @@ export default function ScanLoading({
               inset: 0,
               borderRadius: "9999px",
               filter: "blur(24px)",
-              background: "rgba(0, 180, 53, 0.35)",
+              background: "rgba(79, 179, 186, 0.35)",
               transform: "scale(1.8)",
             }}
           />
@@ -313,7 +313,7 @@ export default function ScanLoading({
               position: "absolute",
               inset: "-10px",
               borderRadius: "9999px",
-              border: "1px solid rgba(0, 255, 76, 0.15)",
+              border: "1px solid rgba(105, 201, 208, 0.15)",
             }}
           />
           <div
@@ -328,7 +328,7 @@ export default function ScanLoading({
               zIndex: 10,
               background:
                 "linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
-              border: "1.5px solid rgba(0, 255, 76, 0.15)",
+              border: "1.5px solid rgba(105, 201, 208, 0.15)",
               backdropFilter: "blur(8px)",
             }}
           >
@@ -346,7 +346,7 @@ export default function ScanLoading({
             }}
           >
             {t("scan.title")}{" "}
-            <span style={{ color: "rgb(0, 255, 76)" }}>@{username}</span>
+            <span style={{ color: "rgb(105, 201, 208)" }}>@{username}</span>
           </h2>
           <p
             style={{
@@ -389,7 +389,7 @@ export default function ScanLoading({
                       ? "1px solid rgba(255, 255, 255, 0.04)"
                       : "none",
                   background: isActive
-                    ? "rgba(0, 255, 76, 0.08)"
+                    ? "rgba(105, 201, 208, 0.08)"
                     : "transparent",
                   opacity: isPending ? 0.35 : 1,
                   transition: "all 0.5s ease",
@@ -406,10 +406,10 @@ export default function ScanLoading({
                     justifyContent: "center",
                     flexShrink: 0,
                     background: isActive || isDone
-                      ? "rgba(0, 255, 76, 0.08)"
+                      ? "rgba(105, 201, 208, 0.08)"
                       : "rgba(255, 255, 255, 0.03)",
                     border: isActive || isDone
-                      ? "1px solid rgba(0, 255, 76, 0.15)"
+                      ? "1px solid rgba(105, 201, 208, 0.15)"
                       : "1px solid rgba(255, 255, 255, 0.06)",
                     transition: "all 0.5s ease",
                   }}
@@ -418,7 +418,7 @@ export default function ScanLoading({
                     style={{
                       color:
                         isActive || isDone
-                          ? "rgb(0, 255, 76)"
+                          ? "rgb(105, 201, 208)"
                           : "rgba(255, 255, 255, 0.2)",
                       display: "flex",
                       animation: isActive ? "spin 1s linear infinite" : "none",
@@ -454,7 +454,7 @@ export default function ScanLoading({
                           width: "4px",
                           height: "4px",
                           borderRadius: "9999px",
-                          background: "rgb(0, 255, 76)",
+                          background: "rgb(105, 201, 208)",
                           animation: `dot-bounce 1.2s ease-in-out ${d * 0.2}s infinite`,
                         }}
                       />
@@ -470,7 +470,7 @@ export default function ScanLoading({
                     height="14"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="rgb(0, 255, 76)"
+                    stroke="rgb(105, 201, 208)"
                     strokeWidth={2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -499,7 +499,7 @@ export default function ScanLoading({
                 height: "100%",
                 borderRadius: "9999px",
                 background:
-                  "linear-gradient(90deg, rgb(0, 180, 53), rgb(0, 255, 76))",
+                  "linear-gradient(90deg, rgb(79, 179, 186), rgb(105, 201, 208))",
                 width: `${progress}%`,
                 transition: "width 0.1s linear",
               }}
@@ -557,7 +557,7 @@ export default function ScanLoading({
           <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
             <button
               onClick={handleRetry}
-              style={{ padding: "10px 24px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))", color: "#000", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+              style={{ padding: "10px 24px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))", color: "#000", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
             >
               {t("scan.retry")}
             </button>

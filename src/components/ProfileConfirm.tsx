@@ -22,7 +22,7 @@ export default function ProfileConfirm({
 }) {
   const { t } = useTranslation();
   const platformName = platform === "tiktok" ? "TikTok" : platform === "youtube" ? "YouTube" : "Instagram";
-  const green = "rgb(0, 210, 106)";
+  const green = "rgb(105, 201, 208)";
 
   const cardStyle: React.CSSProperties = {
     display: "flex",
@@ -30,8 +30,8 @@ export default function ProfileConfirm({
     alignItems: "center",
     gap: "8px",
     borderRadius: "16px",
-    border: "1px solid rgba(0, 210, 106, 0.15)",
-    backgroundColor: "rgba(0, 180, 53, 0.05)",
+    border: "1px solid rgba(105, 201, 208, 0.15)",
+    backgroundColor: "rgba(79, 179, 186, 0.05)",
   };
 
   return (
@@ -52,7 +52,7 @@ export default function ProfileConfirm({
             position: "absolute",
             inset: "-20px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(0, 180, 53, 0.15), transparent 70%)",
+            background: "radial-gradient(circle, rgba(79, 179, 186, 0.15), transparent 70%)",
             filter: "blur(20px)",
           }}
         />
@@ -65,8 +65,8 @@ export default function ProfileConfirm({
             height: "88px",
             borderRadius: "50%",
             objectFit: "cover",
-            border: "3px solid rgba(0, 255, 76, 0.3)",
-            boxShadow: "0 0 40px rgba(0, 180, 53, 0.2)",
+            border: "3px solid rgba(105, 201, 208, 0.3)",
+            boxShadow: "0 0 40px rgba(79, 179, 186, 0.2)",
           }}
         />
       </div>
@@ -97,8 +97,8 @@ export default function ProfileConfirm({
           gap: "6px",
           padding: "4px 12px",
           borderRadius: "9999px",
-          backgroundColor: "rgba(0, 180, 53, 0.1)",
-          border: "1px solid rgba(0, 210, 106, 0.2)",
+          backgroundColor: "rgba(79, 179, 186, 0.1)",
+          border: "1px solid rgba(105, 201, 208, 0.2)",
           marginBottom: "28px",
         }}
       >
@@ -170,8 +170,8 @@ export default function ProfileConfirm({
           fontSize: "14px",
           fontFamily: "inherit",
           color: "#000",
-          background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))",
-          boxShadow: "0 10px 30px rgba(0, 255, 76, 0.25)",
+          background: "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))",
+          boxShadow: "0 10px 30px rgba(105, 201, 208, 0.25)",
           transition: "transform 0.15s, box-shadow 0.15s",
         }}
         onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.03)"; }}

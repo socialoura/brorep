@@ -168,29 +168,34 @@ export default function ServiceSelect({
   onCheckout,
   onBack,
   platform = "tiktok",
+  username: externalUsername,
+  onUsernameChange,
 }: {
-  profile: ScanResult;
+  profile?: ScanResult | null;
   onCheckout: (cart: CartItem[]) => void;
   onBack: () => void;
   platform?: string;
+  username?: string;
+  onUsernameChange?: (u: string) => void;
 }) {
   const { t, lang, currency } = useTranslation();
   const isYouTube = platform === "youtube";
   // Theme colors
-  const accent = isYouTube ? "rgb(255, 0, 0)" : "rgb(0, 255, 76)";
-  const accentMid = isYouTube ? "rgb(204, 0, 0)" : "rgb(0, 210, 106)";
-  const accentDark = isYouTube ? "rgb(153, 0, 0)" : "rgb(0, 180, 53)";
-  const accentBg = isYouTube ? "rgba(255, 0, 0, 0.05)" : "rgba(0, 180, 53, 0.05)";
-  const accentBorder = isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(0, 210, 106, 0.12)";
-  const accentBorderStrong = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(0, 210, 106, 0.2)";
-  const accentGlow = isYouTube ? "rgba(255, 0, 0, 0.25)" : "rgba(0, 255, 76, 0.25)";
-  const gradientBg = isYouTube ? "linear-gradient(135deg, rgb(153, 0, 0), rgb(255, 0, 0))" : "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))";
+  const accent = isYouTube ? "rgb(255, 0, 0)" : "rgb(105, 201, 208)";
+  const accentMid = isYouTube ? "rgb(204, 0, 0)" : "rgb(105, 201, 208)";
+  const accentDark = isYouTube ? "rgb(153, 0, 0)" : "rgb(79, 179, 186)";
+  const accentBg = isYouTube ? "rgba(255, 0, 0, 0.05)" : "rgba(79, 179, 186, 0.05)";
+  const accentBorder = isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)";
+  const accentBorderStrong = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(105, 201, 208, 0.2)";
+  const accentGlow = isYouTube ? "rgba(255, 0, 0, 0.25)" : "rgba(105, 201, 208, 0.25)";
+  const gradientBg = isYouTube ? "linear-gradient(135deg, rgb(153, 0, 0), rgb(255, 0, 0))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
   const activeKeys = isYouTube ? YOUTUBE_KEYS : TIKTOK_KEYS;
   const [activeTab, setActiveTab] = useState<ServiceType>(activeKeys[0]);
   // One selected pack index per service type
   const [selections, setSelections] = useState<Partial<Record<ServiceType, number>>>({}); 
   const [combos, setCombos] = useState<ComboPack[]>([]);
   const [combosLoading, setCombosLoading] = useState(true);
+  const [selectedCombo, setSelectedCombo] = useState<{ id: number; items: CartItem[] } | null>(null);
   const [services, setServices] = useState<Services>(DEFAULT_SERVICES as Services);
 
   useEffect(() => {
@@ -232,6 +237,7 @@ export default function ServiceSelect({
   const selectedIdx = selections[activeTab] ?? null;
 
   function togglePack(idx: number) {
+    setSelectedCombo(null); // clear combo when selecting individual packs
     setSelections((prev) => {
       const copy = { ...prev };
       if (copy[activeTab] === idx) {
@@ -245,15 +251,19 @@ export default function ServiceSelect({
     });
   }
 
-  // Build cart from all selections
-  const cart: CartItem[] = activeKeys
-    .filter((k) => selections[k] !== undefined)
-    .map((k) => {
-      const pack = services[k]!.packs[selections[k]!];
-      return { service: k, label: services[k]!.label, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
-    });
+  // Build cart from all selections OR from combo
+  const cart: CartItem[] = selectedCombo
+    ? selectedCombo.items
+    : activeKeys
+      .filter((k) => selections[k] !== undefined)
+      .map((k) => {
+        const pack = services[k]!.packs[selections[k]!];
+        return { service: k, label: services[k]!.label, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
+      });
 
   const total = cart.reduce((sum, item) => sum + (currency === "usd" ? item.priceUsd : item.price), 0);
+  const currentUsername = profile?.username || externalUsername || "";
+  const canCheckout = cart.length > 0 && currentUsername.trim().length >= 2;
 
   return (
     <div
@@ -266,138 +276,40 @@ export default function ServiceSelect({
         padding: "0 16px",
       }}
     >
-      {/* Mini profile recap */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          padding: "10px 16px",
-          borderRadius: "12px",
-          backgroundColor: accentBg,
-          border: `1px solid ${accentBorder}`,
-          marginBottom: "20px",
-          width: "100%",
-          maxWidth: "360px",
-        }}
-      >
-        <img
-          src={profile.avatarUrl}
-          alt={profile.username}
-          style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentBorderStrong}` }}
-        />
-        <div style={{ textAlign: "left" }}>
-          <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff" }}>@{profile.username}</p>
+      {/* Username input or mini profile recap */}
+      {profile ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "10px 16px",
+            borderRadius: "12px",
+            backgroundColor: accentBg,
+            border: `1px solid ${accentBorder}`,
+            marginBottom: "20px",
+            width: "100%",
+            maxWidth: "360px",
+          }}
+        >
+          <img
+            src={profile.avatarUrl}
+            alt={profile.username}
+            style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentBorderStrong}` }}
+          />
+          <div style={{ textAlign: "left" }}>
+            <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff" }}>@{profile.username}</p>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Title */}
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0" }}>
-        {t("service.composeTitle")} <span style={{ color: accent, textShadow: `0 0 20px ${isYouTube ? 'rgba(255,0,0,0.3)' : 'rgba(0,255,76,0.3)'}` }}>{t("service.pack")}</span>
+        {t("service.composeTitle")} <span style={{ color: accent, textShadow: `0 0 20px ${isYouTube ? 'rgba(255,0,0,0.3)' : 'rgba(105,201,208,0.3)'}` }}>{t("service.pack")}</span>
       </h2>
       <p style={{ fontSize: "13px", color: "rgb(169, 181, 174)", margin: "0 0 20px 0" }}>
         {t("service.composeSubtitle")}
       </p>
-
-      {/* Combo packs */}
-      {combosLoading ? (
-        <div style={{ width: "100%", marginBottom: "20px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px" }}>
-            {[1, 2].map((i) => (
-              <div key={i} style={{ padding: "16px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.02)" }}>
-                <div style={{ height: "14px", width: "60%", borderRadius: "6px", background: "rgba(255,255,255,0.05)", marginBottom: "10px", animation: "pulse 1.5s ease-in-out infinite" }} />
-                <div style={{ height: "10px", width: "80%", borderRadius: "6px", background: "rgba(255,255,255,0.03)", marginBottom: "6px", animation: "pulse 1.5s ease-in-out infinite" }} />
-                <div style={{ height: "10px", width: "40%", borderRadius: "6px", background: "rgba(255,255,255,0.03)", animation: "pulse 1.5s ease-in-out infinite" }} />
-              </div>
-            ))}
-          </div>
-          <style>{`@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
-        </div>
-      ) : combos.length === 0 ? (
-        <div style={{ width: "100%", marginBottom: "20px", padding: "20px", borderRadius: "14px", border: "1px dashed rgba(255,255,255,0.06)", textAlign: "center" }}>
-          <p style={{ margin: 0, fontSize: "13px", color: "rgb(107, 117, 111)" }}>{t("service.combosSoon")}</p>
-        </div>
-      ) : (
-        <div style={{ width: "100%", marginBottom: "20px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px" }}>
-            {combos.map((combo) => {
-              // Calculate original total and discounted total
-              const comboItems = combo.items
-                .map((ci) => {
-                  const svc = ci.service as ServiceType;
-                  const pack = findClosestPack(svc, ci.qty, services);
-                  if (!pack) return null;
-                  return { service: svc, label: services[svc]?.label ?? svc, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
-                })
-                .filter(Boolean) as CartItem[];
-
-              const originalTotal = comboItems.reduce((s, i) => s + (currency === "usd" ? i.priceUsd : i.price), 0);
-              const discountedTotal = originalTotal * (1 - combo.discount_percent / 100);
-
-              return (
-                <button
-                  key={combo.id}
-                  onClick={() => {
-                    const discountedItems = comboItems.map((item) => ({
-                      ...item,
-                      price: Number((item.price * (1 - combo.discount_percent / 100)).toFixed(2)),
-                      priceUsd: Number((item.priceUsd * (1 - combo.discount_percent / 100)).toFixed(2)),
-                    }));
-                    posthog.capture("combo_selected", { combo_name: combo.name, discount_percent: combo.discount_percent, total: discountedItems.reduce((s, i) => s + i.price, 0) });
-                    onCheckout(discountedItems);
-                  }}
-                  style={{
-                    position: "relative",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                    padding: "16px",
-                    borderRadius: "14px",
-                    border: `1px solid ${accentBorderStrong}`,
-                    background: isYouTube ? "linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 0, 0, 0.02))" : "linear-gradient(135deg, rgba(0, 180, 53, 0.08), rgba(0, 255, 76, 0.02))",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    textAlign: "left",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.4)" : "rgba(0, 255, 76, 0.4)"; e.currentTarget.style.transform = "scale(1.02)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(0, 210, 106, 0.2)"; e.currentTarget.style.transform = "scale(1)"; }}
-                >
-                  {/* Discount badge */}
-                  <span style={{
-                    position: "absolute", top: "-8px", right: "10px",
-                    padding: "3px 10px", borderRadius: "9999px",
-                    fontSize: "10px", fontWeight: 800,
-                    background: gradientBg,
-                    color: "#000", letterSpacing: "0.03em",
-                  }}>
-                    -{combo.discount_percent}%
-                  </span>
-
-                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#fff" }}>{lang === "en" && combo.name_en ? combo.name_en : combo.name}</p>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                    {comboItems.map((item, i) => (
-                      <span key={i} style={{ padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, backgroundColor: "rgba(255,255,255,0.04)", color: "rgb(169, 181, 174)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        {fmtQty(item.qty)} {item.label}
-                      </span>
-                    ))}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "rgb(107, 117, 111)", textDecoration: "line-through" }}>{fmtPrice(originalTotal, currency)}</span>
-                    <span style={{ fontSize: "16px", fontWeight: 800, color: accent }}>{fmtPrice(discountedTotal, currency)}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "16px 0 0 0" }}>
-            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
-            <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("service.orCompose")}</span>
-            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
-          </div>
-        </div>
-      )}
 
       {/* Tabs */}
       <div className="service-tabs">
@@ -437,7 +349,7 @@ export default function ServiceSelect({
                     position: "absolute",
                     top: "6px",
                     right: "6px",
-                    boxShadow: `0 0 4px ${isYouTube ? 'rgba(255,0,0,0.5)' : 'rgba(0,255,76,0.5)'}`,
+                    boxShadow: `0 0 4px ${isYouTube ? 'rgba(255,0,0,0.5)' : 'rgba(105,201,208,0.5)'}`,
                   }}
                 />
               )}
@@ -465,8 +377,8 @@ export default function ServiceSelect({
                 cursor: "pointer",
                 fontFamily: "inherit",
                 border: isSelected ? `2px solid ${accent}` : `1px solid ${accentBorder}`,
-                backgroundColor: isSelected ? (isYouTube ? "rgba(255, 0, 0, 0.1)" : "rgba(0, 180, 53, 0.1)") : "rgba(255, 255, 255, 0.02)",
-                boxShadow: isSelected ? (isYouTube ? "0 0 20px rgba(255,0,0,0.1), inset 0 0 20px rgba(255,0,0,0.05)" : "0 0 20px rgba(0, 255, 76, 0.1), inset 0 0 20px rgba(0, 180, 53, 0.05)") : "none",
+                backgroundColor: isSelected ? (isYouTube ? "rgba(255, 0, 0, 0.1)" : "rgba(79, 179, 186, 0.1)") : "rgba(255, 255, 255, 0.02)",
+                boxShadow: isSelected ? (isYouTube ? "0 0 20px rgba(255,0,0,0.1), inset 0 0 20px rgba(255,0,0,0.05)" : "0 0 20px rgba(105, 201, 208, 0.1), inset 0 0 20px rgba(79, 179, 186, 0.05)") : "none",
                 transition: "all 0.2s",
               }}
             >
@@ -482,7 +394,7 @@ export default function ServiceSelect({
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.05em",
-                    background: isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(0, 255, 76, 0.12)",
+                    background: isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)",
                     color: accent,
                     border: `1px solid ${accentBorderStrong}`,
                   }}
@@ -532,6 +444,124 @@ export default function ServiceSelect({
         })}
       </div>
 
+      {/* Username input — after packs */}
+      {!profile && (
+        <div style={{ width: "100%", maxWidth: "360px", marginBottom: "20px" }}>
+          <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            {t("service.usernameLabel")}
+          </label>
+          <div style={{ display: "flex", alignItems: "center", gap: "0", borderRadius: "12px", border: `1px solid ${accentBorder}`, backgroundColor: accentBg, overflow: "hidden" }}>
+            <span style={{ padding: "0 0 0 14px", fontSize: "14px", color: "rgb(107,117,111)", fontWeight: 600, userSelect: "none" }}>@</span>
+            <input
+              type="text"
+              value={externalUsername || ""}
+              onChange={(e) => onUsernameChange?.(e.target.value.replace(/^@/, "").replace(/\s/g, ""))}
+              placeholder={t("service.usernamePlaceholder")}
+              style={{ flex: 1, padding: "12px 14px 12px 4px", border: "none", background: "transparent", color: "#fff", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Combo packs — below individual packs */}
+      {combosLoading ? (
+        <div style={{ width: "100%", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px" }}>
+            {[1, 2].map((i) => (
+              <div key={i} style={{ padding: "16px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.02)" }}>
+                <div style={{ height: "14px", width: "60%", borderRadius: "6px", background: "rgba(255,255,255,0.05)", marginBottom: "10px", animation: "pulse 1.5s ease-in-out infinite" }} />
+                <div style={{ height: "10px", width: "80%", borderRadius: "6px", background: "rgba(255,255,255,0.03)", marginBottom: "6px", animation: "pulse 1.5s ease-in-out infinite" }} />
+                <div style={{ height: "10px", width: "40%", borderRadius: "6px", background: "rgba(255,255,255,0.03)", animation: "pulse 1.5s ease-in-out infinite" }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : combos.length > 0 && (
+        <div style={{ width: "100%", marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "0 0 14px 0" }}>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+            <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("service.orCompose")}</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px" }}>
+            {combos.map((combo) => {
+              const comboItems = combo.items
+                .map((ci) => {
+                  const svc = ci.service as ServiceType;
+                  const pack = findClosestPack(svc, ci.qty, services);
+                  if (!pack) return null;
+                  return { service: svc, label: services[svc]?.label ?? svc, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
+                })
+                .filter(Boolean) as CartItem[];
+
+              const originalTotal = comboItems.reduce((s, i) => s + (currency === "usd" ? i.priceUsd : i.price), 0);
+              const discountedTotal = originalTotal * (1 - combo.discount_percent / 100);
+
+              return (
+                <button
+                  key={combo.id}
+                  onClick={() => {
+                    if (selectedCombo?.id === combo.id) {
+                      setSelectedCombo(null); // deselect
+                    } else {
+                      const discountedItems = comboItems.map((item) => ({
+                        ...item,
+                        price: Number((item.price * (1 - combo.discount_percent / 100)).toFixed(2)),
+                        priceUsd: Number((item.priceUsd * (1 - combo.discount_percent / 100)).toFixed(2)),
+                      }));
+                      setSelections({}); // clear individual selections
+                      setSelectedCombo({ id: combo.id, items: discountedItems });
+                      posthog.capture("combo_selected", { combo_name: combo.name, discount_percent: combo.discount_percent, total: discountedItems.reduce((s, i) => s + i.price, 0) });
+                    }
+                  }}
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                    padding: "16px",
+                    borderRadius: "14px",
+                    border: selectedCombo?.id === combo.id ? `2px solid ${accent}` : `1px solid ${accentBorderStrong}`,
+                    background: selectedCombo?.id === combo.id
+                      ? (isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)")
+                      : (isYouTube ? "linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 0, 0, 0.02))" : "linear-gradient(135deg, rgba(79, 179, 186, 0.08), rgba(105, 201, 208, 0.02))"),
+                    boxShadow: selectedCombo?.id === combo.id ? `0 0 20px ${accentGlow}` : "none",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    textAlign: "left",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => { if (selectedCombo?.id !== combo.id) { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.4)" : "rgba(105, 201, 208, 0.4)"; e.currentTarget.style.transform = "scale(1.02)"; } }}
+                  onMouseLeave={(e) => { if (selectedCombo?.id !== combo.id) { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(105, 201, 208, 0.2)"; e.currentTarget.style.transform = "scale(1)"; } }}
+                >
+                  <span style={{
+                    position: "absolute", top: "-8px", right: "10px",
+                    padding: "3px 10px", borderRadius: "9999px",
+                    fontSize: "10px", fontWeight: 800,
+                    background: gradientBg,
+                    color: "#000", letterSpacing: "0.03em",
+                  }}>
+                    -{combo.discount_percent}%
+                  </span>
+                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#fff" }}>{lang === "en" && combo.name_en ? combo.name_en : combo.name}</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                    {comboItems.map((item, i) => (
+                      <span key={i} style={{ padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, backgroundColor: "rgba(255,255,255,0.04)", color: "rgb(169, 181, 174)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                        {fmtQty(item.qty)} {item.label}
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "rgb(107, 117, 111)", textDecoration: "line-through" }}>{fmtPrice(originalTotal, currency)}</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: accent }}>{fmtPrice(discountedTotal, currency)}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Cart summary */}
       {cart.length > 0 && (
         <div
@@ -539,8 +569,8 @@ export default function ServiceSelect({
             width: "100%",
             padding: "12px 16px",
             borderRadius: "12px",
-            backgroundColor: isYouTube ? "rgba(255, 0, 0, 0.06)" : "rgba(0, 180, 53, 0.06)",
-            border: `1px solid ${isYouTube ? 'rgba(255,0,0,0.15)' : 'rgba(0,210,106,0.15)'}`,
+            backgroundColor: isYouTube ? "rgba(255, 0, 0, 0.06)" : "rgba(79, 179, 186, 0.06)",
+            border: `1px solid ${isYouTube ? 'rgba(255,0,0,0.15)' : 'rgba(105,201,208,0.15)'}`,
             marginBottom: "20px",
           }}
         >
@@ -570,7 +600,7 @@ export default function ServiceSelect({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              borderTop: `1px solid ${isYouTube ? 'rgba(255,0,0,0.1)' : 'rgba(0,210,106,0.1)'}`,
+              borderTop: `1px solid ${isYouTube ? 'rgba(255,0,0,0.1)' : 'rgba(105,201,208,0.1)'}`,
               marginTop: "8px",
               paddingTop: "8px",
             }}
@@ -581,35 +611,45 @@ export default function ServiceSelect({
         </div>
       )}
 
+      {/* Social proof */}
+      {cart.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "10px" }}>
+          <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: isYouTube ? "rgb(255,0,0)" : "rgb(105,201,208)", display: "inline-block", animation: "pulse 2s infinite" }} />
+          <span style={{ fontSize: "11px", color: "rgb(169,181,174)" }}>
+            <strong style={{ color: isYouTube ? "rgb(255,100,100)" : "rgb(105,201,208)" }}>127+</strong> {t("service.ordersThisWeek")}
+          </span>
+        </div>
+      )}
+
       {/* CTA */}
       <button
-        onClick={() => { if (cart.length > 0) onCheckout(cart); }}
-        disabled={cart.length === 0}
+        onClick={() => { if (canCheckout) onCheckout(cart); }}
+        disabled={!canCheckout}
         style={{
           display: "inline-flex",
           alignItems: "center",
           gap: "8px",
-          padding: "14px 32px",
+          padding: "16px 36px",
           borderRadius: "14px",
           border: "none",
-          cursor: cart.length > 0 ? "pointer" : "not-allowed",
+          cursor: canCheckout ? "pointer" : "not-allowed",
           fontWeight: 700,
-          fontSize: "14px",
+          fontSize: "16px",
           fontFamily: "inherit",
-          color: cart.length > 0 ? (isYouTube ? "#fff" : "#000") : "rgb(80, 80, 80)",
-          background: cart.length > 0 ? gradientBg : "rgba(255, 255, 255, 0.06)",
-          boxShadow: cart.length > 0 ? `0 10px 30px ${accentGlow}` : "none",
+          color: canCheckout ? (isYouTube ? "#fff" : "#000") : "rgb(80, 80, 80)",
+          background: canCheckout ? gradientBg : "rgba(255, 255, 255, 0.06)",
+          boxShadow: canCheckout ? `0 10px 30px ${accentGlow}` : "none",
           transition: "all 0.2s",
-          opacity: cart.length > 0 ? 1 : 0.5,
+          opacity: canCheckout ? 1 : 0.5,
         }}
-        onMouseEnter={(e) => { if (cart.length > 0) e.currentTarget.style.transform = "scale(1.03)"; }}
+        onMouseEnter={(e) => { if (canCheckout) e.currentTarget.style.transform = "scale(1.03)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+          <rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />
         </svg>
         {cart.length > 0
-          ? `${t("service.checkout")} \u2014 ${fmtPrice(total, currency)}`
+          ? `${t("service.checkout")} ${fmtPrice(total, currency)}`
           : t("service.selectAtLeast")
         }
       </button>
@@ -619,6 +659,7 @@ export default function ServiceSelect({
         onClick={onBack}
         style={{
           marginTop: "14px",
+          marginBottom: "80px",
           fontSize: "12px",
           color: "rgb(107, 117, 111)",
           background: "none",
@@ -633,6 +674,48 @@ export default function ServiceSelect({
       >
         {t("service.backToProfile")}
       </button>
+
+      {/* Sticky mobile cart bar — always visible */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "12px 16px",
+          background: "linear-gradient(180deg, rgba(5,10,12,0.95), rgba(3,7,8,0.98))",
+          borderTop: `1px solid ${accentBorder}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 100,
+          backdropFilter: "blur(12px)",
+        }}
+        className="sticky-cart-bar"
+      >
+        <div>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{cart.length > 0 ? `${cart.length} ${cart.length > 1 ? "articles" : "article"}` : t("service.emptyCart")}</span>
+          {cart.length > 0 && <span style={{ fontSize: "15px", fontWeight: 700, color: accent, marginLeft: "8px" }}>{fmtPrice(total, currency)}</span>}
+        </div>
+        <button
+          onClick={() => { if (canCheckout) onCheckout(cart); }}
+          disabled={!canCheckout}
+          style={{
+            padding: "10px 24px",
+            borderRadius: "10px",
+            border: "none",
+            cursor: canCheckout ? "pointer" : "not-allowed",
+            fontWeight: 700,
+            fontSize: "13px",
+            fontFamily: "inherit",
+            color: isYouTube ? "#fff" : "#000",
+            background: gradientBg,
+            opacity: canCheckout ? 1 : 0.5,
+          }}
+        >
+          {t("service.checkout")} &rarr;
+        </button>
+      </div>
     </div>
   );
 }

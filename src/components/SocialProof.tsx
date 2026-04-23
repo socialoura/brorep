@@ -30,7 +30,7 @@ export default function SocialProof({ variant = "default" }: { variant?: "defaul
         gap: "12px",
         padding: "10px 20px",
         borderRadius: "16px",
-        border: isYt ? "1px solid rgba(255, 50, 50, 0.2)" : "1px solid rgba(0, 255, 76, 0.2)",
+        border: isYt ? "1px solid rgba(255, 50, 50, 0.2)" : "1px solid rgba(105, 201, 208, 0.2)",
         backgroundColor: "rgba(14, 21, 18, 0.9)",
       }}
     >

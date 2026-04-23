@@ -28,7 +28,7 @@ export default function AnimatedBackground() {
       {/* Radial accent */}
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(circle, rgba(0, 180, 53, 0.08), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle, rgba(79, 179, 186, 0.08), transparent 60%)" }}
       />
 
       {/* Center pulse */}
@@ -39,7 +39,7 @@ export default function AnimatedBackground() {
           top: "50%",
           marginLeft: "-450px",
           marginTop: "-450px",
-          background: "radial-gradient(circle, rgba(0, 180, 53, 0.06) 0%, transparent 50%)",
+          background: "radial-gradient(circle, rgba(79, 179, 186, 0.06) 0%, transparent 50%)",
           filter: "blur(80px)",
           animation: "8s ease-in-out 0s infinite normal none running bgPulse",
         }}
@@ -62,10 +62,10 @@ export default function AnimatedBackground() {
           style={{
             width: `${p.size}px`,
             height: `${p.size}px`,
-            backgroundColor: "rgb(0, 255, 76)",
+            backgroundColor: "rgb(105, 201, 208)",
             left: p.left,
             top: p.top,
-            boxShadow: "rgba(0, 255, 76, 0.3) 0px 0px 4px",
+            boxShadow: "rgba(105, 201, 208, 0.3) 0px 0px 4px",
             animation: `${p.duration}s ease-in-out ${p.delay}s infinite normal none running particleFade`,
           }}
         />
@@ -81,7 +81,7 @@ export default function AnimatedBackground() {
             height: `${o.size}px`,
             left: o.left,
             top: o.top,
-            background: "radial-gradient(circle, rgba(0, 180, 53, 0.06), transparent 70%)",
+            background: "radial-gradient(circle, rgba(79, 179, 186, 0.06), transparent 70%)",
             filter: "blur(40px)",
             animation: `${o.duration}s ease-in-out 0s infinite normal none running orbFloat`,
           }}

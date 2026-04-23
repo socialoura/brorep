@@ -90,7 +90,7 @@ export default function PostPicker({
     >
       {/* Title */}
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0" }}>
-        {t("posts.title")} <span style={{ color: "rgb(0, 255, 76)", textShadow: "0 0 20px rgba(0, 255, 76, 0.3)" }}>{t("posts.posts")}</span>
+        {t("posts.title")} <span style={{ color: "rgb(105, 201, 208)", textShadow: "0 0 20px rgba(105, 201, 208, 0.3)" }}>{t("posts.posts")}</span>
       </h2>
       <p style={{ fontSize: "13px", color: "rgb(169, 181, 174)", margin: "0 0 6px 0" }}>
         {t("posts.whichPosts")} {services} ?
@@ -106,9 +106,9 @@ export default function PostPicker({
           marginBottom: "16px",
           padding: "8px 16px",
           borderRadius: "10px",
-          border: "1px solid rgba(0, 210, 106, 0.2)",
-          backgroundColor: selected.size === profile.posts.length ? "rgba(0, 180, 53, 0.1)" : "rgba(255, 255, 255, 0.03)",
-          color: selected.size === profile.posts.length ? "rgb(0, 255, 76)" : "rgb(169, 181, 174)",
+          border: "1px solid rgba(105, 201, 208, 0.2)",
+          backgroundColor: selected.size === profile.posts.length ? "rgba(79, 179, 186, 0.1)" : "rgba(255, 255, 255, 0.03)",
+          color: selected.size === profile.posts.length ? "rgb(105, 201, 208)" : "rgb(169, 181, 174)",
           fontSize: "12px",
           fontWeight: 600,
           cursor: "pointer",
@@ -141,8 +141,8 @@ export default function PostPicker({
                   borderRadius: "12px",
                   overflow: "hidden",
                   cursor: "pointer",
-                  border: isOn ? "2px solid rgb(0, 255, 76)" : "2px solid transparent",
-                  boxShadow: isOn ? "0 0 16px rgba(0, 255, 76, 0.15)" : "none",
+                  border: isOn ? "2px solid rgb(105, 201, 208)" : "2px solid transparent",
+                  boxShadow: isOn ? "0 0 16px rgba(105, 201, 208, 0.15)" : "none",
                   padding: 0,
                   background: "rgb(14, 21, 18)",
                   transition: "all 0.2s",
@@ -169,7 +169,7 @@ export default function PostPicker({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: "rgba(0, 180, 53, 0.05)",
+                      backgroundColor: "rgba(79, 179, 186, 0.05)",
                       opacity: isOn ? 1 : 0.5,
                     }}
                   >
@@ -222,7 +222,7 @@ export default function PostPicker({
                       width: "20px",
                       height: "20px",
                       borderRadius: "50%",
-                      backgroundColor: "rgb(0, 255, 76)",
+                      backgroundColor: "rgb(105, 201, 208)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -256,8 +256,8 @@ export default function PostPicker({
           fontSize: "14px",
           fontFamily: "inherit",
           color: selected.size > 0 ? "#000" : "rgb(80, 80, 80)",
-          background: selected.size > 0 ? "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))" : "rgba(255, 255, 255, 0.06)",
-          boxShadow: selected.size > 0 ? "0 10px 30px rgba(0, 255, 76, 0.25)" : "none",
+          background: selected.size > 0 ? "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))" : "rgba(255, 255, 255, 0.06)",
+          boxShadow: selected.size > 0 ? "0 10px 30px rgba(105, 201, 208, 0.25)" : "none",
           transition: "all 0.2s",
           opacity: selected.size > 0 ? 1 : 0.5,
         }}

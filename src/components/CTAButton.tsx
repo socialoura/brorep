@@ -21,14 +21,14 @@ export default function CTAButton({ onClick }: { onClick?: () => void }) {
         borderRadius: "16px",
         border: "none",
         cursor: "pointer",
-        background: "linear-gradient(135deg, rgb(0, 180, 53), rgb(0, 255, 76))",
-        color: "rgb(0, 0, 0)",
+        background: "linear-gradient(135deg, #69C9D0, #8DDFE5)",
+        color: "#000",
         fontSize: "18px",
         fontWeight: 700,
         fontFamily: "inherit",
         boxShadow: hovered
-          ? "0 14px 50px rgba(0, 255, 76, 0.4)"
-          : "0 10px 40px rgba(0, 255, 76, 0.25)",
+          ? "0 14px 50px rgba(105, 201, 208, 0.4)"
+          : "0 10px 40px rgba(105, 201, 208, 0.25)",
         transform: hovered ? "scale(1.04)" : "scale(1)",
         transition: "transform 0.3s ease, box-shadow 0.3s ease",
         overflow: "hidden",

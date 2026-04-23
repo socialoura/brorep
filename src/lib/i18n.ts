@@ -26,17 +26,19 @@ const dict: Record<string, Record<Lang, string>> = {
   "cta.launch": { fr: "Lancer ma croissance →", en: "Start my growth →" },
 
   // ===== SocialProof =====
-  "social.profilesAnalyzed": { fr: "créateurs actifs", en: "active creators" },
+  "social.profilesAnalyzed": { fr: "packs vendus", en: "packs sold" },
   "social.videosAnalyzed": { fr: "vidéos analysées", en: "videos analyzed" },
   "social.thisMonth": { fr: "ce mois-ci", en: "this month" },
 
   // ===== HomePage hero =====
-  "hero.title1": { fr: "Accélère ta croissance", en: "Accelerate your growth" },
-  "hero.title2": { fr: "TikTok & Instagram", en: "TikTok & Instagram" },
-  "hero.subtitle1": { fr: "On s'occupe de ta visibilité pendant que", en: "We handle your visibility while" },
+  "hero.title1": { fr: "Accélère ta croissance TikTok", en: "Accelerate your TikTok growth" },
+  "hero.title2": { fr: "TikTok", en: "TikTok" },
+  "hero.subtitle1": { fr: "On s'occupe de ta visibilité TikTok pendant que", en: "We handle your TikTok visibility while" },
   "hero.subtitle2": { fr: "tu te concentres sur ton contenu.", en: "you focus on your content." },
-  "hero.moreProfiles": { fr: "de créateurs actifs de plus qu'hier", en: "more active creators than yesterday" },
+  "hero.moreProfiles": { fr: "de packs vendus de plus qu'hier", en: "more packs sold than yesterday" },
   "hero.morePercent": { fr: "20% plus", en: "20% more" },
+  "hero.startingAt": { fr: "À partir de", en: "Starting at" },
+  "hero.delivery": { fr: "Livraison sous 24h", en: "Delivery within 24h" },
 
   // ===== How it works =====
   "howItWorks.title": { fr: "Comment ça marche", en: "How it works" },
@@ -114,9 +116,13 @@ const dict: Record<string, Record<Lang, string>> = {
   "service.top": { fr: "Top", en: "Top" },
   "service.yourCart": { fr: "Ton panier", en: "Your cart" },
   "service.total": { fr: "Total", en: "Total" },
-  "service.checkout": { fr: "Passer commande", en: "Checkout" },
+  "service.checkout": { fr: "Payer", en: "Pay" },
+  "service.emptyCart": { fr: "Choisis un pack", en: "Pick a pack" },
   "service.selectAtLeast": { fr: "Sélectionne au moins un pack", en: "Select at least one pack" },
-  "service.backToProfile": { fr: "Retour au profil", en: "Back to profile" },
+  "service.backToProfile": { fr: "Retour", en: "Back" },
+  "service.usernamePlaceholder": { fr: "Ton nom d'utilisateur", en: "Your username" },
+  "service.usernameLabel": { fr: "Compte à booster", en: "Account to boost" },
+  "service.ordersThisWeek": { fr: "commandes cette semaine", en: "orders this week" },
 
   // ===== PostPicker =====
   "posts.title": { fr: "Choisis tes", en: "Choose your" },
@@ -155,6 +161,11 @@ const dict: Record<string, Record<Lang, string>> = {
   "checkout.back": { fr: "Retour", en: "Back" },
   "checkout.preparingPayment": { fr: "Préparation du paiement...", en: "Preparing payment..." },
   "checkout.serverError": { fr: "Impossible de contacter le serveur de paiement.", en: "Unable to contact payment server." },
+  "checkout.trustSecure": { fr: "Paiement 100% sécurisé", en: "100% secure payment" },
+  "checkout.trustDelivery": { fr: "Livraison sous 24h", en: "Delivery within 24h" },
+  "checkout.trustGuarantee": { fr: "Satisfait ou remboursé", en: "Satisfaction guaranteed" },
+  "checkout.trustSupport": { fr: "Support 7j/7", en: "24/7 support" },
+  "checkout.urgencyOffer": { fr: "Offre spéciale expire dans", en: "Special offer expires in" },
 
   // ===== SuccessPage =====
   "success.title": { fr: "Paiement réussi !", en: "Payment successful!" },
