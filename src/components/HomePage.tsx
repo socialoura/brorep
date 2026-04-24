@@ -106,6 +106,7 @@ function HomePageInner() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [postAssignments, setPostAssignments] = useState<PostAssignment[] | undefined>(undefined);
   const [orderId, setOrderId] = useState<number | undefined>();
+  const [fetchingPosts, setFetchingPosts] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const posthog = usePostHog();
   const { t, lang, currency } = useTranslation();
@@ -314,19 +315,58 @@ function HomePageInner() {
 
       case "shop":
         return (
+          <>
+          {fetchingPosts && (
+            <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(5,5,5,0.85)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", backdropFilter: "blur(6px)" }}>
+              <div style={{ width: "36px", height: "36px", border: "3px solid rgba(105,201,208,0.2)", borderTopColor: "rgb(105,201,208)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+              <p style={{ fontSize: "14px", fontWeight: 600, color: "rgb(169,181,174)" }}>{t("posts.loading")}</p>
+            </div>
+          )}
           <ServiceSelect
             profile={scanData}
             platform={platform}
             username={username}
             onUsernameChange={setUsername}
-            onCheckout={(items) => {
+            onCheckout={async (items) => {
               setCart(items);
               posthog?.capture("checkout_started", { platform, cart_total: items.reduce((s, i) => s + i.price, 0), cart_items_count: items.length });
               setPostAssignments(undefined);
+
+              const needsPosts = items.some((i) => ["likes", "views"].includes(i.service));
+              if (needsPosts && username) {
+                // Fetch posts to let user pick which ones to boost
+                setFetchingPosts(true);
+                try {
+                  const endpoint = platform === "instagram"
+                    ? `/api/scraper-instagram?username=${encodeURIComponent(username)}`
+                    : `/api/scraper-tiktok?username=${encodeURIComponent(username)}`;
+                  const res = await fetch(endpoint);
+                  const data = await res.json();
+                  if (data.posts && data.posts.length > 0) {
+                    setScanData({
+                      username: data.username || username,
+                      fullName: data.fullName || username,
+                      avatarUrl: data.avatarUrl || "",
+                      followersCount: data.followersCount || 0,
+                      followingCount: data.followingCount || 0,
+                      likesCount: data.likesCount || 0,
+                      videoCount: data.videoCount || 0,
+                      bio: data.bio || "",
+                      verified: data.verified || false,
+                      posts: data.posts,
+                    });
+                    setFetchingPosts(false);
+                    setStep("pickPosts");
+                    return;
+                  }
+                } catch { /* fallback to payment */ }
+                setFetchingPosts(false);
+              }
               setStep("payment");
             }}
             onBack={() => { posthog?.capture("back_clicked", { from_step: "shop" }); setStep("hero"); }}
           />
+          </>
         );
 
       case "pickPosts":

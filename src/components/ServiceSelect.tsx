@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import posthog from "posthog-js";
 import type { ScanResult } from "@/components/ScanLoading";
 import { useTranslation, fmtPrice } from "@/lib/i18n";
@@ -197,6 +197,9 @@ export default function ServiceSelect({
   const [combosLoading, setCombosLoading] = useState(true);
   const [selectedCombo, setSelectedCombo] = useState<{ id: number; items: CartItem[] } | null>(null);
   const [usernameError, setUsernameError] = useState(false);
+  const [previewProfile, setPreviewProfile] = useState<{ username: string; fullName: string; avatarUrl: string; followersCount: number } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [services, setServices] = useState<Services>(DEFAULT_SERVICES as Services);
 
   useEffect(() => {
@@ -233,6 +236,38 @@ export default function ServiceSelect({
       })
       .catch(() => {});
   }, []);
+
+  // Debounced username lookup for profile preview
+  useEffect(() => {
+    if (lookupTimer.current) clearTimeout(lookupTimer.current);
+    const uname = (externalUsername || "").trim();
+    if (uname.length < 2) { setPreviewProfile(null); setPreviewLoading(false); return; }
+    setPreviewLoading(true);
+    lookupTimer.current = setTimeout(() => {
+      const endpoint = isYouTube
+        ? `/api/scraper-youtube?username=${encodeURIComponent(uname)}`
+        : platform === "instagram"
+          ? `/api/scraper-instagram?username=${encodeURIComponent(uname)}`
+          : `/api/scraper-tiktok?username=${encodeURIComponent(uname)}`;
+      fetch(endpoint)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.username) {
+            setPreviewProfile({
+              username: data.username,
+              fullName: data.fullName || data.username,
+              avatarUrl: data.avatarUrl || "",
+              followersCount: data.followersCount || 0,
+            });
+          } else {
+            setPreviewProfile(null);
+          }
+        })
+        .catch(() => setPreviewProfile(null))
+        .finally(() => setPreviewLoading(false));
+    }, 800);
+    return () => { if (lookupTimer.current) clearTimeout(lookupTimer.current); };
+  }, [externalUsername, platform, isYouTube]);
 
   const service = services[activeTab]!;
   const selectedIdx = selections[activeTab] ?? null;
@@ -475,6 +510,50 @@ export default function ServiceSelect({
               style={{ flex: 1, padding: "12px 14px 12px 4px", border: "none", background: "transparent", color: "#fff", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
             />
           </div>
+          {/* Profile preview dropdown */}
+          {(previewLoading || previewProfile) && (externalUsername || "").trim().length >= 2 && (
+            <div style={{
+              marginTop: "6px", padding: "10px 14px", borderRadius: "10px",
+              border: `1px solid ${accentBorder}`, backgroundColor: "rgba(14,21,18,0.95)",
+              display: "flex", alignItems: "center", gap: "10px",
+              animation: "fadeIn 0.2s ease",
+            }}>
+              {previewLoading ? (
+                <>
+                  <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", flexShrink: 0, animation: "pulse 1.5s ease-in-out infinite" }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ height: "12px", width: "80px", borderRadius: "4px", background: "rgba(255,255,255,0.06)", marginBottom: "6px", animation: "pulse 1.5s ease-in-out infinite" }} />
+                    <div style={{ height: "10px", width: "50px", borderRadius: "4px", background: "rgba(255,255,255,0.04)", animation: "pulse 1.5s ease-in-out infinite" }} />
+                  </div>
+                </>
+              ) : previewProfile ? (
+                <>
+                  {previewProfile.avatarUrl ? (
+                    <img
+                      src={previewProfile.avatarUrl.startsWith("http") ? `/api/image-proxy?url=${encodeURIComponent(previewProfile.avatarUrl)}` : previewProfile.avatarUrl}
+                      alt=""
+                      style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${accent}`, flexShrink: 0 }}
+                    />
+                  ) : (
+                    <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: accentBg, border: `2px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: "14px", fontWeight: 700, color: accent }}>{(previewProfile.username[0] || "?").toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {previewProfile.fullName}
+                    </p>
+                    <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
+                      @{previewProfile.username} · {previewProfile.followersCount >= 1000 ? `${(previewProfile.followersCount / 1000).toFixed(1)}K` : previewProfile.followersCount} followers
+                    </p>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </>
+              ) : null}
+            </div>
+          )}
           {usernameError && (
             <p style={{ marginTop: "6px", fontSize: "12px", color: "#ef4444", fontWeight: 500 }}>
               {t("service.usernameRequired")}

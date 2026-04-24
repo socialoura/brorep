@@ -4,6 +4,13 @@ import { useState, useEffect, use, Suspense } from "react";
 import { useTranslation, fmtPrice } from "@/lib/i18n";
 import type { Currency } from "@/lib/i18n";
 
+interface SmmStatus {
+  service: string;
+  qty: number;
+  status: string;
+  remains?: number;
+}
+
 interface OrderData {
   id: number;
   username: string;
@@ -11,6 +18,7 @@ interface OrderData {
   cart: { service: string; label: string; qty: number; price: number }[];
   totalCents: number;
   status: string;
+  smmStatuses?: SmmStatus[];
   followersBefore: number;
   createdAt: string;
   deliveredAt: string | null;
@@ -73,8 +81,8 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
       .finally(() => setScanning(false));
   }, [order]);
 
-  const green = "rgb(0, 255, 76)";
-  const greenDim = "rgb(0, 210, 106)";
+  const green = "rgb(105, 201, 208)";
+  const greenDim = "rgb(79, 179, 186)";
 
   if (error) {
     return (
@@ -91,7 +99,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
   if (!order) {
     return (
       <div style={{ minHeight: "100vh", background: "#050505", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: "32px", height: "32px", border: "3px solid rgba(0,210,106,0.2)", borderTopColor: greenDim, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <div style={{ width: "32px", height: "32px", border: "3px solid rgba(105,201,208,0.2)", borderTopColor: greenDim, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
       </div>
     );
   }
@@ -116,7 +124,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         {/* Status bar */}
-        <div style={{ background: "#0e1512", border: "1px solid rgba(0,210,106,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", position: "relative", marginBottom: "16px" }}>
             {/* Progress line */}
             <div style={{ position: "absolute", top: "14px", left: "16px", right: "16px", height: "2px", background: "rgba(255,255,255,0.06)" }} />
@@ -132,7 +140,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
                     background: active ? green : "rgba(255,255,255,0.06)",
                     border: current ? `2px solid ${green}` : "2px solid transparent",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: current ? `0 0 12px rgba(0,255,76,0.3)` : "none",
+                    boxShadow: current ? `0 0 12px rgba(105,201,208,0.3)` : "none",
                     transition: "all 0.3s",
                   }}>
                     {active && (
@@ -167,7 +175,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Before/After card */}
         {order.followersBefore > 0 && (
-          <div style={{ background: "#0e1512", border: "1px solid rgba(0,210,106,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+          <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <p style={{ margin: "0 0 16px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center" }}>
               📊 {t("orderDetail.evolution")} @{order.username}
             </p>
@@ -194,7 +202,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
                 <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "rgb(107,117,111)", textTransform: "uppercase" }}>{t("orderDetail.now")}</p>
                 {scanning ? (
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <div style={{ width: "20px", height: "20px", border: "2px solid rgba(0,210,106,0.2)", borderTopColor: greenDim, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                    <div style={{ width: "20px", height: "20px", border: "2px solid rgba(105,201,208,0.2)", borderTopColor: greenDim, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
                   </div>
                 ) : followersNow !== null ? (
                   <>
@@ -211,7 +219,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
 
             {/* Gain bar */}
             {gain !== null && gain > 0 && (
-              <div style={{ marginTop: "16px", padding: "12px", background: "rgba(0,255,76,0.06)", borderRadius: "10px", textAlign: "center" }}>
+              <div style={{ marginTop: "16px", padding: "12px", background: "rgba(105,201,208,0.06)", borderRadius: "10px", textAlign: "center" }}>
                 <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>+{fmtQty(gain)} {t("orderDetail.followers")}</span>
                 <span style={{ fontSize: "12px", color: "rgb(169,181,174)", marginLeft: "8px" }}>(+{gainPercent}%)</span>
               </div>
@@ -219,8 +227,35 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
         )}
 
+        {/* Per-service live status */}
+        {order.smmStatuses && order.smmStatuses.length > 0 && (
+          <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+            <p style={{ margin: "0 0 12px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              {t("orderDetail.serviceStatus")}
+            </p>
+            {order.smmStatuses.map((ss, i) => {
+              const statusColor = ss.status === "delivered" ? "#22c55e" : ss.status === "processing" ? "#f59e0b" : ss.status === "error" || ss.status === "cancelled" ? "#ef4444" : green;
+              const statusLabel = ss.status === "delivered" ? t("orderStatus.delivered") : ss.status === "processing" ? t("orderStatus.processing") : ss.status === "error" || ss.status === "cancelled" ? t("orderStatus.error") : t("orderStatus.paid");
+              const delivered = ss.remains !== undefined ? ss.qty - ss.remains : (ss.status === "delivered" ? ss.qty : 0);
+              const pct = ss.qty > 0 ? Math.min(100, Math.round((delivered / ss.qty) * 100)) : 0;
+              return (
+                <div key={i} style={{ marginBottom: i < order.smmStatuses!.length - 1 ? "14px" : 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{fmtQty(ss.qty)} {ss.service}</span>
+                    <span style={{ fontSize: "11px", fontWeight: 600, color: statusColor, textTransform: "uppercase" }}>{statusLabel}</span>
+                  </div>
+                  <div style={{ width: "100%", height: "6px", borderRadius: "3px", background: "rgba(255,255,255,0.06)" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", borderRadius: "3px", background: statusColor, transition: "width 0.6s ease" }} />
+                  </div>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "10px", color: "rgb(107,117,111)" }}>{delivered}/{fmtQty(ss.qty)} ({pct}%)</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Cart recap */}
-        <div style={{ background: "#0e1512", border: "1px solid rgba(0,210,106,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
           <p style={{ margin: "0 0 12px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("orderDetail.orderDetail")}
           </p>
@@ -230,7 +265,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
               <span style={{ fontSize: "13px", fontWeight: 600, color: greenDim }}>{fmtPrice(item.price, (order.currency || "eur") as Currency)}</span>
             </div>
           ))}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(0,210,106,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(105,201,208,0.1)" }}>
             <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{t("service.total")}</span>
             <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>{fmtPrice(order.totalCents / 100, (order.currency || "eur") as Currency)}</span>
           </div>
@@ -248,8 +283,8 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
               padding: "14px 32px", borderRadius: "14px", border: "none",
               fontWeight: 700, fontSize: "15px", fontFamily: "inherit",
               color: "#000", textDecoration: "none",
-              background: "linear-gradient(135deg, rgb(0,180,53), rgb(0,255,76))",
-              boxShadow: "0 10px 30px rgba(0,255,76,0.25)",
+              background: "linear-gradient(135deg, rgb(79,179,186), rgb(105,201,208))",
+              boxShadow: "0 10px 30px rgba(105,201,208,0.25)",
             }}
           >
             🚀 {t("orderDetail.relaunchBoost")}

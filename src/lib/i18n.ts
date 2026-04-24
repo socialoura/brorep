@@ -126,6 +126,7 @@ const dict: Record<string, Record<Lang, string>> = {
   "service.ordersThisWeek": { fr: "commandes cette semaine", en: "orders this week" },
 
   // ===== PostPicker =====
+  "posts.loading": { fr: "Chargement de tes posts...", en: "Loading your posts..." },
   "posts.title": { fr: "Choisis tes", en: "Choose your" },
   "posts.posts": { fr: "posts", en: "posts" },
   "posts.whichPosts": { fr: "Sur quels posts veux-tu recevoir tes", en: "Which posts do you want to receive your" },
@@ -261,6 +262,8 @@ const dict: Record<string, Record<Lang, string>> = {
   "orderDetail.orderedOn": { fr: "Commandé le", en: "Ordered on" },
   "orderDetail.relaunchBoost": { fr: "Relance un boost", en: "Boost again" },
   "orderDetail.loadError": { fr: "Impossible de charger la commande", en: "Unable to load order" },
+  "orderDetail.serviceStatus": { fr: "Statut par service", en: "Status per service" },
+  "orderStatus.error": { fr: "Erreur", en: "Error" },
 };
 
 export function useTranslation() {

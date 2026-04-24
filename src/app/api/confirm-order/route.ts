@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { createOrder, getOrderByPaymentIntent, addLoyaltyPoints, sql } from "@/lib/db";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { sendDiscordOrderNotification } from "@/lib/discord";
-import { placeOrder as placeSmmOrder } from "@/lib/bulkfollows";
+import { placeOrder as placeSmmOrder, getOrderStatus as getSmmStatus } from "@/lib/bulkfollows";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -146,7 +146,8 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          const smmResults: { service: string; qty: number; bulkfollows_order_id?: number; error?: string }[] = [];
+          const smmResults: { service: string; qty: number; bulkfollows_order_id?: number; charge?: number; error?: string }[] = [];
+          let totalCostUsd = 0;
 
           for (const item of cart as { service: string; qty: number }[]) {
             const svcId = configMap[`${plat}:${item.service}`];
@@ -168,10 +169,23 @@ export async function POST(req: NextRequest) {
 
             try {
               const result = await placeSmmOrder(svcId, link, item.qty);
+              let charge: number | undefined;
+              if (result.order) {
+                try {
+                  // Small delay to let BulkFollows register the charge
+                  await new Promise((r) => setTimeout(r, 1000));
+                  const status = await getSmmStatus(result.order);
+                  if (status.charge) {
+                    charge = parseFloat(status.charge);
+                    totalCostUsd += charge;
+                  }
+                } catch { /* ignore status fetch error */ }
+              }
               smmResults.push({
                 service: item.service,
                 qty: item.qty,
                 bulkfollows_order_id: result.order,
+                charge,
                 error: result.error,
               });
             } catch (smmErr) {
@@ -180,9 +194,10 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          // Store SMM order IDs on the order
+          // Store SMM order IDs + cost on the order
           if (smmResults.length > 0) {
-            await sql`UPDATE orders SET smm_orders = ${JSON.stringify(smmResults)}::jsonb WHERE id = ${orderId}`;
+            const costCents = Math.round(totalCostUsd * 100);
+            await sql`UPDATE orders SET smm_orders = ${JSON.stringify(smmResults)}::jsonb, cost_cents = ${costCents} WHERE id = ${orderId}`;
           }
         }
       } catch (smmErr) {
