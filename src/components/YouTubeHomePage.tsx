@@ -77,6 +77,8 @@ function YouTubeHomePageInner() {
       saveSession("yt_step", step);
       window.scrollTo({ top: 0, behavior: "instant" });
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      if (step !== "hero") document.body.setAttribute("data-hide-chat", "");
+      else document.body.removeAttribute("data-hide-chat");
     }
   }, [step, hydrated]);
   useEffect(() => { if (hydrated) saveSession("yt_videoInfo", videoInfo); }, [videoInfo, hydrated]);

@@ -262,6 +262,178 @@ body {
   }
 }
 
+/* ── Spotify desktop layouts (>=768px only, mobile untouched) ── */
+.sp-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .sp-hero {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    justify-content: space-between;
+    gap: 48px;
+    max-width: 960px;
+    padding: 40px 32px;
+  }
+}
+
+.sp-hero-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .sp-hero-text {
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.sp-hero-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .sp-hero-visual {
+    flex-shrink: 0;
+    align-items: center;
+  }
+}
+
+.sp-hero-logo {
+  height: 192px;
+  object-fit: contain;
+}
+@media (min-width: 768px) {
+  .sp-hero-logo {
+    height: 260px;
+  }
+}
+
+.sp-hero-title {
+  font-size: clamp(3.2rem, 12vw, 6.4rem);
+}
+@media (min-width: 768px) {
+  .sp-hero-title {
+    font-size: clamp(3.6rem, 5vw, 5.4rem);
+  }
+}
+
+/* Shop step: 2-column on desktop */
+.sp-shop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 480px;
+  padding-bottom: 120px;
+}
+@media (min-width: 768px) {
+  .sp-shop {
+    flex-direction: row;
+    align-items: flex-start;
+    max-width: 860px;
+    gap: 40px;
+    padding-bottom: 80px;
+  }
+}
+
+.sp-shop-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .sp-shop-left {
+    flex: 1;
+    min-width: 0;
+    align-items: stretch;
+    position: sticky;
+    top: 100px;
+  }
+}
+
+.sp-shop-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .sp-shop-right {
+    flex: 1;
+    min-width: 0;
+    align-items: stretch;
+  }
+}
+
+/* Desktop packs: 3 columns instead of 2 */
+.sp-packs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+@media (min-width: 768px) {
+  .sp-packs-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 100%;
+    gap: 12px;
+  }
+}
+
+/* Below-fold section */
+.sp-below-fold {
+  width: 100%;
+  max-width: 540px;
+  padding: 48px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+@media (min-width: 768px) {
+  .sp-below-fold {
+    max-width: 860px;
+    padding: 64px 32px 80px;
+    gap: 48px;
+  }
+}
+
+.sp-faq-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .sp-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* ── Chat widget pop-in ── */
+@keyframes chat-pop-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* ── Shake animation for error feedback ── */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }

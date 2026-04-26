@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Politique de remboursement — Fanovaly",
+  description: "Politique de remboursement de Fanovaly. Satisfaction garantie, découvrez nos conditions de remboursement.",
+  alternates: { canonical: "https://fanovaly.com/remboursement" },
 };
 
 export default function Remboursement() {
@@ -33,7 +35,7 @@ export default function Remboursement() {
           <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgb(169, 181, 174)", margin: 0 }}>
             Le remboursement ne s'applique pas dans les cas suivants :<br /><br />
             • Le service a été intégralement livré.<br />
-            • La baisse de followers/likes/vues est due à une action de la plateforme (purge).<br />
+            • La baisse d&apos;abonnés/likes/vues est due à une action de la plateforme (purge).<br />
             • Le profil client est privé ou a été supprimé après la commande.<br />
             • Le nom d'utilisateur fourni est incorrect.
           </p>

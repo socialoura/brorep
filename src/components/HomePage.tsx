@@ -162,6 +162,9 @@ function HomePageInner() {
       }
       // Blur any focused input to dismiss keyboard & zoom
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      // Hide chat widget on non-hero steps
+      if (step !== "hero") document.body.setAttribute("data-hide-chat", "");
+      else document.body.removeAttribute("data-hide-chat");
     }
   }, [step, hydrated]);
   useEffect(() => { if (hydrated) saveSession("br_platform", platform); }, [platform, hydrated]);

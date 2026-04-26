@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Conditions Générales de Vente — Fanovaly",
+  description: "Consultez les conditions générales de vente de Fanovaly. Informations sur les commandes, paiements et livraison.",
+  alternates: { canonical: "https://fanovaly.com/cgv" },
 };
 
 export default function CGV() {
@@ -22,7 +24,7 @@ export default function CGV() {
           <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#fff", margin: "0 0 12px 0" }}>2. Services proposés</h2>
           <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgb(169, 181, 174)", margin: 0 }}>
             Fanovaly propose des services de promotion sur les réseaux sociaux, incluant :<br />
-            • Augmentation de followers (abonnés)<br />
+            • Augmentation d&apos;abonnés<br />
             • Augmentation de likes (j'aime)<br />
             • Augmentation de vues<br /><br />
             Ces services sont disponibles pour TikTok et Instagram. Les quantités et tarifs sont indiqués sur le site au moment de la commande.
@@ -41,7 +43,7 @@ export default function CGV() {
           <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#fff", margin: "0 0 12px 0" }}>4. Livraison</h2>
           <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgb(169, 181, 174)", margin: 0 }}>
             La livraison des services commence dès la confirmation du paiement. Les délais de livraison varient selon le service et la quantité commandée :<br />
-            • <strong style={{ color: "#fff" }}>Followers</strong> : livraison progressive sous 1 à 24 heures.<br />
+            • <strong style={{ color: "#fff" }}>Abonnés</strong> : livraison progressive sous 1 à 24 heures.<br />
             • <strong style={{ color: "#fff" }}>Likes</strong> : livraison sous 30 minutes à 6 heures.<br />
             • <strong style={{ color: "#fff" }}>Vues</strong> : livraison sous 30 minutes à 12 heures.<br /><br />
             Ces délais sont indicatifs et peuvent varier en fonction de la charge.

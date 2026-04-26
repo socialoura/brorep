@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité — Fanovaly",
+  description: "Découvrez comment Fanovaly collecte, utilise et protège vos données personnelles.",
+  alternates: { canonical: "https://fanovaly.com/confidentialite" },
 };
 
 export default function Confidentialite() {

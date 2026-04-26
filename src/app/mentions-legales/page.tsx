@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Mentions légales — Fanovaly",
+  description: "Mentions légales de Fanovaly. Informations sur l'éditeur, l'hébergeur et les responsabilités.",
+  alternates: { canonical: "https://fanovaly.com/mentions-legales" },
 };
 
 export default function MentionsLegales() {
