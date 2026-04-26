@@ -4,11 +4,28 @@ import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 export type Lang = "fr" | "en";
-export type Currency = "eur" | "usd";
+export type Currency = "eur" | "usd" | "gbp" | "cad" | "nzd" | "chf";
 
 export function fmtPrice(amount: number, currency: Currency): string {
-  if (currency === "usd") return `$${amount.toFixed(2)}`;
-  return `${amount.toFixed(2)}\u20AC`;
+  switch (currency) {
+    case "usd": return `$${amount.toFixed(2)}`;
+    case "gbp": return `£${amount.toFixed(2)}`;
+    case "cad": return `C$${amount.toFixed(2)}`;
+    case "nzd": return `NZ$${amount.toFixed(2)}`;
+    case "chf": return `CHF ${amount.toFixed(2)}`;
+    default: return `${amount.toFixed(2)}\u20AC`;
+  }
+}
+
+export function currencyField(currency: Currency): string {
+  switch (currency) {
+    case "usd": return "priceUsd";
+    case "gbp": return "priceGbp";
+    case "cad": return "priceCad";
+    case "nzd": return "priceNzd";
+    case "chf": return "priceChf";
+    default: return "price";
+  }
 }
 
 const dict: Record<string, Record<Lang, string>> = {
@@ -37,6 +54,7 @@ const dict: Record<string, Record<Lang, string>> = {
   "hero.subtitle2": { fr: "tu te concentres sur ton contenu.", en: "you focus on your content." },
   "hero.moreProfiles": { fr: "de packs vendus de plus qu'hier", en: "more packs sold than yesterday" },
   "hero.morePercent": { fr: "20% plus", en: "20% more" },
+  "hero.operational": { fr: "Tous nos services sont opérationnels", en: "All our services are operational" },
   "hero.startingAt": { fr: "À partir de", en: "Starting at" },
   "hero.delivery": { fr: "Livraison sous 24h", en: "Delivery within 24h" },
 
@@ -118,12 +136,55 @@ const dict: Record<string, Record<Lang, string>> = {
   "service.total": { fr: "Total", en: "Total" },
   "service.checkout": { fr: "Payer", en: "Pay" },
   "service.emptyCart": { fr: "Choisis un pack", en: "Pick a pack" },
+  "service.boostTip": { fr: "Booste tes résultats en combinant :", en: "Boost your results by combining:" },
+  "service.addAlso": { fr: "Ajoute aussi des", en: "Also add" },
+  "service.discountHint": { fr: "-10% automatique en ajoutant 2 services ou plus", en: "-10% automatic when adding 2+ services" },
+  "service.discountApplied": { fr: "-10% appliqué ! Tu combines 2+ services", en: "-10% applied! You're combining 2+ services" },
+  "service.toastMsg": { fr: "Les profils qui combinent avec des {service} grandissent 2x plus vite — et c'est -10% auto !", en: "Profiles that combine with {service} grow 2x faster — and it's -10% auto!" },
+  "service.toastCta": { fr: "Voir les", en: "See" },
   "service.usernameRequired": { fr: "Entre ton @username pour continuer", en: "Enter your @username to continue" },
   "service.selectAtLeast": { fr: "Sélectionne au moins un pack", en: "Select at least one pack" },
   "service.backToProfile": { fr: "Retour", en: "Back" },
   "service.usernamePlaceholder": { fr: "Ton nom d'utilisateur", en: "Your username" },
   "service.usernameLabel": { fr: "Compte à booster", en: "Account to boost" },
   "service.ordersThisWeek": { fr: "commandes cette semaine", en: "orders this week" },
+
+  // ===== Spotify =====
+  "spotify.heroTitle1": { fr: "Booste tes", en: "Boost your" },
+  "spotify.heroTitle2": { fr: "streams", en: "streams" },
+  "spotify.heroHighlight": { fr: "Spotify", en: "Spotify" },
+  "spotify.subtitle1": { fr: "Plus de streams = plus de royalties et un meilleur placement dans l'algorithme.", en: "More streams = more royalties and better algorithm placement." },
+  "spotify.subtitle2": { fr: "Fais décoller ton morceau et commence à générer des revenus.", en: "Launch your track and start generating revenue." },
+  "spotify.delivery": { fr: "Livraison sous 24-72h", en: "Delivery within 24-72h" },
+  "spotify.trackLabel": { fr: "Lien du morceau Spotify", en: "Spotify track link" },
+  "spotify.trackPlaceholder": { fr: "https://open.spotify.com/track/...", en: "https://open.spotify.com/track/..." },
+  "spotify.trackRequired": { fr: "Colle le lien de ton track Spotify", en: "Paste your Spotify track link" },
+  "spotify.pickPack": { fr: "Choisis ton pack de streams", en: "Choose your streams pack" },
+  "spotify.streams": { fr: "Streams", en: "Streams" },
+  "spotify.startingAt": { fr: "À partir de", en: "Starting at" },
+  "spotify.cta": { fr: "Booster mon morceau", en: "Boost my track" },
+  "spotify.social": { fr: "morceaux boostés", en: "tracks boosted" },
+  "spotify.howItWorks.step1.title": { fr: "Colle ton lien", en: "Paste your link" },
+  "spotify.howItWorks.step1.desc": { fr: "Copie le lien de ton morceau Spotify et colle-le dans le champ prévu.", en: "Copy your Spotify track link and paste it in the field." },
+  "spotify.howItWorks.step2.title": { fr: "Choisis ton pack", en: "Choose your pack" },
+  "spotify.howItWorks.step2.desc": { fr: "Sélectionne le nombre de streams souhaité parmi nos packs.", en: "Select how many streams you want from our packs." },
+  "spotify.howItWorks.step3.title": { fr: "Reçois tes streams", en: "Receive your streams" },
+  "spotify.howItWorks.step3.desc": { fr: "Livraison progressive et naturelle sous 24-72h directement sur ton morceau.", en: "Progressive & natural delivery within 24-72h directly on your track." },
+  "spotify.faq.q1": { fr: "Les streams sont-ils réels ?", en: "Are the streams real?" },
+  "spotify.faq.a1": { fr: "Oui, les streams proviennent de comptes réels avec une écoute naturelle et progressive pour respecter l'algorithme Spotify.", en: "Yes, streams come from real accounts with natural and progressive listening to respect Spotify's algorithm." },
+  "spotify.faq.q2": { fr: "Est-ce que c'est sûr pour mon compte ?", en: "Is it safe for my account?" },
+  "spotify.faq.a2": { fr: "Absolument. Nous ne demandons aucun accès à ton compte. Il suffit du lien de ton morceau.", en: "Absolutely. We don't ask for any access to your account. We just need your track link." },
+  "spotify.faq.q3": { fr: "En combien de temps je reçois mes streams ?", en: "How fast will I receive my streams?" },
+  "spotify.faq.a3": { fr: "La livraison commence sous quelques heures et se fait progressivement sur 24 à 72h pour un rendu naturel.", en: "Delivery starts within hours and happens progressively over 24-72h for a natural result." },
+  "spotify.faq.q4": { fr: "Que se passe-t-il si je perds des streams ?", en: "What if I lose streams?" },
+  "spotify.faq.a4": { fr: "Nous garantissons tes streams pendant 30 jours. En cas de baisse, on recharge gratuitement.", en: "We guarantee your streams for 30 days. If they drop, we refill for free." },
+  "spotify.modeSearch": { fr: "Rechercher un son", en: "Search a track" },
+  "spotify.modeLink": { fr: "Coller un lien", en: "Paste a link" },
+  "spotify.searchPlaceholder": { fr: "Nom du son + artiste", en: "Track name + artist" },
+  "spotify.searching": { fr: "Recherche en cours...", en: "Searching..." },
+  "spotify.trackNotFound": { fr: "Aucun résultat trouvé", en: "No results found" },
+  "spotify.trackConfirm": { fr: "C'est bien ce morceau ?", en: "Is this the right track?" },
+  "spotify.trackChange": { fr: "Changer", en: "Change" },
 
   // ===== PostPicker =====
   "posts.loading": { fr: "Chargement de tes posts...", en: "Loading your posts..." },
@@ -161,6 +222,12 @@ const dict: Record<string, Record<Lang, string>> = {
   "checkout.pay": { fr: "Payer", en: "Pay" },
   "checkout.emailRequired": { fr: "Entre ton e-mail ci-dessus pour accéder au paiement", en: "Enter your email above to access payment" },
   "checkout.back": { fr: "Retour", en: "Back" },
+
+  // ===== Upsell =====
+  "upsell.add": { fr: "Ajoute", en: "Add" },
+  "upsell.onlyFor": { fr: "pour seulement", en: "for only" },
+  "upsell.addBtn": { fr: "Ajouter", en: "Add" },
+  "checkout.emailToUnlock": { fr: "Renseigne ton email ci-dessus pour accéder aux options de paiement", en: "Enter your email above to access payment options" },
   "checkout.preparingPayment": { fr: "Préparation du paiement...", en: "Preparing payment..." },
   "checkout.serverError": { fr: "Impossible de contacter le serveur de paiement.", en: "Unable to contact payment server." },
   "checkout.trustSecure": { fr: "Paiement 100% sécurisé", en: "100% secure payment" },
@@ -291,7 +358,10 @@ export function useTranslation() {
     return path;
   }
 
-  const currency: Currency = lang === "en" ? "usd" : "eur";
+  const currencyParam = searchParams.get("currency") as Currency | null;
+  const currency: Currency = currencyParam && ["eur", "usd", "gbp", "cad", "nzd", "chf"].includes(currencyParam)
+    ? currencyParam
+    : lang === "en" ? "usd" : "eur";
 
   return { t, lang, href, currency };
 }

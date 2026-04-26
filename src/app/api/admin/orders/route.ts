@@ -18,7 +18,15 @@ export async function GET(req: NextRequest) {
   const offset = (page - 1) * limit;
 
   const orders = await sql`
-    SELECT * FROM orders ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}
+    SELECT o.*, ranked.email_order_num, ranked.email_order_total
+    FROM (
+      SELECT id,
+        ROW_NUMBER() OVER (PARTITION BY LOWER(TRIM(email)) ORDER BY created_at ASC) as email_order_num,
+        COUNT(*) OVER (PARTITION BY LOWER(TRIM(email))) as email_order_total
+      FROM orders WHERE email IS NOT NULL AND email != ''
+    ) ranked
+    RIGHT JOIN orders o ON o.id = ranked.id
+    ORDER BY o.created_at DESC LIMIT ${limit} OFFSET ${offset}
   `;
 
   const countResult = await sql`SELECT COUNT(*) as total FROM orders`;

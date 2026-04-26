@@ -36,6 +36,10 @@ export async function initDb() {
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS followers_before INTEGER DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ`;
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_usd NUMERIC(8,2) DEFAULT 0`;
+  await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_gbp NUMERIC(8,2) DEFAULT 0`;
+  await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_cad NUMERIC(8,2) DEFAULT 0`;
+  await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_nzd NUMERIC(8,2) DEFAULT 0`;
+  await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_chf NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'eur'`;
   await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS name_en VARCHAR(100) DEFAULT ''`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cost_cents INTEGER DEFAULT 0`;
@@ -84,6 +88,12 @@ export async function initDb() {
     }
   }
 
+  // Ensure sp_streams exists in smm_config (migration for existing DBs)
+  const spSmmCheck = await sql`SELECT COUNT(*) as cnt FROM smm_config WHERE service = 'sp_streams'`;
+  if (Number(spSmmCheck[0].cnt) === 0) {
+    await sql`INSERT INTO smm_config (platform, service, bulkfollows_service_id) VALUES ('spotify', 'sp_streams', 0)`;
+  }
+
   await sql`
     CREATE TABLE IF NOT EXISTS loyalty (
       id SERIAL PRIMARY KEY,
@@ -116,6 +126,19 @@ export async function initDb() {
       template VARCHAR(20) NOT NULL,
       send_at TIMESTAMPTZ NOT NULL,
       sent BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS upsells (
+      id SERIAL PRIMARY KEY,
+      service VARCHAR(30) NOT NULL,
+      qty INTEGER NOT NULL,
+      label VARCHAR(100) NOT NULL DEFAULT '',
+      label_en VARCHAR(100) NOT NULL DEFAULT '',
+      active BOOLEAN DEFAULT true,
+      sort_order INTEGER DEFAULT 0,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
@@ -205,6 +228,23 @@ export async function initDb() {
       { service: "yt_views", qty: 50000, price: 99.99, price_usd: 99.99 },
     ];
     for (const p of ytPacks) {
+      await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
+    }
+  }
+  // Seed Spotify packs if missing
+  const spCount = await sql`SELECT COUNT(*) as cnt FROM pricing WHERE service LIKE 'sp_%'`;
+  if (Number(spCount[0].cnt) === 0) {
+    const spPacks = [
+      { service: "sp_streams", qty: 1000, price: 2.99, price_usd: 2.99 },
+      { service: "sp_streams", qty: 2500, price: 6.49, price_usd: 6.49 },
+      { service: "sp_streams", qty: 5000, price: 11.99, price_usd: 11.99 },
+      { service: "sp_streams", qty: 10000, price: 21.99, price_usd: 21.99 },
+      { service: "sp_streams", qty: 25000, price: 49.99, price_usd: 49.99 },
+      { service: "sp_streams", qty: 50000, price: 89.99, price_usd: 89.99 },
+      { service: "sp_streams", qty: 100000, price: 159.99, price_usd: 159.99 },
+      { service: "sp_streams", qty: 250000, price: 349.99, price_usd: 349.99 },
+    ];
+    for (const p of spPacks) {
       await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
     }
   }

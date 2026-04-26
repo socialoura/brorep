@@ -112,8 +112,8 @@ function HomePageInner() {
   const { t, lang, currency } = useTranslation();
 
   // Compute minimum price across all TikTok/IG services
-  const [minPrice, setMinPrice] = useState(1.99);
-  const [minPriceUsd, setMinPriceUsd] = useState(1.99);
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [minPriceUsd, setMinPriceUsd] = useState<number | null>(null);
   useEffect(() => {
     fetch("/api/pricing")
       .then((r) => r.json())
@@ -186,17 +186,21 @@ function HomePageInner() {
         return (
           <>
             {/* Fullscreen hero — fills the viewport */}
-            <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", padding: "0 24px", width: "100%", maxWidth: "672px", textAlign: "center", position: "relative" }}>
-              <FanovalyLogo />
-
-              {/* Title + platform icons */}
-              <div className="flex flex-col items-center" style={{ gap: "6px" }}>
-                <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] text-white uppercase">
-                  {t("hero.title1")}
+            <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "32px 24px 40px", width: "100%", maxWidth: "672px", textAlign: "center", position: "relative" }}>
+              {/* Logo + Title group */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                <FanovalyLogo />
+                <h1 style={{ fontSize: "clamp(1.6rem, 6vw, 3.2rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
+                  {lang === "fr" ? "Accélère ta" : "Accelerate your"}
+                  <br />
+                  <span style={{ color: "#fff" }}>{lang === "fr" ? "croissance " : "growth "}</span>
+                  <span style={{ background: "linear-gradient(135deg, #69C9D0, #4FB3BA)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    TikTok
+                    <svg width="0.7em" height="0.7em" viewBox="0 0 24 24" fill="#69C9D0" style={{ display: "inline", verticalAlign: "middle", marginLeft: "4px", filter: "drop-shadow(0 0 12px rgba(105,201,208,0.5))" }}>
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.16 8.16 0 0 0 4.76 1.52V6.83a4.85 4.85 0 0 1-1-.14Z" />
+                    </svg>
+                  </span>
                 </h1>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="#69C9D0" style={{ filter: "drop-shadow(0 0 16px rgba(105,201,208,0.5))" }}>
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.16 8.16 0 0 0 4.76 1.52V6.83a4.85 4.85 0 0 1-1-.14Z" />
-                </svg>
               </div>
 
               {/* Subtitle */}
@@ -207,11 +211,11 @@ function HomePageInner() {
               </p>
 
               {/* Price anchor + delivery */}
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
-                <span style={{ fontSize: "13px", color: "rgb(169,181,174)" }}>
-                  {t("hero.startingAt")} <strong style={{ color: "#69C9D0", fontSize: "16px" }}>{fmtPrice(currency === "usd" ? minPriceUsd : minPrice, currency)}</strong>
-                </span>
-                <span style={{ fontSize: "12px", color: "rgb(107,117,111)", display: "flex", alignItems: "center", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                <p style={{ margin: 0, fontSize: "14px", color: "rgb(169,181,174)" }}>
+                  {minPrice !== null && <>{t("hero.startingAt")} <span style={{ fontSize: "28px", fontWeight: 900, color: "#69C9D0", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
+                </p>
+                <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
                   ⚡ {t("hero.delivery")}
                 </span>
               </div>
@@ -222,11 +226,11 @@ function HomePageInner() {
               {/* CTA */}
               <CTAButton onClick={() => { posthog?.capture("cta_clicked"); setPlatform("tiktok"); setStep("shop"); }} />
 
-              {/* Secondary social proof */}
-              <div className="flex items-center gap-1.5 text-sm">
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "#69C9D0" }} />
-                <span style={{ color: "#69C9D0", fontWeight: 600 }}>{t("hero.morePercent")}</span>
-                <span className="text-gray-500">{t("hero.moreProfiles")}</span>
+              {/* Operational status */}
+              <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "#69C9D0", flexShrink: 0 }} />
+                <span style={{ color: "#69C9D0", fontWeight: 600 }}>{t("hero.operational")}</span>
+                <span className="text-gray-500">({new Date().toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "long", year: "numeric" })})</span>
               </div>
 
               {/* Scroll hint arrow */}
@@ -393,6 +397,14 @@ function HomePageInner() {
             followersBefore={scanData?.followersCount || 0}
             onSuccess={(id) => { posthog?.capture("payment_completed", { platform, total: cart.reduce((s, i) => s + i.price, 0), order_id: id }); setOrderId(id); setStep("success"); }}
             onBack={() => { setStep("shop"); }}
+            onAddToCart={(item) => {
+              setCart((prev) => [...prev, item]);
+              posthog?.capture("upsell_added", { service: item.service, qty: item.qty, price: item.price });
+              const needsPostPick = ["likes", "views"].includes(item.service);
+              if (needsPostPick && scanData && scanData.posts.length > 0) {
+                setStep("pickPosts");
+              }
+            }}
           />
         );
 

@@ -8,15 +8,27 @@ function checkAuth(req: NextRequest): boolean {
   return token === process.env.ADMIN_PASSWORD;
 }
 
-// USD → EUR conversion rate (update periodically)
-const USD_TO_EUR = 0.92;
+// Conversion rates to EUR (update periodically)
+const TO_EUR: Record<string, number> = {
+  eur: 1,
+  usd: 0.92,
+  gbp: 1.16,
+  cad: 0.68,
+  nzd: 0.56,
+  chf: 1.05,
+};
 
 export async function GET(req: NextRequest) {
   if (!checkAuth(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const rate = USD_TO_EUR;
+  // SQL CASE expression to convert any currency → EUR cents
+  const rUsd = TO_EUR.usd;
+  const rGbp = TO_EUR.gbp;
+  const rCad = TO_EUR.cad;
+  const rNzd = TO_EUR.nzd;
+  const rChf = TO_EUR.chf;
 
   // Total orders
   const totalOrders = await sql`SELECT COUNT(*) as count FROM orders`;
@@ -24,26 +36,47 @@ export async function GET(req: NextRequest) {
   // Orders by status
   const byStatus = await sql`SELECT status, COUNT(*) as count FROM orders GROUP BY status`;
 
-  // Revenue (paid orders only) — convert USD to EUR
+  // Revenue (paid orders only) — convert all currencies to EUR
   const revenue = await sql`
     SELECT COALESCE(SUM(
-      CASE WHEN currency = 'usd' THEN ROUND(total_cents * ${rate}::numeric) ELSE total_cents END
+      CASE
+        WHEN currency = 'usd' THEN ROUND(total_cents * ${rUsd}::numeric)
+        WHEN currency = 'gbp' THEN ROUND(total_cents * ${rGbp}::numeric)
+        WHEN currency = 'cad' THEN ROUND(total_cents * ${rCad}::numeric)
+        WHEN currency = 'nzd' THEN ROUND(total_cents * ${rNzd}::numeric)
+        WHEN currency = 'chf' THEN ROUND(total_cents * ${rChf}::numeric)
+        ELSE total_cents
+      END
     ), 0) as total FROM orders WHERE status = 'paid'`;
 
   // Orders today
   const today = await sql`SELECT COUNT(*) as count FROM orders WHERE created_at >= CURRENT_DATE`;
 
-  // Revenue today — convert USD to EUR
+  // Revenue today — convert all currencies to EUR
   const revenueToday = await sql`
     SELECT COALESCE(SUM(
-      CASE WHEN currency = 'usd' THEN ROUND(total_cents * ${rate}::numeric) ELSE total_cents END
+      CASE
+        WHEN currency = 'usd' THEN ROUND(total_cents * ${rUsd}::numeric)
+        WHEN currency = 'gbp' THEN ROUND(total_cents * ${rGbp}::numeric)
+        WHEN currency = 'cad' THEN ROUND(total_cents * ${rCad}::numeric)
+        WHEN currency = 'nzd' THEN ROUND(total_cents * ${rNzd}::numeric)
+        WHEN currency = 'chf' THEN ROUND(total_cents * ${rChf}::numeric)
+        ELSE total_cents
+      END
     ), 0) as total FROM orders WHERE status = 'paid' AND created_at >= CURRENT_DATE`;
 
-  // Orders last 7 days (per day) — convert USD to EUR
+  // Orders last 7 days (per day) — convert all currencies to EUR
   const last7Days = await sql`
     SELECT DATE(created_at) as date, COUNT(*) as count,
       COALESCE(SUM(
-        CASE WHEN currency = 'usd' THEN ROUND(total_cents * ${rate}::numeric) ELSE total_cents END
+        CASE
+          WHEN currency = 'usd' THEN ROUND(total_cents * ${rUsd}::numeric)
+          WHEN currency = 'gbp' THEN ROUND(total_cents * ${rGbp}::numeric)
+          WHEN currency = 'cad' THEN ROUND(total_cents * ${rCad}::numeric)
+          WHEN currency = 'nzd' THEN ROUND(total_cents * ${rNzd}::numeric)
+          WHEN currency = 'chf' THEN ROUND(total_cents * ${rChf}::numeric)
+          ELSE total_cents
+        END
       ), 0) as revenue
     FROM orders
     WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
@@ -51,14 +84,20 @@ export async function GET(req: NextRequest) {
     ORDER BY date
   `;
 
-  // Top services — convert USD to EUR
+  // Top services — convert all currencies to EUR
   const topServices = await sql`
     SELECT 
       item->>'service' as service,
       COUNT(*) as count,
       SUM(
-        CASE WHEN o.currency = 'usd' THEN ROUND((item->>'price')::numeric * 100 * ${rate}::numeric)
-        ELSE (item->>'price')::numeric * 100 END
+        CASE
+          WHEN o.currency = 'usd' THEN ROUND((item->>'price')::numeric * 100 * ${rUsd}::numeric)
+          WHEN o.currency = 'gbp' THEN ROUND((item->>'price')::numeric * 100 * ${rGbp}::numeric)
+          WHEN o.currency = 'cad' THEN ROUND((item->>'price')::numeric * 100 * ${rCad}::numeric)
+          WHEN o.currency = 'nzd' THEN ROUND((item->>'price')::numeric * 100 * ${rNzd}::numeric)
+          WHEN o.currency = 'chf' THEN ROUND((item->>'price')::numeric * 100 * ${rChf}::numeric)
+          ELSE (item->>'price')::numeric * 100
+        END
       ) as revenue_cents
     FROM orders o, jsonb_array_elements(o.cart) as item
     WHERE o.status = 'paid'
@@ -69,14 +108,14 @@ export async function GET(req: NextRequest) {
   // Platform split
   const platforms = await sql`SELECT platform, COUNT(*) as count FROM orders GROUP BY platform`;
 
-  // Total cost (cost_cents is from BulkFollows in USD → convert to EUR)
+  // Total cost (cost_cents is always in USD from SMM provider → convert to EUR)
   const totalCost = await sql`
-    SELECT COALESCE(SUM(ROUND(cost_cents * ${rate}::numeric)), 0) as total
+    SELECT COALESCE(SUM(ROUND(cost_cents * ${rUsd}::numeric)), 0) as total
     FROM orders WHERE status IN ('paid', 'processing', 'delivered')`;
 
   // Cost today (same USD→EUR conversion)
   const costToday = await sql`
-    SELECT COALESCE(SUM(ROUND(cost_cents * ${rate}::numeric)), 0) as total
+    SELECT COALESCE(SUM(ROUND(cost_cents * ${rUsd}::numeric)), 0) as total
     FROM orders WHERE status IN ('paid', 'processing', 'delivered') AND created_at >= CURRENT_DATE`;
 
   return NextResponse.json({

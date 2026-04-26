@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation, fmtPrice } from "@/lib/i18n";
 import type { Currency } from "@/lib/i18n";
 import { loadStripe } from "@stripe/stripe-js";
@@ -10,7 +10,54 @@ import posthog from "posthog-js";
 import type { CartItem } from "@/components/ServiceSelect";
 import type { PostAssignment } from "@/components/PostPicker";
 
+function priceFor(item: CartItem, c: Currency): number {
+  let v: number;
+  switch (c) {
+    case "usd": v = item.priceUsd || item.price; break;
+    case "gbp": v = item.priceGbp || item.price; break;
+    case "cad": v = item.priceCad || item.price; break;
+    case "nzd": v = item.priceNzd || item.price; break;
+    case "chf": v = item.priceChf || item.price; break;
+    default: v = item.price;
+  }
+  return Number(v) || 0;
+}
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+function themeFor(platform?: string) {
+  if (platform === "spotify") return {
+    accent: "rgb(29,185,84)", accentMid: "rgb(30,215,96)", accentDark: "rgb(22,140,63)",
+    bg: "rgba(29,185,84,0.06)", border: "rgba(29,185,84,0.15)", borderStrong: "rgba(29,185,84,0.4)",
+    glow: "rgba(29,185,84,0.25)", stripeBg: "#0e1512", stripeText: "#e8f7ed",
+    gradient: "linear-gradient(135deg, #1DB954, #1ed760)", btnText: "#000",
+    inputBorder: "1px solid rgba(29,185,84,0.15)", inputBorderFocus: "1px solid rgba(29,185,84,0.4)",
+    inputBg: "rgba(29,185,84,0.04)", inputFocusShadow: "0 0 8px rgba(29,185,84,0.1)",
+    tabBorder: "1px solid rgba(29,185,84,0.12)", tabSelectedBorder: "1px solid rgba(29,185,84,0.4)",
+    tabSelectedBg: "rgba(29,185,84,0.08)",
+  };
+  if (platform === "youtube") return {
+    accent: "rgb(255,0,0)", accentMid: "rgb(204,0,0)", accentDark: "rgb(153,0,0)",
+    bg: "rgba(255,0,0,0.06)", border: "rgba(255,0,0,0.15)", borderStrong: "rgba(255,0,0,0.4)",
+    glow: "rgba(255,0,0,0.25)", stripeBg: "#1a0a0a", stripeText: "#f7e8e8",
+    gradient: "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))", btnText: "#fff",
+    inputBorder: "1px solid rgba(255,0,0,0.15)", inputBorderFocus: "1px solid rgba(255,0,0,0.4)",
+    inputBg: "rgba(255,0,0,0.04)", inputFocusShadow: "0 0 8px rgba(255,0,0,0.1)",
+    tabBorder: "1px solid rgba(255,0,0,0.12)", tabSelectedBorder: "1px solid rgba(255,0,0,0.4)",
+    tabSelectedBg: "rgba(255,0,0,0.08)",
+  };
+  // default: tiktok
+  return {
+    accent: "rgb(105,201,208)", accentMid: "rgb(105,201,208)", accentDark: "rgb(79,179,186)",
+    bg: "rgba(79,179,186,0.06)", border: "rgba(105,201,208,0.15)", borderStrong: "rgba(105,201,208,0.4)",
+    glow: "rgba(105,201,208,0.25)", stripeBg: "#0e1512", stripeText: "#e8f7ed",
+    gradient: "linear-gradient(135deg, rgb(79,179,186), rgb(105,201,208))", btnText: "#000",
+    inputBorder: "1px solid rgba(105,201,208,0.15)", inputBorderFocus: "1px solid rgba(105,201,208,0.4)",
+    inputBg: "rgba(79,179,186,0.04)", inputFocusShadow: "0 0 8px rgba(105,201,208,0.1)",
+    tabBorder: "1px solid rgba(105,201,208,0.12)", tabSelectedBorder: "1px solid rgba(105,201,208,0.4)",
+    tabSelectedBg: "rgba(79,179,186,0.08)",
+  };
+}
 
 function fmtQty(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -28,25 +75,25 @@ function CartRecap({ cart, discount, promoPercent, finalTotal, platform, currenc
   currency: Currency;
 }) {
   const { t } = useTranslation();
-  const yt = platform === "youtube";
+  const th = themeFor(platform);
   return (
-    <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: yt ? "rgba(255,0,0,0.06)" : "rgba(79, 179, 186, 0.06)", border: yt ? "1px solid rgba(255,0,0,0.15)" : "1px solid rgba(105, 201, 208, 0.15)", marginBottom: "24px" }}>
+    <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: th.bg, border: `1px solid ${th.border}`, marginBottom: "24px" }}>
       <p style={{ margin: "0 0 8px 0", fontSize: "11px", fontWeight: 600, color: "rgb(169, 181, 174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("checkout.summary")}</p>
       {cart.map((item, i) => (
         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0" }}>
           <span style={{ fontSize: "13px", color: "rgb(232, 247, 237)" }}>{fmtQty(item.qty)} {item.label}</span>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: yt ? "rgb(204,0,0)" : "rgb(105, 201, 208)" }}>{fmtPrice(currency === "usd" ? item.priceUsd : item.price, currency)}</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: th.accentMid }}>{fmtPrice(priceFor(item, currency), currency)}</span>
         </div>
       ))}
       {discount > 0 && (
-        <div style={{ display: "flex", justifyContent: "space-between", borderTop: yt ? "1px solid rgba(255,0,0,0.1)" : "1px solid rgba(105, 201, 208, 0.1)", marginTop: "8px", paddingTop: "8px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", borderTop: `1px solid ${th.border}`, marginTop: "8px", paddingTop: "8px" }}>
           <span style={{ fontSize: "13px", color: "rgb(169, 181, 174)" }}>{t("checkout.discount")} (-{promoPercent}%)</span>
           <span style={{ fontSize: "13px", fontWeight: 600, color: "#ffb800" }}>-{fmtPrice(discount, currency)}</span>
         </div>
       )}
-      <div style={{ display: "flex", justifyContent: "space-between", borderTop: discount > 0 ? "none" : (yt ? "1px solid rgba(255,0,0,0.1)" : "1px solid rgba(105, 201, 208, 0.1)"), marginTop: discount > 0 ? "4px" : "8px", paddingTop: discount > 0 ? "4px" : "8px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", borderTop: discount > 0 ? "none" : `1px solid ${th.border}`, marginTop: discount > 0 ? "4px" : "8px", paddingTop: discount > 0 ? "4px" : "8px" }}>
         <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{t("service.total")}</span>
-        <span style={{ fontSize: "16px", fontWeight: 700, color: yt ? "rgb(255,0,0)" : "rgb(105, 201, 208)" }}>{fmtPrice(finalTotal, currency)}</span>
+        <span style={{ fontSize: "16px", fontWeight: 700, color: th.accent }}>{fmtPrice(finalTotal, currency)}</span>
       </div>
     </div>
   );
@@ -135,19 +182,21 @@ function LoyaltyBanner({ email, onRedeemed }: { email: string; onRedeemed: (cent
 }
 
 /* ===== Sub-component: Email Input ===== */
-function EmailInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function EmailInput({ value, onChange, inputRef, highlight }: { value: string; onChange: (v: string) => void; inputRef?: React.RefObject<HTMLDivElement | null>; highlight?: boolean }) {
   const { t } = useTranslation();
   const [touched, setTouched] = useState(false);
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const showError = (touched && !valid) || highlight;
   return (
-    <div style={{ marginBottom: "16px" }}>
+    <div ref={inputRef} style={{ marginBottom: "16px" }}>
       <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "rgb(169, 181, 174)", marginBottom: "6px" }}>{t("checkout.emailLabel")}</label>
       <input type="email" placeholder="ton@email.com" value={value}
         onChange={(e) => { onChange(e.target.value); setTouched(true); }}
         onBlur={(e) => { e.currentTarget.style.borderColor = touched && !valid ? "#ef4444" : "rgba(105, 201, 208, 0.15)"; }}
         onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(105, 201, 208, 0.4)"; }}
-        style={{ width: "100%", padding: "12px 14px", borderRadius: "12px", border: touched && !valid ? "1px solid #ef4444" : "1px solid rgba(105, 201, 208, 0.15)", backgroundColor: "rgba(79, 179, 186, 0.04)", color: "rgb(232, 247, 237)", fontSize: "14px", fontFamily: "inherit", outline: "none", transition: "border-color 0.2s", boxSizing: "border-box" }} />
-      {touched && !valid && <p style={{ fontSize: "11px", color: "#ef4444", marginTop: "4px" }}>{t("checkout.emailInvalid")}</p>}
+        className={highlight ? "shake" : ""}
+        style={{ width: "100%", padding: "12px 14px", borderRadius: "12px", border: showError ? "1px solid #ef4444" : "1px solid rgba(105, 201, 208, 0.15)", backgroundColor: "rgba(79, 179, 186, 0.04)", color: "rgb(232, 247, 237)", fontSize: "14px", fontFamily: "inherit", outline: "none", transition: "border-color 0.2s", boxSizing: "border-box" }} />
+      {showError && <p style={{ fontSize: "11px", color: "#ef4444", marginTop: "4px" }}>{highlight && !touched ? t("checkout.emailRequired") : t("checkout.emailInvalid")}</p>}
     </div>
   );
 }
@@ -202,7 +251,7 @@ function ExpressCheckout({ email, onSuccess }: { email: string; onSuccess: (orde
 /* ----- Sub-component: Trust Badges ----- */
 function TrustBadges({ platform }: { platform?: string }) {
   const { t } = useTranslation();
-  const yt = platform === "youtube";
+  const th = themeFor(platform);
   const badges = [
     { icon: "\u{1F512}", label: t("checkout.trustSecure") },
     { icon: "\u{26A1}", label: t("checkout.trustDelivery") },
@@ -212,7 +261,7 @@ function TrustBadges({ platform }: { platform?: string }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "20px" }}>
       {badges.map((b, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 10px", borderRadius: "10px", backgroundColor: yt ? "rgba(255,0,0,0.04)" : "rgba(105,201,208,0.04)", border: yt ? "1px solid rgba(255,0,0,0.1)" : "1px solid rgba(105,201,208,0.1)" }}>
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 10px", borderRadius: "10px", backgroundColor: th.bg, border: `1px solid ${th.border}` }}>
           <span style={{ fontSize: "14px" }}>{b.icon}</span>
           <span style={{ fontSize: "11px", fontWeight: 600, color: "rgb(169,181,174)" }}>{b.label}</span>
         </div>
@@ -221,10 +270,97 @@ function TrustBadges({ platform }: { platform?: string }) {
   );
 }
 
+/* ----- Sub-component: Upsell Suggestions ----- */
+function UpsellSuggestions({ cart, platform, onAdd }: {
+  cart: CartItem[];
+  platform?: string;
+  onAdd: (item: CartItem) => void;
+}) {
+  const { t, lang, currency } = useTranslation();
+  const th = themeFor(platform);
+  const [offers, setOffers] = useState<{ id: number; service: string; qty: number; label: string; label_en: string; price: number; price_usd: number; price_gbp?: number; price_cad?: number; price_nzd?: number; price_chf?: number }[]>([]);
+  const [dismissed, setDismissed] = useState<Set<number>>(new Set());
+  const [added, setAdded] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    fetch("/api/upsells")
+      .then((r) => r.json())
+      .then((data) => { if (data.upsells) setOffers(data.upsells); })
+      .catch(() => {});
+  }, []);
+
+  // Filter: only show upsells for services NOT already in cart
+  const cartServices = new Set(cart.map((c) => c.service as string));
+  const visible = offers.filter((o) => !cartServices.has(o.service) && !dismissed.has(o.id) && !added.has(o.id) && o.price);
+
+  if (visible.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+      {visible.slice(0, 2).map((offer) => {
+        const priceMap: Record<string, number> = { eur: offer.price, usd: offer.price_usd, gbp: offer.price_gbp || offer.price, cad: offer.price_cad || offer.price, nzd: offer.price_nzd || offer.price, chf: offer.price_chf || offer.price };
+        const price = Number(priceMap[currency] ?? offer.price) || 0;
+        const label = lang === "en" ? (offer.label_en || offer.label || `${offer.qty} ${offer.service}`) : (offer.label || `${offer.qty} ${offer.service}`);
+        return (
+          <div key={offer.id} style={{
+            padding: "12px 14px", borderRadius: "12px",
+            border: `1px dashed ${th.border}`,
+            backgroundColor: th.bg,
+            display: "flex", alignItems: "center", gap: "10px",
+          }}>
+            <span style={{ fontSize: "18px" }}>⚡</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff" }}>
+                {t("upsell.add")} {label}
+              </p>
+              <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(169,181,174)" }}>
+                {t("upsell.onlyFor")} <strong style={{ color: th.accent }}>{fmtPrice(price, currency)}</strong>
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  onAdd({
+                    service: offer.service as CartItem["service"],
+                    label: label,
+                    qty: offer.qty,
+                    price: Number(offer.price) || 0,
+                    priceUsd: Number(offer.price_usd || offer.price) || 0,
+                    priceGbp: Number(offer.price_gbp || offer.price) || 0,
+                    priceCad: Number(offer.price_cad || offer.price) || 0,
+                    priceNzd: Number(offer.price_nzd || offer.price) || 0,
+                    priceChf: Number(offer.price_chf || offer.price) || 0,
+                  });
+                  setAdded((prev) => new Set(prev).add(offer.id));
+                }}
+                style={{
+                  padding: "6px 14px", borderRadius: "8px", border: "none",
+                  background: th.gradient,
+                  color: th.btnText, fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                }}
+              >
+                {t("upsell.addBtn")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDismissed((prev) => new Set(prev).add(offer.id))}
+                style={{ padding: "6px 8px", borderRadius: "8px", border: "none", background: "transparent", color: "rgb(107,117,111)", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ----- Sub-component: Urgency Timer ----- */
 function UrgencyTimer({ platform }: { platform?: string }) {
   const { t } = useTranslation();
-  const yt = platform === "youtube";
+  const th = themeFor(platform);
   const [seconds, setSeconds] = useState(() => {
     if (typeof window === "undefined") return 900;
     const stored = sessionStorage.getItem("checkout_timer_end");
@@ -246,9 +382,9 @@ function UrgencyTimer({ platform }: { platform?: string }) {
   const secs = seconds % 60;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "10px 16px", borderRadius: "10px", marginBottom: "20px", background: yt ? "linear-gradient(135deg, rgba(255,0,0,0.08), rgba(255,0,0,0.03))" : "linear-gradient(135deg, rgba(255,184,0,0.08), rgba(255,184,0,0.03))", border: yt ? "1px solid rgba(255,0,0,0.15)" : "1px solid rgba(255,184,0,0.15)" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "10px 16px", borderRadius: "10px", marginBottom: "20px", background: `linear-gradient(135deg, ${th.bg}, transparent)`, border: `1px solid ${th.border}` }}>
       <span style={{ fontSize: "14px" }}>{"\u{23F0}"}</span>
-      <span style={{ fontSize: "12px", fontWeight: 600, color: yt ? "rgb(255,100,100)" : "#ffb800" }}>
+      <span style={{ fontSize: "12px", fontWeight: 600, color: th.accent }}>
         {t("checkout.urgencyOffer")} {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
       </span>
     </div>
@@ -263,6 +399,7 @@ function PayForm({
   onBack,
   onPromoApplied,
   onLoyaltyRedeemed,
+  onAddToCart,
   platform,
 }: {
   cart: CartItem[];
@@ -271,16 +408,19 @@ function PayForm({
   onBack: () => void;
   onPromoApplied: (code: string) => void;
   onLoyaltyRedeemed: (cents: number) => void;
+  onAddToCart?: (item: CartItem) => void;
   platform?: string;
 }) {
   const { t, currency } = useTranslation();
-  const yt = platform === "youtube";
+  const th = themeFor(platform);
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const emailRef = useRef<HTMLDivElement>(null);
+  const [emailShake, setEmailShake] = useState(false);
   const [promoPercent, setPromoPercent] = useState(0);
   const [loyaltyDiscountCents, setLoyaltyDiscountCents] = useState(0);
   const [showPromo, setShowPromo] = useState(false);
@@ -290,7 +430,15 @@ function PayForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!stripe || !elements || !emailValid) return;
+    if (!stripe || !elements) return;
+    if (!emailValid) {
+      setEmailShake(true);
+      emailRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const input = emailRef.current?.querySelector("input");
+      if (input) input.focus();
+      setTimeout(() => setEmailShake(false), 600);
+      return;
+    }
     setLoading(true);
     setError(null);
     const result = await stripe.confirmPayment({ elements, confirmParams: { return_url: window.location.origin + "?payment=success", receipt_email: email }, redirect: "if_required" });
@@ -309,46 +457,54 @@ function PayForm({
 
   return (
     <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-      {/* 1. Cart recap */}
+      {/* 1. Email first */}
+      <EmailInput value={email} onChange={setEmail} inputRef={emailRef} highlight={emailShake} />
+
+      {/* 2. Cart recap */}
       <CartRecap cart={cart} discount={discount} promoPercent={promoPercent} finalTotal={finalTotal} platform={platform} currency={currency} />
 
-      {/* 2. Trust badges */}
-      <TrustBadges platform={platform} />
+      {/* 3. Upsell suggestions */}
+      {onAddToCart && <UpsellSuggestions cart={cart} platform={platform} onAdd={onAddToCart} />}
 
-      {/* 4. Email — compact */}
-      <EmailInput value={email} onChange={setEmail} />
+      {/* 4. Payment methods — only visible when email is valid */}
+      {emailValid ? (
+        <>
+          {/* Express checkout (Apple/Google Pay) */}
+          <ExpressCheckout email={email} onSuccess={onSuccess} />
 
-      {/* 5. Express checkout (Apple/Google Pay) — always visible */}
-      <ExpressCheckout email={email} onSuccess={onSuccess} />
+          {/* Separator */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "0 0 16px 0" }}>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+            <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>{t("checkout.orPayByCard")}</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+          </div>
 
-      {/* 6. Separator */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "0 0 16px 0" }}>
-        <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
-        <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>{t("checkout.orPayByCard")}</span>
-        <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
-      </div>
+          {/* Card payment form */}
+          <div style={{ marginBottom: "20px" }}><PaymentElement options={{ layout: "tabs", wallets: { applePay: "never", googlePay: "never" } }} /></div>
 
-      {/* 7. Card payment form — always visible */}
-      <div style={{ marginBottom: "20px" }}><PaymentElement options={{ layout: "tabs", wallets: { applePay: "never", googlePay: "never" } }} /></div>
+          {error && <p style={{ fontSize: "13px", color: "#ef4444", margin: "0 0 16px 0", textAlign: "center" }}>{error}</p>}
 
-      {error && <p style={{ fontSize: "13px", color: "#ef4444", margin: "0 0 16px 0", textAlign: "center" }}>{error}</p>}
-
-      {/* 8. Pay button */}
-      <button type="submit" disabled={!stripe || loading || !emailValid}
-        style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "16px 0", borderRadius: "14px", border: "none", cursor: loading || !emailValid ? "not-allowed" : "pointer", fontWeight: 700, fontSize: "16px", fontFamily: "inherit", color: yt ? "#fff" : "#000", background: yt ? "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))", boxShadow: yt ? "0 10px 30px rgba(255,0,0,0.25)" : "0 10px 30px rgba(105, 201, 208, 0.25)", opacity: loading || !emailValid ? 0.6 : 1, transition: "all 0.2s" }}>
-        {loading ? (
-          <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="31.4" strokeLinecap="round" /></svg>
-            {t("checkout.processing")}
-          </span>
-        ) : (
-          <>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
-            {t("checkout.pay")} {fmtPrice(finalTotal, currency)}
-          </>
-        )}
-      </button>
-      {!emailValid && <p style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textAlign: "center", marginTop: "6px" }}>{t("checkout.emailRequired")}</p>}
+          {/* Pay button */}
+          <button type="submit" disabled={!stripe || loading}
+            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "16px 0", borderRadius: "14px", border: "none", cursor: loading ? "not-allowed" : "pointer", fontWeight: 700, fontSize: "16px", fontFamily: "inherit", color: th.btnText, background: th.gradient, boxShadow: `0 10px 30px ${th.glow}`, opacity: loading ? 0.6 : 1, transition: "all 0.2s" }}>
+            {loading ? (
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="31.4" strokeLinecap="round" /></svg>
+                {t("checkout.processing")}
+              </span>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
+                {t("checkout.pay")} {fmtPrice(finalTotal, currency)}
+              </>
+            )}
+          </button>
+        </>
+      ) : (
+        <p style={{ fontSize: "12px", color: "rgb(107,117,111)", textAlign: "center", margin: "16px 0", lineHeight: 1.5 }}>
+          {t("checkout.emailToUnlock")}
+        </p>
+      )}
 
       {/* 9. Promo code — collapsed by default to reduce noise */}
       <div style={{ marginTop: "16px" }}>
@@ -383,6 +539,7 @@ export default function CheckoutForm({
   followersBefore,
   onSuccess,
   onBack,
+  onAddToCart,
 }: {
   cart: CartItem[];
   username: string;
@@ -391,13 +548,14 @@ export default function CheckoutForm({
   followersBefore?: number;
   onSuccess: (orderId?: number) => void;
   onBack: () => void;
+  onAddToCart?: (item: CartItem) => void;
 }) {
   const { t, currency } = useTranslation();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [appliedPromo, setAppliedPromo] = useState<string>("");
   const [loyaltyDiscountCents, setLoyaltyDiscountCents] = useState(0);
-  const total = cart.reduce((sum, item) => sum + (currency === "usd" ? item.priceUsd : item.price), 0);
+  const total = cart.reduce((sum, item) => sum + priceFor(item, currency), 0);
 
   const [intentKey, setIntentKey] = useState(0);
 
@@ -422,6 +580,7 @@ export default function CheckoutForm({
   }, [cart, username, platform, postAssignments, followersBefore]);
 
   useEffect(() => {
+    setIntentKey((k) => k + 1);
     createIntent();
   }, [createIntent]);
 
@@ -451,6 +610,8 @@ export default function CheckoutForm({
     );
   }
 
+  const th = themeFor(platform);
+
   if (!clientSecret) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", padding: "40px 0" }}>
@@ -458,8 +619,8 @@ export default function CheckoutForm({
           style={{
             width: "32px",
             height: "32px",
-            border: "3px solid rgba(105, 201, 208, 0.2)",
-            borderTopColor: "rgb(105, 201, 208)",
+            border: `3px solid ${th.border}`,
+            borderTopColor: th.accent,
             borderRadius: "50%",
             animation: "spin 0.8s linear infinite",
           }}
@@ -472,12 +633,8 @@ export default function CheckoutForm({
   return (
     <div className="checkout-wrap" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0" }}>
-        <span style={{ color: platform === "youtube" ? "rgb(255,0,0)" : "rgb(105, 201, 208)", textShadow: platform === "youtube" ? "0 0 20px rgba(255,0,0,0.3)" : "0 0 20px rgba(105, 201, 208, 0.3)" }}>{t("checkout.paymentSecure")}</span> {t("checkout.secureLabel")}
+        <span style={{ color: th.accent, textShadow: `0 0 20px ${th.glow}` }}>{t("checkout.paymentSecure")}</span> {t("checkout.secureLabel")}
       </h2>
-      <p style={{ fontSize: "13px", color: "rgb(169, 181, 174)", margin: "0 0 24px 0" }}>
-        {t("checkout.poweredByStripe")}
-      </p>
-
       <Elements
         key={intentKey}
         stripe={stripePromise}
@@ -486,9 +643,9 @@ export default function CheckoutForm({
           appearance: {
             theme: "night",
             variables: {
-              colorPrimary: platform === "youtube" ? "#ff0000" : "#69C9D0",
-              colorBackground: platform === "youtube" ? "#1a0a0a" : "#0e1512",
-              colorText: platform === "youtube" ? "#f7e8e8" : "#e8f7ed",
+              colorPrimary: th.accent,
+              colorBackground: th.stripeBg,
+              colorText: th.stripeText,
               colorDanger: "#ef4444",
               fontFamily: "inherit",
               borderRadius: "12px",
@@ -496,21 +653,21 @@ export default function CheckoutForm({
             },
             rules: {
               ".Input": {
-                border: platform === "youtube" ? "1px solid rgba(255,0,0,0.15)" : "1px solid rgba(105, 201, 208, 0.15)",
-                backgroundColor: platform === "youtube" ? "rgba(255,0,0,0.04)" : "rgba(79, 179, 186, 0.04)",
+                border: th.inputBorder,
+                backgroundColor: th.inputBg,
                 boxShadow: "none",
               },
               ".Input:focus": {
-                border: platform === "youtube" ? "1px solid rgba(255,0,0,0.4)" : "1px solid rgba(105, 201, 208, 0.4)",
-                boxShadow: platform === "youtube" ? "0 0 8px rgba(255,0,0,0.1)" : "0 0 8px rgba(105, 201, 208, 0.1)",
+                border: th.inputBorderFocus,
+                boxShadow: th.inputFocusShadow,
               },
               ".Tab": {
-                border: platform === "youtube" ? "1px solid rgba(255,0,0,0.12)" : "1px solid rgba(105, 201, 208, 0.12)",
+                border: th.tabBorder,
                 backgroundColor: "rgba(255, 255, 255, 0.02)",
               },
               ".Tab--selected": {
-                border: platform === "youtube" ? "1px solid rgba(255,0,0,0.4)" : "1px solid rgba(105, 201, 208, 0.4)",
-                backgroundColor: platform === "youtube" ? "rgba(255,0,0,0.08)" : "rgba(79, 179, 186, 0.08)",
+                border: th.tabSelectedBorder,
+                backgroundColor: th.tabSelectedBg,
               },
               ".Label": {
                 color: "rgb(169, 181, 174)",
@@ -519,7 +676,7 @@ export default function CheckoutForm({
           },
         }}
       >
-        <PayForm cart={cart} total={total} onSuccess={onSuccess} onBack={onBack} onPromoApplied={handlePromoApplied} onLoyaltyRedeemed={handleLoyaltyRedeemed} platform={platform} />
+        <PayForm cart={cart} total={total} onSuccess={onSuccess} onBack={onBack} onPromoApplied={handlePromoApplied} onLoyaltyRedeemed={handleLoyaltyRedeemed} onAddToCart={onAddToCart} platform={platform} />
       </Elements>
     </div>
   );

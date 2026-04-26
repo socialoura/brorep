@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 
-type Tab = "analytics" | "orders" | "pricing" | "combos" | "smm";
+type Tab = "analytics" | "orders" | "pricing" | "combos" | "upsells" | "smm";
 
 interface SmmConfigItem {
   id: number;
@@ -18,6 +18,8 @@ interface SmmData {
   balance: { balance?: string; currency?: string } | null;
 }
 
+const CURRENCY_SYMBOLS: Record<string, string> = { eur: "\u20AC", usd: "$", gbp: "\u00A3", cad: "C$", nzd: "NZ$", chf: "CHF" };
+
 interface Order {
   id: number;
   stripe_payment_intent_id: string;
@@ -28,6 +30,9 @@ interface Order {
   post_assignments: unknown;
   total_cents: number;
   cost_cents: number;
+  currency: string;
+  email_order_num: number | null;
+  email_order_total: number | null;
   smm_orders: { service: string; qty: number; bulkfollows_order_id?: number; error?: string }[];
   status: string;
   created_at: string;
@@ -39,6 +44,10 @@ interface PricingItem {
   qty: number;
   price: number;
   price_usd: number;
+  price_gbp: number;
+  price_cad: number;
+  price_nzd: number;
+  price_chf: number;
   active: boolean;
 }
 
@@ -84,10 +93,16 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editPrice, setEditPrice] = useState("");
   const [editPriceUsd, setEditPriceUsd] = useState("");
-  const [newPack, setNewPack] = useState({ service: "followers", qty: "", price: "", priceUsd: "" });
+  const [editPriceGbp, setEditPriceGbp] = useState("");
+  const [editPriceCad, setEditPriceCad] = useState("");
+  const [editPriceNzd, setEditPriceNzd] = useState("");
+  const [editPriceChf, setEditPriceChf] = useState("");
+  const [newPack, setNewPack] = useState({ service: "followers", qty: "", price: "", priceUsd: "", priceGbp: "", priceCad: "", priceNzd: "", priceChf: "" });
   const [combos, setCombos] = useState<ComboPack[]>([]);
   const [newCombo, setNewCombo] = useState({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
   const [smm, setSmm] = useState<SmmData | null>(null);
+  const [upsells, setUpsells] = useState<{ id: number; service: string; qty: number; label: string; label_en: string; active: boolean; sort_order: number }[]>([]);
+  const [newUpsell, setNewUpsell] = useState({ service: "followers", qty: "", label: "", labelEn: "" });
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
 
@@ -146,8 +161,16 @@ export default function AdminPage() {
     if (tab === "orders") fetchOrders(1);
     if (tab === "pricing") fetchPricing();
     if (tab === "combos") fetchCombos();
+    if (tab === "upsells") fetchUpsells();
     if (tab === "smm") fetchSmm();
   }, [tab, authed, fetchAnalytics, fetchOrders, fetchPricing, fetchCombos]);
+
+  const fetchUpsells = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch("/api/admin/upsells", { headers: { Authorization: `Bearer ${password}` } });
+    if (res.ok) { const data = await res.json(); setUpsells(data.upsells); }
+    setLoading(false);
+  }, [password]);
 
   const fetchSmm = async () => {
     setLoading(true);
@@ -156,11 +179,11 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  const updatePrice = async (id: number, newPrice: number, newPriceUsd: number) => {
+  const updatePrice = async (id: number) => {
     await fetch("/api/admin/pricing", {
       method: "PUT",
       headers,
-      body: JSON.stringify({ id, price: newPrice, price_usd: newPriceUsd }),
+      body: JSON.stringify({ id, price: Number(editPrice), price_usd: Number(editPriceUsd), price_gbp: Number(editPriceGbp), price_cad: Number(editPriceCad), price_nzd: Number(editPriceNzd), price_chf: Number(editPriceChf) }),
     });
     setEditingId(null);
     fetchPricing();
@@ -180,9 +203,9 @@ export default function AdminPage() {
     await fetch("/api/admin/pricing", {
       method: "POST",
       headers,
-      body: JSON.stringify({ service: newPack.service, qty: Number(newPack.qty), price: Number(newPack.price), price_usd: Number(newPack.priceUsd) || 0 }),
+      body: JSON.stringify({ service: newPack.service, qty: Number(newPack.qty), price: Number(newPack.price), price_usd: Number(newPack.priceUsd) || 0, price_gbp: Number(newPack.priceGbp) || 0, price_cad: Number(newPack.priceCad) || 0, price_nzd: Number(newPack.priceNzd) || 0, price_chf: Number(newPack.priceChf) || 0 }),
     });
-    setNewPack({ service: newPack.service, qty: "", price: "", priceUsd: "" });
+    setNewPack({ service: newPack.service, qty: "", price: "", priceUsd: "", priceGbp: "", priceCad: "", priceNzd: "", priceChf: "" });
     fetchPricing();
   };
 
@@ -231,7 +254,7 @@ export default function AdminPage() {
           Admin <span style={{ color: green }}>Fanovaly</span>
         </h1>
         <div style={{ display: "flex", gap: "4px", padding: "4px", borderRadius: "10px", backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-          {(["analytics", "orders", "pricing", "combos", "smm"] as Tab[]).map((t) => (
+          {(["analytics", "orders", "pricing", "combos", "upsells", "smm"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -247,7 +270,7 @@ export default function AdminPage() {
                 background: tab === t ? "linear-gradient(135deg, rgb(0,180,53), rgb(0,255,76))" : "transparent",
               }}
             >
-              {t === "analytics" ? "Analytics" : t === "orders" ? "Commandes" : t === "pricing" ? "Prix" : t === "combos" ? "Combos" : "SMM"}
+              {t === "analytics" ? "Analytics" : t === "orders" ? "Commandes" : t === "pricing" ? "Prix" : t === "combos" ? "Combos" : t === "upsells" ? "Upsells" : "SMM"}
             </button>
           ))}
         </div>
@@ -362,12 +385,19 @@ export default function AdminPage() {
                         @{o.username}
                       </a>
                     </td>
-                    <td style={{ padding: "8px", color: "rgb(169,181,174)" }}>{o.email || "—"}</td>
+                    <td style={{ padding: "8px", color: "rgb(169,181,174)" }}>
+                      {o.email || "—"}
+                      {o.email_order_num && o.email_order_total && o.email_order_total > 1 && (
+                        <span style={{ marginLeft: "6px", padding: "1px 6px", borderRadius: "6px", fontSize: "9px", fontWeight: 700, backgroundColor: o.email_order_num === 1 ? "rgba(0,210,106,0.12)" : "rgba(255,184,0,0.15)", color: o.email_order_num === 1 ? "#00d26a" : "#ffb800" }}>
+                          {o.email_order_num}/{o.email_order_total}
+                        </span>
+                      )}
+                    </td>
                     <td style={{ padding: "8px" }}>{o.platform}</td>
                     <td style={{ padding: "8px", color: "rgb(169,181,174)" }}>
                       {Array.isArray(o.cart) ? o.cart.map((c) => `${c.qty} ${c.label}`).join(", ") : "—"}
                     </td>
-                    <td style={{ padding: "8px", textAlign: "right", fontWeight: 600, color: green }}>{(o.total_cents / 100).toFixed(2)}€</td>
+                    <td style={{ padding: "8px", textAlign: "right", fontWeight: 600, color: green }}>{(o.total_cents / 100).toFixed(2)}{CURRENCY_SYMBOLS[o.currency] || "\u20AC"}</td>
                     <td style={{ padding: "8px", textAlign: "right" }}>
                       <input
                         type="number"
@@ -526,6 +556,7 @@ export default function AdminPage() {
                 <option value="yt_subscribers">Abonnés YT</option>
                 <option value="yt_likes">Likes YT</option>
                 <option value="yt_views">Vues YT</option>
+                <option value="sp_streams">Streams Spotify</option>
               </select>
               <input
                 type="number"
@@ -595,29 +626,23 @@ export default function AdminPage() {
                       </div>
 
                       {editingId === item.id ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "8px" }}>
-                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>€</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editPrice}
-                              onChange={(e) => setEditPrice(e.target.value)}
-                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.3)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
-                            />
-                          </div>
-                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editPriceUsd}
-                              onChange={(e) => setEditPriceUsd(e.target.value)}
-                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.3)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
-                            />
-                          </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginBottom: "8px" }}>
+                          {[
+                            { label: "€", val: editPrice, set: setEditPrice },
+                            { label: "$", val: editPriceUsd, set: setEditPriceUsd },
+                            { label: "£", val: editPriceGbp, set: setEditPriceGbp },
+                            { label: "C$", val: editPriceCad, set: setEditPriceCad },
+                            { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "CHF", val: editPriceChf, set: setEditPriceChf },
+                          ].map((c) => (
+                            <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                              <span style={{ fontSize: "9px", color: "rgb(107,117,111)", width: "22px", textAlign: "right" }}>{c.label}</span>
+                              <input type="number" step="0.01" value={c.val} onChange={(e) => c.set(e.target.value)}
+                                style={{ width: "65px", padding: "3px 6px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.3)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", outline: "none", fontFamily: "inherit" }} />
+                            </div>
+                          ))}
                           <button
-                            onClick={() => updatePrice(item.id, Number(editPrice), Number(editPriceUsd))}
+                            onClick={() => updatePrice(item.id)}
                             style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: green, color: "#000", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}
                           >
                             OK
@@ -625,7 +650,7 @@ export default function AdminPage() {
                         </div>
                       ) : (
                         <div
-                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); }}
+                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
                           style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
                         >
                           <span style={{ color: green }}>{Number(item.price).toFixed(2)}€</span>
@@ -685,29 +710,23 @@ export default function AdminPage() {
                       </div>
 
                       {editingId === item.id ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "8px" }}>
-                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>€</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editPrice}
-                              onChange={(e) => setEditPrice(e.target.value)}
-                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(255,0,0,0.3)", backgroundColor: "rgba(255,0,0,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
-                            />
-                          </div>
-                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-                            <span style={{ fontSize: "10px", color: "rgb(107,117,111)", width: "16px" }}>$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editPriceUsd}
-                              onChange={(e) => setEditPriceUsd(e.target.value)}
-                              style={{ width: "70px", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(255,0,0,0.3)", backgroundColor: "rgba(255,0,0,0.04)", color: "#e8f7ed", fontSize: "13px", outline: "none", fontFamily: "inherit" }}
-                            />
-                          </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginBottom: "8px" }}>
+                          {[
+                            { label: "€", val: editPrice, set: setEditPrice },
+                            { label: "$", val: editPriceUsd, set: setEditPriceUsd },
+                            { label: "£", val: editPriceGbp, set: setEditPriceGbp },
+                            { label: "C$", val: editPriceCad, set: setEditPriceCad },
+                            { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "CHF", val: editPriceChf, set: setEditPriceChf },
+                          ].map((c) => (
+                            <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                              <span style={{ fontSize: "9px", color: "rgb(107,117,111)", width: "22px", textAlign: "right" }}>{c.label}</span>
+                              <input type="number" step="0.01" value={c.val} onChange={(e) => c.set(e.target.value)}
+                                style={{ width: "65px", padding: "3px 6px", borderRadius: "6px", border: "1px solid rgba(255,0,0,0.3)", backgroundColor: "rgba(255,0,0,0.04)", color: "#e8f7ed", fontSize: "12px", outline: "none", fontFamily: "inherit" }} />
+                            </div>
+                          ))}
                           <button
-                            onClick={() => updatePrice(item.id, Number(editPrice), Number(editPriceUsd))}
+                            onClick={() => updatePrice(item.id)}
                             style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "#FF0000", color: "#fff", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}
                           >
                             OK
@@ -715,7 +734,7 @@ export default function AdminPage() {
                         </div>
                       ) : (
                         <div
-                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); }}
+                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
                           style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
                         >
                           <span style={{ color: "#FF0000" }}>{Number(item.price).toFixed(2)}€</span>
@@ -743,6 +762,79 @@ export default function AdminPage() {
               </div>
             );
           })}
+
+          {/* Spotify Streams */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "32px 0 16px 0" }}>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(29,185,84,0.15)" }} />
+            <span style={{ fontSize: "14px", fontWeight: 700, color: "#1DB954" }}>Spotify Streams</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(29,185,84,0.15)" }} />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "10px" }}>
+            {pricing.filter((p) => p.service === "sp_streams").map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  padding: "14px 10px", borderRadius: "12px", textAlign: "center",
+                  border: `1px solid ${item.active ? "rgba(29,185,84,0.15)" : "rgba(255,255,255,0.06)"}`,
+                  backgroundColor: item.active ? "rgba(29,185,84,0.04)" : "rgba(255,255,255,0.02)",
+                  opacity: item.active ? 1 : 0.5,
+                }}
+              >
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "#e8f7ed", marginBottom: "4px" }}>
+                  {item.qty >= 1000 ? `${item.qty / 1000}K` : item.qty}
+                </div>
+
+                {editingId === item.id ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginBottom: "8px" }}>
+                    {[
+                      { label: "\u20AC", val: editPrice, set: setEditPrice },
+                      { label: "$", val: editPriceUsd, set: setEditPriceUsd },
+                      { label: "\u00A3", val: editPriceGbp, set: setEditPriceGbp },
+                      { label: "C$", val: editPriceCad, set: setEditPriceCad },
+                      { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                      { label: "CHF", val: editPriceChf, set: setEditPriceChf },
+                    ].map((c) => (
+                      <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                        <span style={{ fontSize: "9px", color: "rgb(107,117,111)", width: "22px", textAlign: "right" }}>{c.label}</span>
+                        <input type="number" step="0.01" value={c.val} onChange={(e) => c.set(e.target.value)}
+                          style={{ width: "65px", padding: "3px 6px", borderRadius: "6px", border: "1px solid rgba(29,185,84,0.3)", backgroundColor: "rgba(29,185,84,0.04)", color: "#e8f7ed", fontSize: "12px", outline: "none", fontFamily: "inherit" }} />
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => updatePrice(item.id)}
+                      style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "#1DB954", color: "#000", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}
+                    >
+                      OK
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
+                    style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
+                  >
+                    <span style={{ color: "#1DB954" }}>{Number(item.price).toFixed(2)}{"\u20AC"}</span>
+                    <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={() => toggleActive(item.id, item.active)}
+                    style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    {item.active ? "D\u00E9sactiver" : "Activer"}
+                  </button>
+                  <button
+                    onClick={() => deletePack(item.id)}
+                    style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.15)", backgroundColor: "transparent", color: "#ef4444", cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    {"\u2715"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -890,6 +982,102 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+      {/* Upsells Tab */}
+      {tab === "upsells" && (
+        <div>
+          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "16px", color: "rgb(169,181,174)" }}>Offres d&apos;upsell (page de paiement)</h3>
+
+          {/* Add new upsell */}
+          <div style={{ marginBottom: "24px", padding: "16px", borderRadius: "14px", border: "1px solid rgba(0,210,106,0.12)", backgroundColor: "rgba(0,180,53,0.03)" }}>
+            <p style={{ margin: "0 0 10px 0", fontSize: "13px", fontWeight: 600, color: "#fff" }}>Nouvel upsell</p>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+              <select
+                value={newUpsell.service}
+                onChange={(e) => setNewUpsell({ ...newUpsell, service: e.target.value })}
+                style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit" }}
+              >
+                <option value="followers">Followers</option>
+                <option value="likes">Likes</option>
+                <option value="views">Views</option>
+              </select>
+              <input
+                type="number"
+                placeholder="Quantité"
+                value={newUpsell.qty}
+                onChange={(e) => setNewUpsell({ ...newUpsell, qty: e.target.value })}
+                style={{ width: "90px", padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", outline: "none" }}
+              />
+              <input
+                type="text"
+                placeholder="Label FR (ex: 500 likes)"
+                value={newUpsell.label}
+                onChange={(e) => setNewUpsell({ ...newUpsell, label: e.target.value })}
+                style={{ width: "160px", padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", outline: "none" }}
+              />
+              <input
+                type="text"
+                placeholder="Label EN"
+                value={newUpsell.labelEn}
+                onChange={(e) => setNewUpsell({ ...newUpsell, labelEn: e.target.value })}
+                style={{ width: "140px", padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", outline: "none" }}
+              />
+              <button
+                onClick={async () => {
+                  if (!newUpsell.qty) return;
+                  await fetch("/api/admin/upsells", { method: "POST", headers, body: JSON.stringify({ service: newUpsell.service, qty: Number(newUpsell.qty), label: newUpsell.label, label_en: newUpsell.labelEn }) });
+                  setNewUpsell({ service: "followers", qty: "", label: "", labelEn: "" });
+                  fetchUpsells();
+                }}
+                style={{ padding: "8px 18px", borderRadius: "8px", border: "none", backgroundColor: green, color: "#000", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Ajouter
+              </button>
+            </div>
+            <p style={{ margin: "8px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
+              ⚠️ La quantité doit correspondre à un pack existant dans les Prix pour que le prix soit affiché.
+            </p>
+          </div>
+
+          {/* List */}
+          {upsells.length === 0 ? (
+            <p style={{ fontSize: "13px", color: "rgb(107,117,111)" }}>Aucun upsell configuré.</p>
+          ) : (
+            <div style={{ display: "grid", gap: "8px" }}>
+              {upsells.map((u) => (
+                <div key={u.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", borderRadius: "12px", border: `1px solid ${u.active ? "rgba(0,210,106,0.15)" : "rgba(255,255,255,0.06)"}`, backgroundColor: u.active ? "rgba(0,180,53,0.04)" : "rgba(255,255,255,0.02)", opacity: u.active ? 1 : 0.5 }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#fff" }}>
+                      {u.qty >= 1000 ? `${u.qty / 1000}K` : u.qty} {u.service}
+                    </p>
+                    <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
+                      FR: {u.label || "—"} | EN: {u.label_en || "—"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/admin/upsells", { method: "PUT", headers, body: JSON.stringify({ id: u.id, active: !u.active }) });
+                      fetchUpsells();
+                    }}
+                    style={{ padding: "4px 12px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "transparent", color: u.active ? green : "rgb(107,117,111)", fontSize: "11px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    {u.active ? "ON" : "OFF"}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!confirm("Supprimer cet upsell ?")) return;
+                      await fetch("/api/admin/upsells", { method: "DELETE", headers, body: JSON.stringify({ id: u.id }) });
+                      fetchUpsells();
+                    }}
+                    style={{ padding: "4px 10px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.15)", backgroundColor: "transparent", color: "#ef4444", fontSize: "10px", cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {/* SMM Tab */}

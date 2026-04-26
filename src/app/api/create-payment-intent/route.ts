@@ -8,15 +8,18 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency } = body;
-    const currency = reqCurrency === "usd" ? "usd" : "eur";
+    const validCurrencies = ["eur", "usd", "gbp", "cad", "nzd", "chf"];
+    const currency = validCurrencies.includes(reqCurrency) ? reqCurrency : "eur";
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
     // Calculate total in cents based on currency
+    const currencyFieldMap: Record<string, string> = { eur: "price", usd: "priceUsd", gbp: "priceGbp", cad: "priceCad", nzd: "priceNzd", chf: "priceChf" };
+    const field = currencyFieldMap[currency] || "price";
     let totalCents = Math.round(
-      cart.reduce((sum: number, item: { price: number; priceUsd?: number }) => sum + (currency === "usd" ? (item.priceUsd || item.price) : item.price), 0) * 100
+      cart.reduce((sum: number, item: Record<string, number>) => sum + (item[field] || item.price || 0), 0) * 100
     );
 
     // Apply promo code discount

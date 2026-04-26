@@ -1,16 +1,21 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import posthog from "posthog-js";
 import type { ScanResult } from "@/components/ScanLoading";
-import { useTranslation, fmtPrice } from "@/lib/i18n";
+import { useTranslation, fmtPrice, type Currency } from "@/lib/i18n";
 
-type ServiceType = "followers" | "likes" | "views" | "yt_subscribers" | "yt_likes" | "yt_views";
+type ServiceType = "followers" | "likes" | "views" | "yt_subscribers" | "yt_likes" | "yt_views" | "sp_streams";
 
 interface Pack {
   qty: number;
   price: number;
   priceUsd: number;
+  priceGbp: number;
+  priceCad: number;
+  priceNzd: number;
+  priceChf: number;
   popular?: boolean;
 }
 
@@ -20,6 +25,10 @@ export interface CartItem {
   qty: number;
   price: number;
   priceUsd: number;
+  priceGbp: number;
+  priceCad: number;
+  priceNzd: number;
+  priceChf: number;
 }
 
 const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React.ReactNode; packs: Pack[] }>> = {
@@ -31,14 +40,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.99, priceUsd: 2.99 },
-      { qty: 250, price: 5.99, priceUsd: 5.99 },
-      { qty: 500, price: 9.99, priceUsd: 9.99, popular: true },
-      { qty: 1000, price: 16.99, priceUsd: 16.99 },
-      { qty: 2500, price: 34.99, priceUsd: 34.99 },
-      { qty: 5000, price: 59.99, priceUsd: 59.99 },
-      { qty: 10000, price: 99.99, priceUsd: 99.99 },
-      { qty: 25000, price: 199.99, priceUsd: 199.99 },
+      { qty: 100, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 5.99, priceUsd: 5.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 16.99, priceUsd: 16.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 34.99, priceUsd: 34.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 10000, price: 99.99, priceUsd: 99.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 25000, price: 199.99, priceUsd: 199.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
     ],
   },
   likes: {
@@ -49,14 +58,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 1.99, priceUsd: 1.99 },
-      { qty: 250, price: 3.99, priceUsd: 3.99 },
-      { qty: 500, price: 6.99, priceUsd: 6.99, popular: true },
-      { qty: 1000, price: 11.99, priceUsd: 11.99 },
-      { qty: 2500, price: 24.99, priceUsd: 24.99 },
-      { qty: 5000, price: 44.99, priceUsd: 44.99 },
-      { qty: 10000, price: 79.99, priceUsd: 79.99 },
-      { qty: 25000, price: 149.99, priceUsd: 149.99 },
+      { qty: 100, price: 1.99, priceUsd: 1.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 3.99, priceUsd: 3.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 24.99, priceUsd: 24.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 44.99, priceUsd: 44.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 10000, price: 79.99, priceUsd: 79.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 25000, price: 149.99, priceUsd: 149.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
     ],
   },
   views: {
@@ -67,14 +76,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 500, price: 1.99, priceUsd: 1.99 },
-      { qty: 1000, price: 3.49, priceUsd: 3.49 },
-      { qty: 2500, price: 7.99, priceUsd: 7.99 },
-      { qty: 5000, price: 12.99, priceUsd: 12.99, popular: true },
-      { qty: 10000, price: 22.99, priceUsd: 22.99 },
-      { qty: 25000, price: 49.99, priceUsd: 49.99 },
-      { qty: 50000, price: 89.99, priceUsd: 89.99 },
-      { qty: 100000, price: 149.99, priceUsd: 149.99 },
+      { qty: 500, price: 1.99, priceUsd: 1.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 1000, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 7.99, priceUsd: 7.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 12.99, priceUsd: 12.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 10000, price: 22.99, priceUsd: 22.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 25000, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 50000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100000, price: 149.99, priceUsd: 149.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
     ],
   },
   yt_subscribers: {
@@ -85,12 +94,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 3.99, priceUsd: 3.99 },
-      { qty: 250, price: 7.99, priceUsd: 7.99 },
-      { qty: 500, price: 13.99, priceUsd: 13.99, popular: true },
-      { qty: 1000, price: 24.99, priceUsd: 24.99 },
-      { qty: 2500, price: 49.99, priceUsd: 49.99 },
-      { qty: 5000, price: 89.99, priceUsd: 89.99 },
+      { qty: 100, price: 3.99, priceUsd: 3.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 7.99, priceUsd: 7.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 13.99, priceUsd: 13.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 24.99, priceUsd: 24.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
     ],
   },
   yt_likes: {
@@ -101,12 +110,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.49, priceUsd: 2.49 },
-      { qty: 250, price: 4.99, priceUsd: 4.99 },
-      { qty: 500, price: 8.99, priceUsd: 8.99, popular: true },
-      { qty: 1000, price: 14.99, priceUsd: 14.99 },
-      { qty: 2500, price: 29.99, priceUsd: 29.99 },
-      { qty: 5000, price: 54.99, priceUsd: 54.99 },
+      { qty: 100, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 8.99, priceUsd: 8.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 14.99, priceUsd: 14.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 54.99, priceUsd: 54.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
     ],
   },
   yt_views: {
@@ -117,25 +126,55 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 500, price: 2.49, priceUsd: 2.49 },
-      { qty: 1000, price: 4.49, priceUsd: 4.49 },
-      { qty: 2500, price: 9.99, priceUsd: 9.99 },
-      { qty: 5000, price: 16.99, priceUsd: 16.99, popular: true },
-      { qty: 10000, price: 29.99, priceUsd: 29.99 },
-      { qty: 25000, price: 59.99, priceUsd: 59.99 },
-      { qty: 50000, price: 99.99, priceUsd: 99.99 },
+      { qty: 500, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 1000, price: 4.49, priceUsd: 4.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 16.99, priceUsd: 16.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 10000, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 25000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 50000, price: 99.99, priceUsd: 99.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+    ],
+  },
+  sp_streams: {
+    label: "Streams",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" />
+      </svg>
+    ),
+    packs: [
+      { qty: 1000, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 6.49, priceUsd: 6.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 10000, price: 21.99, priceUsd: 21.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 25000, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 50000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100000, price: 159.99, priceUsd: 159.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250000, price: 349.99, priceUsd: 349.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
     ],
   },
 };
 
 const TIKTOK_KEYS: ServiceType[] = ["followers", "likes", "views"];
 const YOUTUBE_KEYS: ServiceType[] = ["yt_subscribers", "yt_likes", "yt_views"];
-const SERVICE_KEYS: ServiceType[] = [...TIKTOK_KEYS, ...YOUTUBE_KEYS];
+const SPOTIFY_KEYS: ServiceType[] = ["sp_streams"];
+const SERVICE_KEYS: ServiceType[] = [...TIKTOK_KEYS, ...YOUTUBE_KEYS, ...SPOTIFY_KEYS];
 
 function fmtQty(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
   if (n >= 1000) return (n / 1000) + "K";
   return String(n);
+}
+
+function priceForCurrency(p: Pack | CartItem, c: Currency): number {
+  switch (c) {
+    case "usd": return p.priceUsd || p.price;
+    case "gbp": return p.priceGbp || p.price;
+    case "cad": return p.priceCad || p.price;
+    case "nzd": return p.priceNzd || p.price;
+    case "chf": return p.priceChf || p.price;
+    default: return p.price;
+  }
 }
 
 type Services = Partial<Record<ServiceType, { label: string; icon: React.ReactNode; packs: Pack[] }>>;
@@ -201,6 +240,8 @@ export default function ServiceSelect({
   const [previewLoading, setPreviewLoading] = useState(false);
   const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [services, setServices] = useState<Services>(DEFAULT_SERVICES as Services);
+  const [toast, setToast] = useState<{ message: string; cta: string; targetTab: ServiceType } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Fetch combos + dynamic pricing in parallel
@@ -219,7 +260,7 @@ export default function ServiceSelect({
           const svc = row.service as ServiceType;
           if (!SERVICE_KEYS.includes(svc)) continue;
           if (!grouped[svc]) grouped[svc] = [];
-          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price), priceUsd: Number(row.price_usd || 0) });
+          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price), priceUsd: Number(row.price_usd || 0), priceGbp: Number(row.price_gbp || 0), priceCad: Number(row.price_cad || 0), priceNzd: Number(row.price_nzd || 0), priceChf: Number(row.price_chf || 0) });
         }
         setServices((prev) => {
           const next = { ...prev };
@@ -272,6 +313,14 @@ export default function ServiceSelect({
   const service = services[activeTab]!;
   const selectedIdx = selections[activeTab] ?? null;
 
+  const MULTI_DISCOUNT = 0.10; // 10% off when 2+ services
+
+  function showToast(message: string, cta: string, targetTab: ServiceType) {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ message, cta, targetTab });
+    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  }
+
   function togglePack(idx: number) {
     setSelectedCombo(null); // clear combo when selecting individual packs
     setSelections((prev) => {
@@ -282,22 +331,55 @@ export default function ServiceSelect({
         copy[activeTab] = idx;
         const pack = service.packs[idx];
         if (pack) posthog.capture("service_selected", { platform, service: activeTab, qty: pack.qty, price: pack.price });
+        // Show toast suggesting another service
+        const missing = activeKeys.filter((k) => k !== activeTab && copy[k] === undefined);
+        if (missing.length > 0) {
+          const suggest = missing[0];
+          const suggestLabel = services[suggest]?.label || suggest;
+          showToast(
+            t("service.toastMsg").replace("{service}", suggestLabel),
+            `${t("service.toastCta")} ${suggestLabel} →`,
+            suggest
+          );
+        }
       }
       return copy;
     });
   }
 
   // Build cart from all selections OR from combo
+  const uniqueServiceCount = selectedCombo ? 0 : Object.keys(selections).length;
+  const hasMultiDiscount = !selectedCombo && uniqueServiceCount >= 2;
+
   const cart: CartItem[] = selectedCombo
     ? selectedCombo.items
     : activeKeys
       .filter((k) => selections[k] !== undefined)
       .map((k) => {
         const pack = services[k]!.packs[selections[k]!];
-        return { service: k, label: services[k]!.label, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
+        const discountMult = hasMultiDiscount ? (1 - MULTI_DISCOUNT) : 1;
+        return {
+          service: k,
+          label: services[k]!.label,
+          qty: pack.qty,
+          price: Number((pack.price * discountMult).toFixed(2)),
+          priceUsd: Number(((pack.priceUsd || pack.price) * discountMult).toFixed(2)),
+          priceGbp: Number(((pack.priceGbp || pack.price) * discountMult).toFixed(2)),
+          priceCad: Number(((pack.priceCad || pack.price) * discountMult).toFixed(2)),
+          priceNzd: Number(((pack.priceNzd || pack.price) * discountMult).toFixed(2)),
+          priceChf: Number(((pack.priceChf || pack.price) * discountMult).toFixed(2)),
+        };
       });
 
-  const total = cart.reduce((sum, item) => sum + (currency === "usd" ? item.priceUsd : item.price), 0);
+  const totalBeforeDiscount = selectedCombo
+    ? 0
+    : activeKeys
+      .filter((k) => selections[k] !== undefined)
+      .reduce((sum, k) => {
+        const pack = services[k]!.packs[selections[k]!];
+        return sum + priceForCurrency(pack, currency);
+      }, 0);
+  const total = cart.reduce((sum, item) => sum + priceForCurrency(item, currency), 0);
   const currentUsername = profile?.username || externalUsername || "";
   const hasItems = cart.length > 0;
   const hasUsername = currentUsername.trim().length >= 2;
@@ -408,90 +490,119 @@ export default function ServiceSelect({
         })}
       </div>
 
+      {/* Multi-service discount banner */}
+      <div style={{
+        width: "100%", padding: "8px 14px", borderRadius: "10px", marginBottom: "14px",
+        background: hasMultiDiscount
+          ? `linear-gradient(135deg, ${isYouTube ? "rgba(255,0,0,0.12)" : "rgba(105,201,208,0.12)"}, ${isYouTube ? "rgba(255,0,0,0.04)" : "rgba(105,201,208,0.04)"})`
+          : "rgba(255,255,255,0.02)",
+        border: hasMultiDiscount ? `1px solid ${accentBorderStrong}` : `1px dashed ${accentBorder}`,
+        display: "flex", alignItems: "center", gap: "8px", transition: "all 0.3s",
+      }}>
+        <span style={{ fontSize: "16px" }}>{hasMultiDiscount ? "🎉" : "🎁"}</span>
+        <span style={{ fontSize: "12px", fontWeight: 600, color: hasMultiDiscount ? accent : "rgb(169,181,174)" }}>
+          {hasMultiDiscount ? t("service.discountApplied") : t("service.discountHint")}
+        </span>
+      </div>
+
       {/* Packs grid — 2 cols × 4 rows */}
       <div className="grid-packs" style={{ marginBottom: "20px" }}>
-        {service.packs.map((pack, i) => {
-          const isSelected = selectedIdx === i;
-          return (
-            <button
-              key={i}
-              onClick={() => togglePack(i)}
-              style={{
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "4px",
-                padding: "14px 8px",
-                borderRadius: "14px",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                border: isSelected ? `2px solid ${accent}` : `1px solid ${accentBorder}`,
-                backgroundColor: isSelected ? (isYouTube ? "rgba(255, 0, 0, 0.1)" : "rgba(79, 179, 186, 0.1)") : "rgba(255, 255, 255, 0.02)",
-                boxShadow: isSelected ? (isYouTube ? "0 0 20px rgba(255,0,0,0.1), inset 0 0 20px rgba(255,0,0,0.05)" : "0 0 20px rgba(105, 201, 208, 0.1), inset 0 0 20px rgba(79, 179, 186, 0.05)") : "none",
-                transition: "all 0.2s",
-              }}
-            >
-              {pack.popular && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-7px",
-                    right: "-2px",
-                    padding: "2px 7px",
-                    borderRadius: "9999px",
-                    fontSize: "8px",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    background: isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)",
-                    color: accent,
-                    border: `1px solid ${accentBorderStrong}`,
-                  }}
-                >
-                  {t("service.top")}
-                </span>
-              )}
-              {isSelected && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "8px",
-                    left: "8px",
-                    width: "16px",
-                    height: "16px",
-                    borderRadius: "50%",
-                    backgroundColor: accent,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={isYouTube ? "#fff" : "#000"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </span>
-              )}
-              <span style={{ fontSize: "18px", fontWeight: 700, color: "rgb(232, 247, 237)" }}>
-                {fmtQty(pack.qty)}
-              </span>
-              <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
-                {service.label}
-              </span>
-              <span
+        {(() => {
+          const basePPU = service.packs.length > 0 ? priceForCurrency(service.packs[0], currency) / service.packs[0].qty : 0;
+          return service.packs.map((pack, i) => {
+            const isSelected = selectedIdx === i;
+            const ppu = priceForCurrency(pack, currency) / pack.qty;
+            const savePct = basePPU > 0 ? Math.round((1 - ppu / basePPU) * 100) : 0;
+            return (
+              <button
+                key={i}
+                onClick={() => togglePack(i)}
                 style={{
-                  marginTop: "2px",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  color: isSelected ? accentMid : "rgb(169, 181, 174)",
-                  transition: "color 0.2s",
+                  position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "4px",
+                  padding: "14px 8px",
+                  borderRadius: "14px",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  border: isSelected ? `2px solid ${accent}` : `1px solid ${accentBorder}`,
+                  backgroundColor: isSelected ? (isYouTube ? "rgba(255, 0, 0, 0.1)" : "rgba(79, 179, 186, 0.1)") : "rgba(255, 255, 255, 0.02)",
+                  boxShadow: isSelected ? (isYouTube ? "0 0 20px rgba(255,0,0,0.1), inset 0 0 20px rgba(255,0,0,0.05)" : "0 0 20px rgba(105, 201, 208, 0.1), inset 0 0 20px rgba(79, 179, 186, 0.05)") : "none",
+                  transition: "all 0.2s",
                 }}
               >
-                {fmtPrice(currency === "usd" ? pack.priceUsd : pack.price, currency)}
-              </span>
-            </button>
-          );
-        })}
+                {pack.popular && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "-7px",
+                      right: "-2px",
+                      padding: "2px 7px",
+                      borderRadius: "9999px",
+                      fontSize: "8px",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      background: isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)",
+                      color: accent,
+                      border: `1px solid ${accentBorderStrong}`,
+                    }}
+                  >
+                    {t("service.top")}
+                  </span>
+                )}
+                {isSelected && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      left: "8px",
+                      width: "16px",
+                      height: "16px",
+                      borderRadius: "50%",
+                      backgroundColor: accent,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={isYouTube ? "#fff" : "#000"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                )}
+                <span style={{ fontSize: "18px", fontWeight: 700, color: "rgb(232, 247, 237)" }}>
+                  {fmtQty(pack.qty)}
+                </span>
+                <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                  {service.label}
+                </span>
+                <span
+                  style={{
+                    marginTop: "2px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    color: isSelected ? accentMid : "rgb(169, 181, 174)",
+                    transition: "color 0.2s",
+                  }}
+                >
+                  {fmtPrice(priceForCurrency(pack, currency), currency)}
+                </span>
+                {savePct > 0 && (
+                  <span style={{
+                    marginTop: "2px", fontSize: "10px", fontWeight: 700,
+                    color: "#00d26a", backgroundColor: "rgba(0,210,106,0.1)",
+                    padding: "1px 6px", borderRadius: "6px",
+                  }}>
+                    -{savePct}%
+                  </span>
+                )}
+              </button>
+            );
+          });
+        })()}
       </div>
 
       {/* Username input — after packs */}
@@ -589,11 +700,11 @@ export default function ServiceSelect({
                   const svc = ci.service as ServiceType;
                   const pack = findClosestPack(svc, ci.qty, services);
                   if (!pack) return null;
-                  return { service: svc, label: services[svc]?.label ?? svc, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd };
+                  return { service: svc, label: services[svc]?.label ?? svc, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd || pack.price, priceGbp: pack.priceGbp || pack.price, priceCad: pack.priceCad || pack.price, priceNzd: pack.priceNzd || pack.price, priceChf: pack.priceChf || pack.price };
                 })
                 .filter(Boolean) as CartItem[];
 
-              const originalTotal = comboItems.reduce((s, i) => s + (currency === "usd" ? i.priceUsd : i.price), 0);
+              const originalTotal = comboItems.reduce((s, i) => s + priceForCurrency(i, currency), 0);
               const discountedTotal = originalTotal * (1 - combo.discount_percent / 100);
 
               return (
@@ -603,10 +714,15 @@ export default function ServiceSelect({
                     if (selectedCombo?.id === combo.id) {
                       setSelectedCombo(null); // deselect
                     } else {
+                      const dm = 1 - combo.discount_percent / 100;
                       const discountedItems = comboItems.map((item) => ({
                         ...item,
-                        price: Number((item.price * (1 - combo.discount_percent / 100)).toFixed(2)),
-                        priceUsd: Number((item.priceUsd * (1 - combo.discount_percent / 100)).toFixed(2)),
+                        price: Number((item.price * dm).toFixed(2)),
+                        priceUsd: Number((item.priceUsd * dm).toFixed(2)),
+                        priceGbp: Number((item.priceGbp * dm).toFixed(2)),
+                        priceCad: Number((item.priceCad * dm).toFixed(2)),
+                        priceNzd: Number((item.priceNzd * dm).toFixed(2)),
+                        priceChf: Number((item.priceChf * dm).toFixed(2)),
                       }));
                       setSelections({}); // clear individual selections
                       setSelectedCombo({ id: combo.id, items: discountedItems });
@@ -690,7 +806,7 @@ export default function ServiceSelect({
                 {fmtQty(item.qty)} {item.label}
               </span>
               <span style={{ fontSize: "13px", fontWeight: 600, color: accentMid }}>
-                {fmtPrice(currency === "usd" ? item.priceUsd : item.price, currency)}
+                {fmtPrice(priceForCurrency(item, currency), currency)}
               </span>
             </div>
           ))}
@@ -705,8 +821,45 @@ export default function ServiceSelect({
             }}
           >
             <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{t("service.total")}</span>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: accent }}>{fmtPrice(total, currency)}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              {hasMultiDiscount && <span style={{ fontSize: "12px", color: "rgb(107,117,111)", textDecoration: "line-through" }}>{fmtPrice(totalBeforeDiscount, currency)}</span>}
+              <span style={{ fontSize: "16px", fontWeight: 700, color: accent }}>{fmtPrice(total, currency)}</span>
+              {hasMultiDiscount && <span style={{ fontSize: "10px", fontWeight: 700, color: accent, padding: "2px 6px", borderRadius: "6px", background: isYouTube ? "rgba(255,0,0,0.1)" : "rgba(105,201,208,0.1)" }}>-10%</span>}
+            </span>
           </div>
+          {/* Suggest missing services */}
+          {(() => {
+            const cartServiceKeys = new Set(cart.map((c) => c.service));
+            const missing = activeKeys.filter((k) => !cartServiceKeys.has(k));
+            if (missing.length === 0) return null;
+            return (
+              <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: `1px dashed ${isYouTube ? "rgba(255,0,0,0.1)" : "rgba(105,201,208,0.1)"}` }}>
+                <p style={{ margin: "0 0 6px 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
+                  {t("service.boostTip")}
+                </p>
+                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                  {missing.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setActiveTab(key)}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "4px",
+                        padding: "5px 10px", borderRadius: "8px", border: `1px dashed ${accentBorderStrong}`,
+                        background: "transparent", color: accent, fontSize: "11px", fontWeight: 600,
+                        cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = accentBg; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <span style={{ display: "flex", opacity: 0.7 }}>{DEFAULT_SERVICES[key]?.icon}</span>
+                      + {services[key]?.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -758,7 +911,7 @@ export default function ServiceSelect({
         onClick={onBack}
         style={{
           marginTop: "14px",
-          marginBottom: "80px",
+          marginBottom: "16px",
           fontSize: "12px",
           color: "rgb(107, 117, 111)",
           background: "none",
@@ -774,47 +927,102 @@ export default function ServiceSelect({
         {t("service.backToProfile")}
       </button>
 
-      {/* Sticky mobile cart bar — always visible */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: "12px 16px",
-          background: "linear-gradient(180deg, rgba(5,10,12,0.95), rgba(3,7,8,0.98))",
-          borderTop: `1px solid ${accentBorder}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          zIndex: 100,
-          backdropFilter: "blur(12px)",
-        }}
-        className="sticky-cart-bar"
-      >
-        <div>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{cart.length > 0 ? `${cart.length} ${cart.length > 1 ? "articles" : "article"}` : t("service.emptyCart")}</span>
-          {cart.length > 0 && <span style={{ fontSize: "15px", fontWeight: 700, color: accent, marginLeft: "8px" }}>{fmtPrice(total, currency)}</span>}
-        </div>
-        <button
-          onClick={handleCheckoutClick}
-          disabled={!hasItems}
+      {/* Spacer for fixed bottom bar */}
+      <div style={{ height: "72px" }} />
+
+      {/* Toast notification */}
+      {typeof window !== "undefined" && toast && ReactDOM.createPortal(
+        <div
           style={{
-            padding: "10px 24px",
-            borderRadius: "10px",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: 700,
-            fontSize: "13px",
-            fontFamily: "inherit",
-            color: isYouTube ? "#fff" : "#000",
-            background: gradientBg,
-            opacity: hasItems ? 1 : 0.5,
+            position: "fixed",
+            bottom: "68px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            maxWidth: "360px",
+            width: "calc(100% - 32px)",
+            padding: "12px 14px",
+            borderRadius: "12px",
+            background: isYouTube ? "rgba(40,8,8,0.97)" : "rgba(8,30,28,0.97)",
+            border: `1px solid ${accentBorderStrong}`,
+            backdropFilter: "blur(12px)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            animation: "fadeIn 0.3s ease",
+            boxShadow: `0 8px 32px ${isYouTube ? "rgba(255,0,0,0.15)" : "rgba(105,201,208,0.15)"}`,
           }}
         >
-          {t("service.checkout")} &rarr;
-        </button>
-      </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: "12px", color: "rgb(232,247,237)", lineHeight: 1.4 }}>{toast.message}</p>
+          </div>
+          <button
+            onClick={() => { setActiveTab(toast.targetTab); setToast(null); }}
+            style={{
+              padding: "6px 12px", borderRadius: "8px", border: "none",
+              background: gradientBg, color: isYouTube ? "#fff" : "#000",
+              fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+              whiteSpace: "nowrap", flexShrink: 0,
+            }}
+          >
+            {toast.cta}
+          </button>
+          <button
+            onClick={() => setToast(null)}
+            style={{ background: "none", border: "none", color: "rgb(107,117,111)", fontSize: "14px", cursor: "pointer", padding: "0 2px", flexShrink: 0 }}
+          >
+            ✕
+          </button>
+        </div>,
+        document.body
+      )}
+
+      {/* Fixed bottom cart bar — always visible */}
+      {typeof window !== "undefined" && ReactDOM.createPortal(
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: "10px 16px",
+            background: "linear-gradient(180deg, rgba(5,10,12,0.97), rgba(3,7,8,1))",
+            borderTop: `1px solid ${accentBorder}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            zIndex: 9999,
+            backdropFilter: "blur(16px)",
+          }}
+        >
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{cart.length > 0 ? `${cart.length} ${cart.length > 1 ? "articles" : "article"}` : t("service.emptyCart")}</span>
+              {cart.length > 0 && <span style={{ fontSize: "15px", fontWeight: 700, color: accent, marginLeft: "8px" }}>{fmtPrice(total, currency)}</span>}
+            </div>
+          </div>
+          <button
+            onClick={handleCheckoutClick}
+            disabled={!hasItems}
+            style={{
+              padding: "10px 24px",
+              borderRadius: "10px",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: 700,
+              fontSize: "13px",
+              fontFamily: "inherit",
+              color: isYouTube ? "#fff" : "#000",
+              background: gradientBg,
+              opacity: hasItems ? 1 : 0.5,
+              flexShrink: 0,
+            }}
+          >
+            {t("service.checkout")} &rarr;
+          </button>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
