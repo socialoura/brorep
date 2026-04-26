@@ -76,6 +76,11 @@ interface Analytics {
   last7Days: { date: string; count: string; revenue: string }[];
   topServices: { service: string; count: string; revenue_cents: string }[];
   platforms: { platform: string; count: string }[];
+  uniqueCustomers: number;
+  avgPerCustomerCents: number;
+  avgOrderValueCents: number;
+  avgOrdersPerCustomer: number;
+  topSpenders: { email: string; order_count: string; total_eur_cents: string }[];
 }
 
 export default function AdminPage() {
@@ -292,6 +297,42 @@ export default function AdminPage() {
             <KpiCard label="Coût aujourd'hui" value={`${(analytics.costTodayCents / 100).toFixed(2)}€`} />
             <KpiCard label="Profit aujourd'hui" value={`${((analytics.revenueTodayCents - analytics.costTodayCents) / 100).toFixed(2)}€`} />
           </div>
+
+          {/* Customer KPIs */}
+          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Par client (email)</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "28px" }}>
+            <KpiCard label="Clients uniques" value={String(analytics.uniqueCustomers)} />
+            <KpiCard label="Dépense moyenne / client" value={`${(analytics.avgPerCustomerCents / 100).toFixed(2)}€`} />
+            <KpiCard label="Panier moyen" value={`${(analytics.avgOrderValueCents / 100).toFixed(2)}€`} />
+            <KpiCard label="Commandes / client" value={analytics.avgOrdersPerCustomer.toFixed(2)} />
+          </div>
+
+          {/* Top spenders */}
+          {analytics.topSpenders.length > 0 && (
+            <>
+              <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Top 10 clients</h3>
+              <div style={{ overflowX: "auto", marginBottom: "24px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid rgba(0,210,106,0.1)" }}>
+                      <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Email</th>
+                      <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Commandes</th>
+                      <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Dépensé</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analytics.topSpenders.map((c) => (
+                      <tr key={c.email} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                        <td style={{ padding: "8px" }}>{c.email}</td>
+                        <td style={{ padding: "8px", textAlign: "right" }}>{c.order_count}</td>
+                        <td style={{ padding: "8px", textAlign: "right", color: green }}>{(Number(c.total_eur_cents) / 100).toFixed(2)}€</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
 
           {/* Status breakdown */}
           <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Par statut</h3>

@@ -118,6 +118,56 @@ export async function GET(req: NextRequest) {
     SELECT COALESCE(SUM(ROUND(cost_cents * ${rUsd}::numeric)), 0) as total
     FROM orders WHERE status IN ('paid', 'processing', 'delivered') AND created_at >= CURRENT_DATE`;
 
+  // Per-customer analytics (paid orders only, grouped by email, all currencies → EUR)
+  const customerStats = await sql`
+    WITH paid_in_eur AS (
+      SELECT
+        LOWER(TRIM(email)) AS email_norm,
+        CASE
+          WHEN currency = 'usd' THEN ROUND(total_cents * ${rUsd}::numeric)
+          WHEN currency = 'gbp' THEN ROUND(total_cents * ${rGbp}::numeric)
+          WHEN currency = 'cad' THEN ROUND(total_cents * ${rCad}::numeric)
+          WHEN currency = 'nzd' THEN ROUND(total_cents * ${rNzd}::numeric)
+          WHEN currency = 'chf' THEN ROUND(total_cents * ${rChf}::numeric)
+          ELSE total_cents
+        END AS eur_cents
+      FROM orders
+      WHERE status = 'paid' AND email IS NOT NULL AND TRIM(email) <> ''
+    ),
+    per_customer AS (
+      SELECT email_norm, SUM(eur_cents) AS total_eur_cents, COUNT(*) AS order_count
+      FROM paid_in_eur
+      GROUP BY email_norm
+    )
+    SELECT
+      (SELECT COUNT(*) FROM per_customer) AS unique_customers,
+      (SELECT COALESCE(AVG(total_eur_cents), 0) FROM per_customer) AS avg_per_customer_cents,
+      (SELECT COALESCE(AVG(eur_cents), 0) FROM paid_in_eur) AS avg_order_value_cents,
+      (SELECT COALESCE(AVG(order_count), 0) FROM per_customer) AS avg_orders_per_customer
+  `;
+
+  // Top 10 spenders
+  const topSpenders = await sql`
+    SELECT
+      LOWER(TRIM(email)) AS email,
+      COUNT(*) AS order_count,
+      SUM(
+        CASE
+          WHEN currency = 'usd' THEN ROUND(total_cents * ${rUsd}::numeric)
+          WHEN currency = 'gbp' THEN ROUND(total_cents * ${rGbp}::numeric)
+          WHEN currency = 'cad' THEN ROUND(total_cents * ${rCad}::numeric)
+          WHEN currency = 'nzd' THEN ROUND(total_cents * ${rNzd}::numeric)
+          WHEN currency = 'chf' THEN ROUND(total_cents * ${rChf}::numeric)
+          ELSE total_cents
+        END
+      ) AS total_eur_cents
+    FROM orders
+    WHERE status = 'paid' AND email IS NOT NULL AND TRIM(email) <> ''
+    GROUP BY LOWER(TRIM(email))
+    ORDER BY total_eur_cents DESC
+    LIMIT 10
+  `;
+
   return NextResponse.json({
     totalOrders: Number(totalOrders[0].count),
     byStatus,
@@ -129,5 +179,10 @@ export async function GET(req: NextRequest) {
     last7Days,
     topServices,
     platforms,
+    uniqueCustomers: Number(customerStats[0].unique_customers),
+    avgPerCustomerCents: Number(customerStats[0].avg_per_customer_cents),
+    avgOrderValueCents: Number(customerStats[0].avg_order_value_cents),
+    avgOrdersPerCustomer: Number(customerStats[0].avg_orders_per_customer),
+    topSpenders,
   });
 }
