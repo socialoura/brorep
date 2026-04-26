@@ -6,7 +6,7 @@ import posthog from "posthog-js";
 import type { ScanResult } from "@/components/ScanLoading";
 import { useTranslation, fmtPrice, type Currency } from "@/lib/i18n";
 
-type ServiceType = "followers" | "likes" | "views" | "yt_subscribers" | "yt_likes" | "yt_views" | "sp_streams";
+type ServiceType = "followers" | "likes" | "views" | "yt_subscribers" | "yt_likes" | "yt_views" | "sp_streams" | "x_followers" | "x_likes" | "x_retweets" | "tw_followers" | "tw_live_viewers";
 
 interface Pack {
   qty: number;
@@ -29,6 +29,7 @@ export interface CartItem {
   priceCad: number;
   priceNzd: number;
   priceChf: number;
+  liveStartAt?: string; // ISO date for Twitch live viewers (when stream starts)
 }
 
 const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React.ReactNode; packs: Pack[] }>> = {
@@ -153,12 +154,98 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       { qty: 250000, price: 349.99, priceUsd: 349.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
     ],
   },
+  x_followers: {
+    label: "Followers",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+    packs: [
+      { qty: 100, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 19.99, priceUsd: 19.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 39.99, priceUsd: 39.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 69.99, priceUsd: 69.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+    ],
+  },
+  x_likes: {
+    label: "Likes",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      </svg>
+    ),
+    packs: [
+      { qty: 100, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 8.99, priceUsd: 8.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 14.99, priceUsd: 14.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 54.99, priceUsd: 54.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+    ],
+  },
+  tw_followers: {
+    label: "Followers",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+    packs: [
+      { qty: 100, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 19.99, priceUsd: 19.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 39.99, priceUsd: 39.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 69.99, priceUsd: 69.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 10000, price: 119.99, priceUsd: 119.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 25000, price: 249.99, priceUsd: 249.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+    ],
+  },
+  tw_live_viewers: {
+    label: "Live Viewers",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" />
+      </svg>
+    ),
+    packs: [
+      { qty: 10, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 25, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 50, price: 17.99, priceUsd: 17.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 100, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 64.99, priceUsd: 64.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 119.99, priceUsd: 119.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 1000, price: 219.99, priceUsd: 219.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 499.99, priceUsd: 499.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+    ],
+  },
+  x_retweets: {
+    label: "Retweets",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" />
+      </svg>
+    ),
+    packs: [
+      { qty: 100, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 250, price: 5.49, priceUsd: 5.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 17.99, priceUsd: 17.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 2500, price: 34.99, priceUsd: 34.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 5000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+    ],
+  },
 };
 
 const TIKTOK_KEYS: ServiceType[] = ["followers", "likes", "views"];
 const YOUTUBE_KEYS: ServiceType[] = ["yt_subscribers", "yt_likes", "yt_views"];
 const SPOTIFY_KEYS: ServiceType[] = ["sp_streams"];
-const SERVICE_KEYS: ServiceType[] = [...TIKTOK_KEYS, ...YOUTUBE_KEYS, ...SPOTIFY_KEYS];
+const X_KEYS: ServiceType[] = ["x_followers", "x_likes", "x_retweets"];
+const TWITCH_KEYS: ServiceType[] = ["tw_followers", "tw_live_viewers"];
+const SERVICE_KEYS: ServiceType[] = [...TIKTOK_KEYS, ...YOUTUBE_KEYS, ...SPOTIFY_KEYS, ...X_KEYS, ...TWITCH_KEYS];
 
 function fmtQty(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -219,16 +306,18 @@ export default function ServiceSelect({
 }) {
   const { t, lang, currency } = useTranslation();
   const isYouTube = platform === "youtube";
+  const isX = platform === "x";
+  const isTwitch = platform === "twitch";
   // Theme colors
-  const accent = isYouTube ? "rgb(255, 0, 0)" : "rgb(105, 201, 208)";
-  const accentMid = isYouTube ? "rgb(204, 0, 0)" : "rgb(105, 201, 208)";
-  const accentDark = isYouTube ? "rgb(153, 0, 0)" : "rgb(79, 179, 186)";
-  const accentBg = isYouTube ? "rgba(255, 0, 0, 0.05)" : "rgba(79, 179, 186, 0.05)";
-  const accentBorder = isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)";
-  const accentBorderStrong = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(105, 201, 208, 0.2)";
-  const accentGlow = isYouTube ? "rgba(255, 0, 0, 0.25)" : "rgba(105, 201, 208, 0.25)";
-  const gradientBg = isYouTube ? "linear-gradient(135deg, rgb(153, 0, 0), rgb(255, 0, 0))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
-  const activeKeys = isYouTube ? YOUTUBE_KEYS : TIKTOK_KEYS;
+  const accent = isYouTube ? "rgb(255, 0, 0)" : isX ? "rgb(29, 155, 240)" : isTwitch ? "rgb(145, 71, 255)" : "rgb(105, 201, 208)";
+  const accentMid = isYouTube ? "rgb(204, 0, 0)" : isX ? "rgb(29, 155, 240)" : isTwitch ? "rgb(145, 71, 255)" : "rgb(105, 201, 208)";
+  const accentDark = isYouTube ? "rgb(153, 0, 0)" : isX ? "rgb(20, 120, 200)" : isTwitch ? "rgb(110, 50, 200)" : "rgb(79, 179, 186)";
+  const accentBg = isYouTube ? "rgba(255, 0, 0, 0.05)" : isX ? "rgba(29, 155, 240, 0.05)" : isTwitch ? "rgba(145, 71, 255, 0.05)" : "rgba(79, 179, 186, 0.05)";
+  const accentBorder = isYouTube ? "rgba(255, 0, 0, 0.12)" : isX ? "rgba(29, 155, 240, 0.12)" : isTwitch ? "rgba(145, 71, 255, 0.12)" : "rgba(105, 201, 208, 0.12)";
+  const accentBorderStrong = isYouTube ? "rgba(255, 0, 0, 0.2)" : isX ? "rgba(29, 155, 240, 0.2)" : isTwitch ? "rgba(145, 71, 255, 0.2)" : "rgba(105, 201, 208, 0.2)";
+  const accentGlow = isYouTube ? "rgba(255, 0, 0, 0.25)" : isX ? "rgba(29, 155, 240, 0.25)" : isTwitch ? "rgba(145, 71, 255, 0.25)" : "rgba(105, 201, 208, 0.25)";
+  const gradientBg = isYouTube ? "linear-gradient(135deg, rgb(153, 0, 0), rgb(255, 0, 0))" : isX ? "linear-gradient(135deg, rgb(20, 120, 200), rgb(29, 155, 240))" : isTwitch ? "linear-gradient(135deg, rgb(110, 50, 200), rgb(145, 71, 255))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
+  const activeKeys = isYouTube ? YOUTUBE_KEYS : isX ? X_KEYS : isTwitch ? TWITCH_KEYS : TIKTOK_KEYS;
   const [activeTab, setActiveTab] = useState<ServiceType>(activeKeys[0]);
   // One selected pack index per service type
   const [selections, setSelections] = useState<Partial<Record<ServiceType, number>>>({}); 
@@ -237,6 +326,7 @@ export default function ServiceSelect({
   const [selectedCombo, setSelectedCombo] = useState<{ id: number; items: CartItem[] } | null>(null);
   const [usernameError, setUsernameError] = useState(false);
   const [previewProfile, setPreviewProfile] = useState<{ username: string; fullName: string; avatarUrl: string; followersCount: number } | null>(null);
+  const [editingUsername, setEditingUsername] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [services, setServices] = useState<Services>(DEFAULT_SERVICES as Services);
@@ -287,9 +377,13 @@ export default function ServiceSelect({
     lookupTimer.current = setTimeout(() => {
       const endpoint = isYouTube
         ? `/api/scraper-youtube?username=${encodeURIComponent(uname)}`
-        : platform === "instagram"
-          ? `/api/scraper-instagram?username=${encodeURIComponent(uname)}`
-          : `/api/scraper-tiktok?username=${encodeURIComponent(uname)}`;
+        : isX
+          ? `/api/scraper-x?username=${encodeURIComponent(uname)}`
+          : isTwitch
+            ? `/api/scraper-twitch?username=${encodeURIComponent(uname)}`
+            : platform === "instagram"
+              ? `/api/scraper-instagram?username=${encodeURIComponent(uname)}`
+              : `/api/scraper-tiktok?username=${encodeURIComponent(uname)}`;
       fetch(endpoint)
         .then((r) => r.json())
         .then((data) => {
@@ -409,7 +503,7 @@ export default function ServiceSelect({
       }}
     >
       {/* Username input or mini profile recap */}
-      {profile ? (
+      {profile && !editingUsername ? (
         <div
           style={{
             display: "flex",
@@ -429,9 +523,17 @@ export default function ServiceSelect({
             alt={profile.username}
             style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentBorderStrong}` }}
           />
-          <div style={{ textAlign: "left" }}>
+          <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff" }}>@{profile.username}</p>
           </div>
+          <button
+            onClick={() => { setEditingUsername(true); onUsernameChange?.(""); }}
+            style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${accentBorder}`, background: "transparent", color: "rgb(169,181,174)", fontSize: "11px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s", flexShrink: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
+          >
+            {lang === "en" ? "Change" : "Changer"}
+          </button>
         </div>
       ) : null}
 
@@ -606,7 +708,7 @@ export default function ServiceSelect({
       </div>
 
       {/* Username input — after packs */}
-      {!profile && (
+      {(!profile || editingUsername) && (
         <div id="username-input-section" style={{ width: "100%", maxWidth: "360px", marginBottom: "20px" }}>
           <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("service.usernameLabel")}
@@ -655,12 +757,23 @@ export default function ServiceSelect({
                       {previewProfile.fullName}
                     </p>
                     <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
-                      @{previewProfile.username} · {previewProfile.followersCount >= 1000 ? `${(previewProfile.followersCount / 1000).toFixed(1)}K` : previewProfile.followersCount} followers
+                      @{previewProfile.username}
+                      {previewProfile.followersCount > 0 && (
+                        <> · {previewProfile.followersCount >= 1000 ? `${(previewProfile.followersCount / 1000).toFixed(1)}K` : previewProfile.followersCount} followers</>
+                      )}
                     </p>
                   </div>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
+                  <button
+                    onClick={() => { onUsernameChange?.(""); setPreviewProfile(null); }}
+                    style={{ marginLeft: "4px", padding: "4px 8px", borderRadius: "8px", border: `1px solid ${accentBorder}`, background: "transparent", color: "rgb(169,181,174)", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
+                  >
+                    {lang === "en" ? "Change" : "Changer"}
+                  </button>
                 </>
               ) : null}
             </div>

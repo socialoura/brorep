@@ -467,3 +467,6 @@ body {
     letter-spacing: 3px;
   }
 }
+
+/* Force dark dropdown options in admin */
+select option { background-color: #000 !important; color: #fff !important; }

@@ -5,7 +5,7 @@ interface OrderNotifParams {
   username: string;
   platform: string;
   email: string;
-  cart: { label: string; qty: number; price: number }[];
+  cart: { label: string; qty: number; price: number; service?: string; liveStartAt?: string }[];
   totalCents: number;
   currency?: string;
 }
@@ -24,11 +24,24 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
   const { username, platform, email, cart, totalCents, currency } = params;
   const sym = currency === "usd" ? "$" : "€";
   const total = (totalCents / 100).toFixed(2);
-  const platformLabel = platform === "youtube" ? "YouTube" : platform === "tiktok" ? "TikTok" : "Instagram";
+  const platformLabel = platform === "youtube" ? "YouTube"
+    : platform === "tiktok" ? "TikTok"
+    : platform === "instagram" ? "Instagram"
+    : platform === "spotify" ? "Spotify"
+    : platform === "x" ? "X (Twitter)"
+    : platform === "twitch" ? "Twitch"
+    : platform;
 
   const cartLines = cart
-    .map((item) => `> ${fmtQty(item.qty)} ${item.label} — ${item.price.toFixed(2)}${sym}`)
+    .map((item) => {
+      const liveSuffix = item.liveStartAt
+        ? ` ⏰ ${new Date(item.liveStartAt).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`
+        : "";
+      return `> ${fmtQty(item.qty)} ${item.label} — ${item.price.toFixed(2)}${sym}${liveSuffix}`;
+    })
     .join("\n");
+
+  const liveItem = cart.find((c) => c.liveStartAt);
 
   const embed = {
     title: "💰 Nouvelle commande !",
@@ -39,6 +52,7 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
       { name: "💵 Total", value: `**${total}${sym}**`, inline: true },
       { name: "📧 Email", value: email || "Non renseigné", inline: false },
       { name: "🛒 Panier", value: cartLines, inline: false },
+      ...(liveItem?.liveStartAt ? [{ name: "🔴 Début du live", value: new Date(liveItem.liveStartAt).toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }), inline: false }] : []),
     ],
     timestamp: new Date().toISOString(),
     footer: { text: "Fanovaly" },

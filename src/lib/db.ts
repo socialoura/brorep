@@ -94,6 +94,31 @@ export async function initDb() {
     await sql`INSERT INTO smm_config (platform, service, bulkfollows_service_id) VALUES ('spotify', 'sp_streams', 0)`;
   }
 
+  // Ensure X (Twitter) services exist in smm_config (migration for existing DBs)
+  const xSmmCheck = await sql`SELECT COUNT(*) as cnt FROM smm_config WHERE platform = 'x'`;
+  if (Number(xSmmCheck[0].cnt) === 0) {
+    const xMappings = [
+      { service: "x_followers", id: 0 },
+      { service: "x_likes", id: 0 },
+      { service: "x_retweets", id: 0 },
+    ];
+    for (const m of xMappings) {
+      await sql`INSERT INTO smm_config (platform, service, bulkfollows_service_id) VALUES ('x', ${m.service}, ${m.id}) ON CONFLICT DO NOTHING`;
+    }
+  }
+
+  // Ensure Twitch services exist in smm_config (migration for existing DBs)
+  const twSmmCheck = await sql`SELECT COUNT(*) as cnt FROM smm_config WHERE platform = 'twitch'`;
+  if (Number(twSmmCheck[0].cnt) === 0) {
+    const twMappings = [
+      { service: "tw_followers", id: 0 },
+      { service: "tw_live_viewers", id: 0 }, // manual handling, kept for visibility
+    ];
+    for (const m of twMappings) {
+      await sql`INSERT INTO smm_config (platform, service, bulkfollows_service_id) VALUES ('twitch', ${m.service}, ${m.id}) ON CONFLICT DO NOTHING`;
+    }
+  }
+
   await sql`
     CREATE TABLE IF NOT EXISTS loyalty (
       id SERIAL PRIMARY KEY,
@@ -245,6 +270,65 @@ export async function initDb() {
       { service: "sp_streams", qty: 250000, price: 349.99, price_usd: 349.99 },
     ];
     for (const p of spPacks) {
+      await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
+    }
+  }
+
+  // Seed X (Twitter) packs if missing
+  const xCount = await sql`SELECT COUNT(*) as cnt FROM pricing WHERE service LIKE 'x_%'`;
+  if (Number(xCount[0].cnt) === 0) {
+    const xPacks = [
+      // x_followers
+      { service: "x_followers", qty: 100, price: 3.49, price_usd: 3.49 },
+      { service: "x_followers", qty: 250, price: 6.99, price_usd: 6.99 },
+      { service: "x_followers", qty: 500, price: 11.99, price_usd: 11.99 },
+      { service: "x_followers", qty: 1000, price: 19.99, price_usd: 19.99 },
+      { service: "x_followers", qty: 2500, price: 39.99, price_usd: 39.99 },
+      { service: "x_followers", qty: 5000, price: 69.99, price_usd: 69.99 },
+      // x_likes
+      { service: "x_likes", qty: 100, price: 2.49, price_usd: 2.49 },
+      { service: "x_likes", qty: 250, price: 4.99, price_usd: 4.99 },
+      { service: "x_likes", qty: 500, price: 8.99, price_usd: 8.99 },
+      { service: "x_likes", qty: 1000, price: 14.99, price_usd: 14.99 },
+      { service: "x_likes", qty: 2500, price: 29.99, price_usd: 29.99 },
+      { service: "x_likes", qty: 5000, price: 54.99, price_usd: 54.99 },
+      // x_retweets
+      { service: "x_retweets", qty: 100, price: 2.99, price_usd: 2.99 },
+      { service: "x_retweets", qty: 250, price: 5.49, price_usd: 5.49 },
+      { service: "x_retweets", qty: 500, price: 9.99, price_usd: 9.99 },
+      { service: "x_retweets", qty: 1000, price: 17.99, price_usd: 17.99 },
+      { service: "x_retweets", qty: 2500, price: 34.99, price_usd: 34.99 },
+      { service: "x_retweets", qty: 5000, price: 59.99, price_usd: 59.99 },
+    ];
+    for (const p of xPacks) {
+      await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
+    }
+  }
+
+  // Seed Twitch packs if missing
+  const twCount = await sql`SELECT COUNT(*) as cnt FROM pricing WHERE service LIKE 'tw_%'`;
+  if (Number(twCount[0].cnt) === 0) {
+    const twPacks = [
+      // tw_followers (8 packs)
+      { service: "tw_followers", qty: 100, price: 3.49, price_usd: 3.49 },
+      { service: "tw_followers", qty: 250, price: 6.99, price_usd: 6.99 },
+      { service: "tw_followers", qty: 500, price: 11.99, price_usd: 11.99 },
+      { service: "tw_followers", qty: 1000, price: 19.99, price_usd: 19.99 },
+      { service: "tw_followers", qty: 2500, price: 39.99, price_usd: 39.99 },
+      { service: "tw_followers", qty: 5000, price: 69.99, price_usd: 69.99 },
+      { service: "tw_followers", qty: 10000, price: 119.99, price_usd: 119.99 },
+      { service: "tw_followers", qty: 25000, price: 249.99, price_usd: 249.99 },
+      // tw_live_viewers (8 packs)
+      { service: "tw_live_viewers", qty: 10, price: 4.99, price_usd: 4.99 },
+      { service: "tw_live_viewers", qty: 25, price: 9.99, price_usd: 9.99 },
+      { service: "tw_live_viewers", qty: 50, price: 17.99, price_usd: 17.99 },
+      { service: "tw_live_viewers", qty: 100, price: 29.99, price_usd: 29.99 },
+      { service: "tw_live_viewers", qty: 250, price: 64.99, price_usd: 64.99 },
+      { service: "tw_live_viewers", qty: 500, price: 119.99, price_usd: 119.99 },
+      { service: "tw_live_viewers", qty: 1000, price: 219.99, price_usd: 219.99 },
+      { service: "tw_live_viewers", qty: 2500, price: 499.99, price_usd: 499.99 },
+    ];
+    for (const p of twPacks) {
       await sql`INSERT INTO pricing (service, qty, price, price_usd) VALUES (${p.service}, ${p.qty}, ${p.price}, ${p.price_usd}) ON CONFLICT DO NOTHING`;
     }
   }

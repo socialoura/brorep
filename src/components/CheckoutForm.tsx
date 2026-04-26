@@ -46,6 +46,26 @@ function themeFor(platform?: string) {
     tabBorder: "1px solid rgba(255,0,0,0.12)", tabSelectedBorder: "1px solid rgba(255,0,0,0.4)",
     tabSelectedBg: "rgba(255,0,0,0.08)",
   };
+  if (platform === "x") return {
+    accent: "rgb(29,155,240)", accentMid: "rgb(29,155,240)", accentDark: "rgb(20,120,200)",
+    bg: "rgba(29,155,240,0.06)", border: "rgba(29,155,240,0.15)", borderStrong: "rgba(29,155,240,0.4)",
+    glow: "rgba(29,155,240,0.25)", stripeBg: "#0a1520", stripeText: "#e0f0ff",
+    gradient: "linear-gradient(135deg, rgb(20,120,200), rgb(29,155,240))", btnText: "#fff",
+    inputBorder: "1px solid rgba(29,155,240,0.15)", inputBorderFocus: "1px solid rgba(29,155,240,0.4)",
+    inputBg: "rgba(29,155,240,0.04)", inputFocusShadow: "0 0 8px rgba(29,155,240,0.1)",
+    tabBorder: "1px solid rgba(29,155,240,0.12)", tabSelectedBorder: "1px solid rgba(29,155,240,0.4)",
+    tabSelectedBg: "rgba(29,155,240,0.08)",
+  };
+  if (platform === "twitch") return {
+    accent: "rgb(145,71,255)", accentMid: "rgb(145,71,255)", accentDark: "rgb(110,50,200)",
+    bg: "rgba(145,71,255,0.06)", border: "rgba(145,71,255,0.15)", borderStrong: "rgba(145,71,255,0.4)",
+    glow: "rgba(145,71,255,0.25)", stripeBg: "#150a20", stripeText: "#ede0ff",
+    gradient: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))", btnText: "#fff",
+    inputBorder: "1px solid rgba(145,71,255,0.15)", inputBorderFocus: "1px solid rgba(145,71,255,0.4)",
+    inputBg: "rgba(145,71,255,0.04)", inputFocusShadow: "0 0 8px rgba(145,71,255,0.1)",
+    tabBorder: "1px solid rgba(145,71,255,0.12)", tabSelectedBorder: "1px solid rgba(145,71,255,0.4)",
+    tabSelectedBg: "rgba(145,71,255,0.08)",
+  };
   // default: tiktok
   return {
     accent: "rgb(105,201,208)", accentMid: "rgb(105,201,208)", accentDark: "rgb(79,179,186)",

@@ -15,7 +15,7 @@ interface OrderData {
   id: number;
   username: string;
   platform: string;
-  cart: { service: string; label: string; qty: number; price: number }[];
+  cart: { service: string; label: string; qty: number; price: number; liveStartAt?: string }[];
   totalCents: number;
   status: string;
   smmStatuses?: SmmStatus[];
@@ -260,9 +260,16 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
             {t("orderDetail.orderDetail")}
           </p>
           {Array.isArray(order.cart) && order.cart.map((item, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: i < order.cart.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
-              <span style={{ fontSize: "13px", color: "#e8f7ed" }}>{fmtQty(item.qty)} {item.label}</span>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: greenDim }}>{fmtPrice(item.price, (order.currency || "eur") as Currency)}</span>
+            <div key={i} style={{ padding: "6px 0", borderBottom: i < order.cart.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "13px", color: "#e8f7ed" }}>{fmtQty(item.qty)} {item.label}</span>
+                <span style={{ fontSize: "13px", fontWeight: 600, color: greenDim }}>{fmtPrice(item.price, (order.currency || "eur") as Currency)}</span>
+              </div>
+              {item.liveStartAt && (
+                <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "rgb(145,71,255)", fontWeight: 600 }}>
+                  🔴 {lang === "en" ? "Live starts" : "Début du live"}: {new Date(item.liveStartAt).toLocaleString(lang === "en" ? "en-US" : "fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+                </p>
+              )}
             </div>
           ))}
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(105,201,208,0.1)" }}>

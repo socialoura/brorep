@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
     const piCurrency = meta.currency || (pi.currency === "usd" ? "usd" : "eur");
 
     const rawCart = meta.cart ? JSON.parse(meta.cart) : [];
-    const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; pu?: number; service?: string; label?: string; qty?: number; price?: number; priceUsd?: number }) =>
-      c.service ? c : { service: c.s, label: c.l, qty: c.q, price: c.p, priceUsd: c.pu || c.p }
+    const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; pu?: number; ls?: string; service?: string; label?: string; qty?: number; price?: number; priceUsd?: number; liveStartAt?: string }) =>
+      c.service ? c : { service: c.s, label: c.l, qty: c.q, price: c.p, priceUsd: c.pu || c.p, ...(c.ls ? { liveStartAt: c.ls } : {}) }
     );
 
     // PostAssignments: compact {id,l,v} → full {postId,postUrl,imageUrl,likes,views}
@@ -131,9 +131,13 @@ export async function POST(req: NextRequest) {
           const plat = platform || "tiktok";
           const profileLink = plat === "youtube"
             ? `https://www.youtube.com/@${username}`
-            : plat === "instagram"
-              ? `https://www.instagram.com/${username}`
-              : `https://www.tiktok.com/@${username}`;
+            : plat === "x"
+              ? `https://x.com/${username}`
+              : plat === "twitch"
+                ? `https://www.twitch.tv/${username}`
+                : plat === "instagram"
+                  ? `https://www.instagram.com/${username}`
+                  : `https://www.tiktok.com/@${username}`;
 
           // Build post URL map for likes/views: service -> array of post URLs
           const postUrlsMap: Record<string, string[]> = {};
@@ -143,10 +147,14 @@ export async function POST(req: NextRequest) {
                 if (pa.likes) {
                   if (!postUrlsMap["likes"]) postUrlsMap["likes"] = [];
                   postUrlsMap["likes"].push(pa.postUrl);
+                  if (!postUrlsMap["x_likes"]) postUrlsMap["x_likes"] = [];
+                  postUrlsMap["x_likes"].push(pa.postUrl);
                 }
                 if (pa.views) {
                   if (!postUrlsMap["views"]) postUrlsMap["views"] = [];
                   postUrlsMap["views"].push(pa.postUrl);
+                  if (!postUrlsMap["x_retweets"]) postUrlsMap["x_retweets"] = [];
+                  postUrlsMap["x_retweets"].push(pa.postUrl);
                 }
               }
             }
@@ -156,10 +164,12 @@ export async function POST(req: NextRequest) {
           let totalCostUsd = 0;
 
           for (const item of cart as { service: string; qty: number }[]) {
+            // Skip services that are handled manually (e.g., Twitch live viewers)
+            if (item.service === "tw_live_viewers") continue;
             const svcId = configMap[`${plat}:${item.service}`];
             if (!svcId) continue;
 
-            const needsPostUrl = ["likes", "views", "yt_likes", "yt_views"].includes(item.service);
+            const needsPostUrl = ["likes", "views", "yt_likes", "yt_views", "x_likes", "x_retweets"].includes(item.service);
 
             // Collect all links to send orders to
             let links: { url: string; qty: number }[] = [];

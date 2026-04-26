@@ -22,6 +22,7 @@ export interface PostAssignment {
 function buildPostUrl(platform: string, username: string, postId: string): string {
   if (platform === "tiktok") return `https://www.tiktok.com/@${username}/video/${postId}`;
   if (platform === "instagram") return `https://www.instagram.com/p/${postId}/`;
+  if (platform === "x") return `https://x.com/${username}/status/${postId}`;
   return "";
 }
 
@@ -39,8 +40,8 @@ export default function PostPicker({
   onBack: () => void;
 }) {
   const { t } = useTranslation();
-  const hasLikes = cart.some((c) => c.service === "likes");
-  const hasViews = cart.some((c) => c.service === "views");
+  const hasLikes = cart.some((c) => ["likes", "x_likes"].includes(c.service));
+  const hasViews = cart.some((c) => ["views", "x_retweets"].includes(c.service));
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -57,7 +58,17 @@ export default function PostPicker({
     if (selected.size === profile.posts.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(profile.posts.map((p) => p.id)));
+      const allIds = new Set(profile.posts.map((p) => p.id));
+      setSelected(allIds);
+      // Auto-confirm when selecting all
+      const assignments: PostAssignment[] = profile.posts.map((post) => ({
+        postId: post.id,
+        postUrl: buildPostUrl(platform, profile.username, post.id),
+        imageUrl: post.imageUrl || "",
+        likes: hasLikes,
+        views: hasViews,
+      }));
+      onConfirm(assignments);
     }
   }
 
@@ -75,7 +86,16 @@ export default function PostPicker({
     onConfirm(assignments);
   }
 
-  const services = [hasLikes && "likes", hasViews && "vues"].filter(Boolean).join(" + ");
+  const isX = platform === "x";
+  const accent = isX ? "rgb(29, 155, 240)" : "rgb(105, 201, 208)";
+  const accentBg = isX ? "rgba(29, 155, 240, 0.1)" : "rgba(79, 179, 186, 0.1)";
+  const accentBorder = isX ? "rgba(29, 155, 240, 0.2)" : "rgba(105, 201, 208, 0.2)";
+  const accentGlow = isX ? "rgba(29, 155, 240, 0.15)" : "rgba(105, 201, 208, 0.15)";
+  const accentShadow = isX ? "rgba(29, 155, 240, 0.25)" : "rgba(105, 201, 208, 0.25)";
+  const gradientBg = isX ? "linear-gradient(135deg, rgb(20, 120, 200), rgb(29, 155, 240))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
+  const services = isX
+    ? [hasLikes && "likes", hasViews && "retweets"].filter(Boolean).join(" + ")
+    : [hasLikes && "likes", hasViews && "vues"].filter(Boolean).join(" + ");
 
   return (
     <div
@@ -90,7 +110,7 @@ export default function PostPicker({
     >
       {/* Title */}
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0" }}>
-        {t("posts.title")} <span style={{ color: "rgb(105, 201, 208)", textShadow: "0 0 20px rgba(105, 201, 208, 0.3)" }}>{t("posts.posts")}</span>
+        {t("posts.title")} <span style={{ color: accent, textShadow: `0 0 20px ${accentShadow}` }}>{t("posts.posts")}</span>
       </h2>
       <p style={{ fontSize: "13px", color: "rgb(169, 181, 174)", margin: "0 0 6px 0" }}>
         {t("posts.whichPosts")} {services} ?
@@ -106,9 +126,9 @@ export default function PostPicker({
           marginBottom: "16px",
           padding: "8px 16px",
           borderRadius: "10px",
-          border: "1px solid rgba(105, 201, 208, 0.2)",
-          backgroundColor: selected.size === profile.posts.length ? "rgba(79, 179, 186, 0.1)" : "rgba(255, 255, 255, 0.03)",
-          color: selected.size === profile.posts.length ? "rgb(105, 201, 208)" : "rgb(169, 181, 174)",
+          border: `1px solid ${accentBorder}`,
+          backgroundColor: selected.size === profile.posts.length ? accentBg : "rgba(255, 255, 255, 0.03)",
+          color: selected.size === profile.posts.length ? accent : "rgb(169, 181, 174)",
           fontSize: "12px",
           fontWeight: 600,
           cursor: "pointer",
@@ -141,8 +161,8 @@ export default function PostPicker({
                   borderRadius: "12px",
                   overflow: "hidden",
                   cursor: "pointer",
-                  border: isOn ? "2px solid rgb(105, 201, 208)" : "2px solid transparent",
-                  boxShadow: isOn ? "0 0 16px rgba(105, 201, 208, 0.15)" : "none",
+                  border: isOn ? `2px solid ${accent}` : "2px solid transparent",
+                  boxShadow: isOn ? `0 0 16px ${accentGlow}` : "none",
                   padding: 0,
                   background: "rgb(14, 21, 18)",
                   transition: "all 0.2s",
@@ -161,6 +181,28 @@ export default function PostPicker({
                       transition: "opacity 0.2s",
                     }}
                   />
+                ) : isX && post.caption ? (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      justifyContent: "flex-start",
+                      padding: "10px",
+                      backgroundColor: isOn ? "rgba(29, 155, 240, 0.08)" : "rgba(29, 155, 240, 0.03)",
+                      opacity: isOn ? 1 : 0.6,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="rgb(29,155,240)" style={{ marginBottom: "6px", flexShrink: 0, opacity: 0.6 }}>
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                    <span style={{ fontSize: "9px", lineHeight: 1.35, color: "rgb(169,181,174)", wordBreak: "break-word", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical" as const }}>
+                      {post.caption}
+                    </span>
+                  </div>
                 ) : (
                   <div
                     style={{
@@ -169,7 +211,7 @@ export default function PostPicker({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: "rgba(79, 179, 186, 0.05)",
+                      backgroundColor: isX ? "rgba(29, 155, 240, 0.05)" : "rgba(79, 179, 186, 0.05)",
                       opacity: isOn ? 1 : 0.5,
                     }}
                   >
@@ -222,7 +264,7 @@ export default function PostPicker({
                       width: "20px",
                       height: "20px",
                       borderRadius: "50%",
-                      backgroundColor: "rgb(105, 201, 208)",
+                      backgroundColor: accent,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -256,8 +298,8 @@ export default function PostPicker({
           fontSize: "14px",
           fontFamily: "inherit",
           color: selected.size > 0 ? "#000" : "rgb(80, 80, 80)",
-          background: selected.size > 0 ? "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))" : "rgba(255, 255, 255, 0.06)",
-          boxShadow: selected.size > 0 ? "0 10px 30px rgba(105, 201, 208, 0.25)" : "none",
+          background: selected.size > 0 ? gradientBg : "rgba(255, 255, 255, 0.06)",
+          boxShadow: selected.size > 0 ? `0 10px 30px ${accentShadow}` : "none",
           transition: "all 0.2s",
           opacity: selected.size > 0 ? 1 : 0.5,
         }}

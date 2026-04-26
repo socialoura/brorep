@@ -11,6 +11,16 @@ function getTheme(pathname: string) {
     gradient: "linear-gradient(135deg, #1DB954, #1ed760)", text: "#000",
     glow: "0 4px 20px rgba(29,185,84,0.3)",
   };
+  if (pathname.startsWith("/x")) return {
+    accent: "rgb(29,155,240)", bg: "rgba(29,155,240,0.08)", border: "rgba(29,155,240,0.25)",
+    gradient: "linear-gradient(135deg, rgb(20,120,200), rgb(29,155,240))", text: "#fff",
+    glow: "0 4px 20px rgba(29,155,240,0.3)",
+  };
+  if (pathname.startsWith("/twitch")) return {
+    accent: "rgb(145,71,255)", bg: "rgba(145,71,255,0.08)", border: "rgba(145,71,255,0.25)",
+    gradient: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))", text: "#fff",
+    glow: "0 4px 20px rgba(145,71,255,0.3)",
+  };
   if (pathname === "/" || pathname.startsWith("/tiktok")) return {
     accent: "rgb(105,201,208)", bg: "rgba(79,179,186,0.08)", border: "rgba(105,201,208,0.25)",
     gradient: "linear-gradient(135deg, rgb(79,179,186), rgb(105,201,208))", text: "#000",
@@ -108,7 +118,7 @@ export default function ChatWidget() {
       aria-label="Chat"
       style={{
         position: "fixed", bottom: "20px", right: "20px", zIndex: 9999,
-        width: "48px", height: "48px", borderRadius: "50%", border: "none",
+        width: "40px", height: "40px", borderRadius: "50%", border: "none",
         background: theme.gradient, color: theme.text,
         boxShadow: theme.glow, cursor: "pointer",
         display: "flex", alignItems: "center", justifyContent: "center",
@@ -117,7 +127,7 @@ export default function ChatWidget() {
       onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
     >
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     </button>
@@ -138,7 +148,7 @@ export default function ChatWidget() {
       <div
         style={{
           position: "fixed", bottom: "20px", right: "20px", zIndex: 9999,
-          width: "300px", maxHeight: "360px",
+          width: "260px", maxHeight: "320px",
           borderRadius: "16px", overflow: "hidden",
           border: `1px solid ${theme.border}`,
           backgroundColor: "rgb(14,21,18)",

@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         username: username || "",
         platform: platform || "",
         email: email || "",
-        cart: JSON.stringify(cart.map((c: { service: string; label: string; qty: number; price: number; priceUsd?: number }) => ({ s: c.service, l: c.label, q: c.qty, p: c.price, pu: c.priceUsd || c.price }))),
+        cart: JSON.stringify(cart.map((c: { service: string; label: string; qty: number; price: number; priceUsd?: number; liveStartAt?: string }) => ({ s: c.service, l: c.label, q: c.qty, p: c.price, pu: c.priceUsd || c.price, ...(c.liveStartAt ? { ls: c.liveStartAt } : {}) }))),
         currency,
         postAssignments: postAssignments ? JSON.stringify(postAssignments.map((pa: { postId: string; likes: boolean; views: boolean }) => ({ id: pa.postId, l: pa.likes ? 1 : 0, v: pa.views ? 1 : 0 }))) : "[]",
         postsCount: postAssignments ? String(postAssignments.length) : "0",

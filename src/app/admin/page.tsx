@@ -26,7 +26,7 @@ interface Order {
   email: string;
   username: string;
   platform: string;
-  cart: { service: string; label: string; qty: number; price: number }[];
+  cart: { service: string; label: string; qty: number; price: number; liveStartAt?: string }[];
   post_assignments: unknown;
   total_cents: number;
   cost_cents: number;
@@ -396,6 +396,11 @@ export default function AdminPage() {
                     <td style={{ padding: "8px" }}>{o.platform}</td>
                     <td style={{ padding: "8px", color: "rgb(169,181,174)" }}>
                       {Array.isArray(o.cart) ? o.cart.map((c) => `${c.qty} ${c.label}`).join(", ") : "—"}
+                      {Array.isArray(o.cart) && o.cart.find((c) => c.liveStartAt) && (
+                        <div style={{ marginTop: "4px", padding: "3px 8px", borderRadius: "6px", fontSize: "10px", fontWeight: 600, backgroundColor: "rgba(145,71,255,0.12)", color: "#c79dff", border: "1px solid rgba(145,71,255,0.25)", display: "inline-block" }}>
+                          🔴 Live: {new Date(o.cart.find((c) => c.liveStartAt)!.liveStartAt!).toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: "8px", textAlign: "right", fontWeight: 600, color: green }}>{(o.total_cents / 100).toFixed(2)}{CURRENCY_SYMBOLS[o.currency] || "\u20AC"}</td>
                     <td style={{ padding: "8px", textAlign: "right" }}>
@@ -469,7 +474,7 @@ export default function AdminPage() {
                               });
                               fetchOrders(ordersPage);
                             }}
-                            style={{ padding: "2px 4px", borderRadius: "4px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "10px", fontFamily: "inherit", cursor: "pointer" }}
+                            style={{ padding: "2px 4px", borderRadius: "4px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "10px", fontFamily: "inherit", cursor: "pointer", colorScheme: "dark" }}
                           >
                             <option value="">→</option>
                             {o.status === "pending" && <option value="paid">paid</option>}
@@ -548,7 +553,7 @@ export default function AdminPage() {
               <select
                 value={newPack.service}
                 onChange={(e) => setNewPack({ ...newPack, service: e.target.value })}
-                style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit" }}
+                style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", colorScheme: "dark" }}
               >
                 <option value="followers">Followers</option>
                 <option value="likes">Likes</option>
@@ -557,6 +562,11 @@ export default function AdminPage() {
                 <option value="yt_likes">Likes YT</option>
                 <option value="yt_views">Vues YT</option>
                 <option value="sp_streams">Streams Spotify</option>
+                <option value="x_followers">Followers X (Twitter)</option>
+                <option value="x_likes">Likes X (Twitter)</option>
+                <option value="x_retweets">Retweets X</option>
+                <option value="tw_followers">Followers Twitch</option>
+                <option value="tw_live_viewers">Live Viewers Twitch</option>
               </select>
               <input
                 type="number"
@@ -835,6 +845,120 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+
+          {/* X (Twitter) pricing */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "32px 0 16px 0" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(29,155,240)" }}>X (Twitter)</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(29,155,240,0.15)" }} />
+          </div>
+
+          {([["x_followers", "Followers X"], ["x_likes", "Likes X"], ["x_retweets", "Retweets X"]] as const).map(([service, label]) => {
+            const items = pricing.filter((p) => p.service === service);
+            if (items.length === 0) return null;
+            return (
+              <div key={service} style={{ marginBottom: "28px" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#fff", marginBottom: "10px" }}>{label}</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "8px" }}>
+                  {items.map((item) => (
+                    <div key={item.id} style={{ padding: "14px", borderRadius: "12px", border: `1px solid ${item.active ? "rgba(29,155,240,0.15)" : "rgba(255,255,255,0.06)"}`, backgroundColor: item.active ? "rgba(29,155,240,0.04)" : "rgba(255,255,255,0.02)", opacity: item.active ? 1 : 0.5 }}>
+                      <div style={{ fontSize: "16px", fontWeight: 700, color: "#e8f7ed", marginBottom: "4px" }}>
+                        {item.qty >= 1000 ? `${item.qty / 1000}K` : item.qty}
+                      </div>
+                      {editingId === item.id ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginBottom: "8px" }}>
+                          {[
+                            { label: "\u20AC", val: editPrice, set: setEditPrice },
+                            { label: "$", val: editPriceUsd, set: setEditPriceUsd },
+                            { label: "\u00A3", val: editPriceGbp, set: setEditPriceGbp },
+                            { label: "C$", val: editPriceCad, set: setEditPriceCad },
+                            { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "CHF", val: editPriceChf, set: setEditPriceChf },
+                          ].map((c) => (
+                            <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                              <span style={{ fontSize: "9px", color: "rgb(107,117,111)", width: "22px", textAlign: "right" }}>{c.label}</span>
+                              <input type="number" step="0.01" value={c.val} onChange={(e) => c.set(e.target.value)}
+                                style={{ width: "65px", padding: "3px 6px", borderRadius: "6px", border: "1px solid rgba(29,155,240,0.3)", backgroundColor: "rgba(29,155,240,0.04)", color: "#e8f7ed", fontSize: "12px", outline: "none", fontFamily: "inherit" }} />
+                            </div>
+                          ))}
+                          <button onClick={() => updatePrice(item.id)} style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "rgb(29,155,240)", color: "#fff", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}>OK</button>
+                        </div>
+                      ) : (
+                        <div onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }} style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}>
+                          <span style={{ color: "rgb(29,155,240)" }}>{Number(item.price).toFixed(2)}{"\u20AC"}</span>
+                          <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div style={{ display: "flex", gap: "4px" }}>
+                        <button onClick={() => toggleActive(item.id, item.active)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}>
+                          {item.active ? "Désactiver" : "Activer"}
+                        </button>
+                        <button onClick={() => deletePack(item.id)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.15)", backgroundColor: "transparent", color: "#ef4444", cursor: "pointer", fontFamily: "inherit" }}>
+                          {"\u2715"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Twitch pricing */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "32px 0 16px 0" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)" }}>Twitch</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(145,71,255,0.15)" }} />
+          </div>
+
+          {([["tw_followers", "Followers Twitch"], ["tw_live_viewers", "Live Viewers Twitch"]] as const).map(([service, label]) => {
+            const items = pricing.filter((p) => p.service === service);
+            if (items.length === 0) return null;
+            return (
+              <div key={service} style={{ marginBottom: "28px" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#fff", marginBottom: "10px" }}>{label}</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "8px" }}>
+                  {items.map((item) => (
+                    <div key={item.id} style={{ padding: "14px", borderRadius: "12px", border: `1px solid ${item.active ? "rgba(145,71,255,0.15)" : "rgba(255,255,255,0.06)"}`, backgroundColor: item.active ? "rgba(145,71,255,0.04)" : "rgba(255,255,255,0.02)", opacity: item.active ? 1 : 0.5 }}>
+                      <div style={{ fontSize: "16px", fontWeight: 700, color: "#e8f7ed", marginBottom: "4px" }}>
+                        {item.qty >= 1000 ? `${item.qty / 1000}K` : item.qty}
+                      </div>
+                      {editingId === item.id ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginBottom: "8px" }}>
+                          {[
+                            { label: "\u20AC", val: editPrice, set: setEditPrice },
+                            { label: "$", val: editPriceUsd, set: setEditPriceUsd },
+                            { label: "\u00A3", val: editPriceGbp, set: setEditPriceGbp },
+                            { label: "C$", val: editPriceCad, set: setEditPriceCad },
+                            { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "CHF", val: editPriceChf, set: setEditPriceChf },
+                          ].map((c) => (
+                            <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                              <span style={{ fontSize: "9px", color: "rgb(107,117,111)", width: "22px", textAlign: "right" }}>{c.label}</span>
+                              <input type="number" step="0.01" value={c.val} onChange={(e) => c.set(e.target.value)}
+                                style={{ width: "65px", padding: "3px 6px", borderRadius: "6px", border: "1px solid rgba(145,71,255,0.3)", backgroundColor: "rgba(145,71,255,0.04)", color: "#e8f7ed", fontSize: "12px", outline: "none", fontFamily: "inherit" }} />
+                            </div>
+                          ))}
+                          <button onClick={() => updatePrice(item.id)} style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "rgb(145,71,255)", color: "#fff", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}>OK</button>
+                        </div>
+                      ) : (
+                        <div onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }} style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}>
+                          <span style={{ color: "rgb(145,71,255)" }}>{Number(item.price).toFixed(2)}{"\u20AC"}</span>
+                          <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div style={{ display: "flex", gap: "4px" }}>
+                        <button onClick={() => toggleActive(item.id, item.active)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}>
+                          {item.active ? "Désactiver" : "Activer"}
+                        </button>
+                        <button onClick={() => deletePack(item.id)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.15)", backgroundColor: "transparent", color: "#ef4444", cursor: "pointer", fontFamily: "inherit" }}>
+                          {"\u2715"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -879,7 +1003,7 @@ export default function AdminPage() {
                     items[i] = { ...items[i], service: e.target.value };
                     setNewCombo({ ...newCombo, items });
                   }}
-                  style={{ padding: "6px 8px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit" }}
+                  style={{ padding: "6px 8px", borderRadius: "6px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", colorScheme: "dark" }}
                 >
                   <option value="followers">Followers</option>
                   <option value="likes">Likes</option>
@@ -996,7 +1120,7 @@ export default function AdminPage() {
               <select
                 value={newUpsell.service}
                 onChange={(e) => setNewUpsell({ ...newUpsell, service: e.target.value })}
-                style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit" }}
+                style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", colorScheme: "dark" }}
               >
                 <option value="followers">Followers</option>
                 <option value="likes">Likes</option>
