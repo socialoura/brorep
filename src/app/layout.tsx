@@ -1,10 +1,28 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies, headers } from "next/headers";
 import Script from "next/script";
 import PostHogProviderWrapper from "@/components/PostHogProvider";
+import { CurrencyProvider } from "@/components/CurrencyProvider";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
+import type { Currency } from "@/lib/i18n";
 import "./globals.css";
+
+const VALID_CURRENCIES: Currency[] = ["eur", "usd", "gbp", "cad", "nzd", "chf"];
+
+const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
+  GB: "gbp", IM: "gbp", JE: "gbp", GG: "gbp",
+  US: "usd", PR: "usd", VI: "usd", AS: "usd", GU: "usd", MP: "usd",
+  EC: "usd", SV: "usd", PA: "usd", TL: "usd", FM: "usd", MH: "usd", PW: "usd",
+  CA: "cad",
+  NZ: "nzd", AU: "nzd",
+  CH: "chf", LI: "chf",
+  AT: "eur", BE: "eur", CY: "eur", DE: "eur", EE: "eur", ES: "eur", FI: "eur",
+  FR: "eur", GR: "eur", HR: "eur", IE: "eur", IT: "eur", LT: "eur", LU: "eur",
+  LV: "eur", MT: "eur", NL: "eur", PT: "eur", SI: "eur", SK: "eur",
+  AD: "eur", MC: "eur", SM: "eur", VA: "eur", ME: "eur", XK: "eur",
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -109,11 +127,25 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const cookieCurrency = cookieStore.get("currency")?.value;
+  let detectedCurrency: Currency | null = null;
+  if (cookieCurrency && VALID_CURRENCIES.includes(cookieCurrency as Currency)) {
+    detectedCurrency = cookieCurrency as Currency;
+  } else {
+    // First visit: detect from Vercel geo IP header
+    const headerStore = await headers();
+    const country = (headerStore.get("x-vercel-ip-country") || "").toUpperCase();
+    if (country && COUNTRY_TO_CURRENCY[country]) {
+      detectedCurrency = COUNTRY_TO_CURRENCY[country];
+    }
+  }
+
   return (
     <html
       lang="fr"
@@ -140,11 +172,13 @@ export default function RootLayout({
             </Script>
           </>
         )}
-        <PostHogProviderWrapper>
-          <main style={{ flex: 1 }}>{children}</main>
-        </PostHogProviderWrapper>
-        <Footer />
-        <ChatWidget />
+        <CurrencyProvider initial={detectedCurrency}>
+          <PostHogProviderWrapper>
+            <main style={{ flex: 1 }}>{children}</main>
+          </PostHogProviderWrapper>
+          <Footer />
+          <ChatWidget />
+        </CurrencyProvider>
       </body>
     </html>
   );

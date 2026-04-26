@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { useDetectedCurrency } from "@/components/CurrencyProvider";
 
 export type Lang = "fr" | "en";
 export type Currency = "eur" | "usd" | "gbp" | "cad" | "nzd" | "chf";
@@ -358,10 +359,13 @@ export function useTranslation() {
     return path;
   }
 
+  const detectedCurrency = useDetectedCurrency();
   const currencyParam = searchParams.get("currency") as Currency | null;
   const currency: Currency = currencyParam && ["eur", "usd", "gbp", "cad", "nzd", "chf"].includes(currencyParam)
     ? currencyParam
-    : lang === "en" ? "usd" : "eur";
+    : detectedCurrency
+      ? detectedCurrency
+      : lang === "en" ? "usd" : "eur";
 
   return { t, lang, href, currency };
 }
