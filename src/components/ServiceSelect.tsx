@@ -333,13 +333,19 @@ export default function ServiceSelect({
   const [toast, setToast] = useState<{ message: string; cta: string; targetTab: ServiceType } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const showCombos = platform === "tiktok";
+
   useEffect(() => {
-    // Fetch combos + dynamic pricing in parallel
-    fetch("/api/combos")
-      .then((r) => r.json())
-      .then((data) => { if (data.combos) setCombos(data.combos); })
-      .catch(() => {})
-      .finally(() => setCombosLoading(false));
+    // Fetch combos + dynamic pricing in parallel — combos only on TikTok
+    if (showCombos) {
+      fetch("/api/combos")
+        .then((r) => r.json())
+        .then((data) => { if (data.combos) setCombos(data.combos); })
+        .catch(() => {})
+        .finally(() => setCombosLoading(false));
+    } else {
+      setCombosLoading(false);
+    }
 
     fetch("/api/pricing")
       .then((r) => r.json())
@@ -786,8 +792,8 @@ export default function ServiceSelect({
         </div>
       )}
 
-      {/* Combo packs — below individual packs */}
-      {combosLoading ? (
+      {/* Combo packs — TikTok only, below individual packs */}
+      {showCombos && (combosLoading ? (
         <div style={{ width: "100%", marginBottom: "20px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px" }}>
             {[1, 2].map((i) => (
@@ -888,7 +894,7 @@ export default function ServiceSelect({
             })}
           </div>
         </div>
-      )}
+      ))}
 
       {/* Cart summary */}
       {cart.length > 0 && (

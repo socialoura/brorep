@@ -103,7 +103,7 @@ function TwitchHomePageInner() {
       .then((data) => {
         if (data.pricing && Array.isArray(data.pricing) && data.pricing.length > 0) {
           type PricingRow = { service: string; price: number; price_usd?: number };
-          const tw = (data.pricing as PricingRow[]).filter((r) => ["tw_followers", "tw_live_viewers"].includes(r.service));
+          const tw = (data.pricing as PricingRow[]).filter((r) => r.service === "tw_followers");
           if (tw.length > 0) {
             setMinPrice(Math.min(...tw.map((r) => Number(r.price))));
             setMinPriceUsd(Math.min(...tw.map((r) => Number(r.price_usd || r.price))));
@@ -159,9 +159,9 @@ function TwitchHomePageInner() {
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
                 <FanovalyLogo />
                 <h1 style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
-                  {lang === "fr" ? "Boost ton" : "Boost your"}
+                  {lang === "fr" ? "Fais connaître ta" : "Promote your"}
                   <br />
-                  <span style={{ color: "#fff" }}>{lang === "fr" ? "stream " : "stream "}</span>
+                  <span style={{ color: "#fff" }}>{lang === "fr" ? "chaîne " : "channel "}</span>
                   <span style={{ background: "linear-gradient(135deg, rgb(145,71,255), rgb(110,50,200))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     Twitch
                     <svg width="0.7em" height="0.7em" viewBox="0 0 24 24" fill="rgb(145,71,255)" style={{ display: "inline", verticalAlign: "middle", marginLeft: "6px", filter: "drop-shadow(0 0 12px rgba(145,71,255,0.5))" }}>
@@ -173,8 +173,8 @@ function TwitchHomePageInner() {
 
               <p style={{ fontSize: "15px", color: "rgb(169,181,174)", maxWidth: "380px", lineHeight: 1.5, margin: 0 }}>
                 {lang === "fr"
-                  ? <>Plus de viewers, plus de followers, plus de visibilité<br /><span style={{ color: "rgb(107,117,111)" }}>pendant que tu streames.</span></>
-                  : <>More viewers, more followers, more visibility<br /><span style={{ color: "rgb(107,117,111)" }}>while you stream.</span></>}
+                  ? <>Une visibilité accrue auprès d&apos;une audience<br /><span style={{ color: "rgb(107,117,111)" }}>passionnée de gaming et de streaming.</span></>
+                  : <>Reach a wider audience of gaming<br /><span style={{ color: "rgb(107,117,111)" }}>and streaming enthusiasts.</span></>}
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
@@ -182,7 +182,7 @@ function TwitchHomePageInner() {
                   {minPrice !== null && <>{lang === "fr" ? "À partir de" : "Starting at"} <span style={{ fontSize: "28px", fontWeight: 900, color: "rgb(145,71,255)", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
                 </p>
                 <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
-                  ⚡ {lang === "fr" ? "Viewers en direct sur ton stream" : "Live viewers on your stream"}
+                  ⚡ {lang === "fr" ? "Promotion de ta chaîne Twitch" : "Twitch channel promotion"}
                 </span>
               </div>
 
@@ -198,7 +198,7 @@ function TwitchHomePageInner() {
                   color: "#fff", boxShadow: "0 4px 24px rgba(145,71,255,0.3)",
                 }}
               >
-                {lang === "fr" ? "Booster mon stream →" : "Boost my stream →"}
+                {lang === "fr" ? "Promouvoir ma chaîne →" : "Promote my channel →"}
               </button>
 
               <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
@@ -219,9 +219,9 @@ function TwitchHomePageInner() {
                 <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)", marginBottom: "16px", textAlign: "center" }}>{lang === "fr" ? "Comment ça marche" : "How it works"}</p>
                 <div className="grid-steps">
                   {[
-                    { num: "1", title: lang === "fr" ? "Entre ton @" : "Enter your @", desc: lang === "fr" ? "Indique ton pseudo Twitch et choisis tes packs (followers ou viewers live)." : "Enter your Twitch username and pick your packs (followers or live viewers)." },
-                    { num: "2", title: lang === "fr" ? "Programme ton live" : "Schedule your live", desc: lang === "fr" ? "Pour les viewers : indique précisément quand ton stream commence." : "For live viewers: tell us exactly when your stream starts." },
-                    { num: "3", title: lang === "fr" ? "Boost en direct" : "Boost live", desc: lang === "fr" ? "Tes viewers arrivent dès le début du live et restent connectés." : "Viewers arrive at the start of your live and stay connected." },
+                    { num: "1", title: lang === "fr" ? "Entre ton @" : "Enter your @", desc: lang === "fr" ? "Indique ta chaîne Twitch et choisis ta formule de promotion." : "Enter your Twitch channel and choose your promotion plan." },
+                    { num: "2", title: lang === "fr" ? "Paie en sécurité" : "Pay securely", desc: lang === "fr" ? "Paiement sécurisé par Stripe, en quelques secondes." : "Secure Stripe payment, takes only seconds." },
+                    { num: "3", title: lang === "fr" ? "Audience ciblée" : "Targeted audience", desc: lang === "fr" ? "Ta chaîne est mise en avant auprès de viewers intéressés par ton contenu." : "Your channel is showcased to viewers interested in your content." },
                   ].map((s) => (
                     <div key={s.num} style={{ padding: "20px 14px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", textAlign: "center" }}>
                       <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "rgba(145,71,255,0.1)", border: "1px solid rgba(145,71,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px auto", fontSize: "13px", fontWeight: 800, color: "rgb(145,71,255)" }}>{s.num}</div>
