@@ -108,6 +108,8 @@ export default function AdminPage() {
   const [smm, setSmm] = useState<SmmData | null>(null);
   const [upsells, setUpsells] = useState<{ id: number; service: string; qty: number; label: string; label_en: string; active: boolean; sort_order: number }[]>([]);
   const [newUpsell, setNewUpsell] = useState({ service: "followers", qty: "", label: "", labelEn: "" });
+  const [editingSmm, setEditingSmm] = useState<{ orderId: number; index: number } | null>(null);
+  const [editingSmmValue, setEditingSmmValue] = useState("");
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
 
@@ -176,6 +178,38 @@ export default function AdminPage() {
     if (res.ok) { const data = await res.json(); setUpsells(data.upsells); }
     setLoading(false);
   }, [password]);
+
+  const saveSmmId = async (order: Order, index: number, newId: number | null) => {
+    const current = Array.isArray(order.smm_orders) ? [...order.smm_orders] : [];
+    if (index < 0 || index >= current.length) return;
+    const entry = { ...current[index] };
+    if (newId && newId > 0) {
+      entry.bulkfollows_order_id = newId;
+      delete entry.error;
+    } else {
+      delete entry.bulkfollows_order_id;
+    }
+    current[index] = entry;
+    await fetch("/api/admin/orders", {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ id: order.id, smm_orders: current }),
+    });
+    setEditingSmm(null);
+    setEditingSmmValue("");
+    fetchOrders(ordersPage);
+  };
+
+  const addSmmEntry = async (order: Order, service: string, qty: number, bulkfollowsOrderId: number) => {
+    const current = Array.isArray(order.smm_orders) ? [...order.smm_orders] : [];
+    current.push({ service, qty, bulkfollows_order_id: bulkfollowsOrderId });
+    await fetch("/api/admin/orders", {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ id: order.id, smm_orders: current }),
+    });
+    fetchOrders(ordersPage);
+  };
 
   const fetchSmm = async () => {
     setLoading(true);
@@ -477,17 +511,65 @@ export default function AdminPage() {
                       />
                     </td>
                     <td style={{ padding: "8px" }}>
-                      {Array.isArray(o.smm_orders) && o.smm_orders.length > 0 ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                          {o.smm_orders.map((s, i) => (
-                            <span key={i} style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", backgroundColor: s.error ? "rgba(239,68,68,0.08)" : "rgba(0,180,53,0.08)", color: s.error ? "#ef4444" : green, border: `1px solid ${s.error ? "rgba(239,68,68,0.15)" : "rgba(0,210,106,0.15)"}` }}>
-                              {s.service} {s.qty} → {s.bulkfollows_order_id ? `#${s.bulkfollows_order_id}` : s.error || "—"}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                        {Array.isArray(o.smm_orders) && o.smm_orders.map((s, i) => {
+                          const isEditing = editingSmm?.orderId === o.id && editingSmm.index === i;
+                          if (isEditing) {
+                            return (
+                              <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                <span style={{ fontSize: "10px", color: "rgb(169,181,174)" }}>{s.service} {s.qty} →</span>
+                                <input
+                                  type="number"
+                                  autoFocus
+                                  value={editingSmmValue}
+                                  onChange={(e) => setEditingSmmValue(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") saveSmmId(o, i, Number(editingSmmValue) || null);
+                                    if (e.key === "Escape") { setEditingSmm(null); setEditingSmmValue(""); }
+                                  }}
+                                  placeholder="ID BulkFollows"
+                                  style={{ width: "100px", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(0,210,106,0.3)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "10px", outline: "none", fontFamily: "inherit" }}
+                                />
+                                <button
+                                  onClick={() => saveSmmId(o, i, Number(editingSmmValue) || null)}
+                                  style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", border: "none", backgroundColor: green, color: "#000", cursor: "pointer", fontWeight: 700, fontFamily: "inherit" }}
+                                >OK</button>
+                                <button
+                                  onClick={() => { setEditingSmm(null); setEditingSmmValue(""); }}
+                                  style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(169,181,174)", cursor: "pointer", fontFamily: "inherit" }}
+                                >{"\u2715"}</button>
+                              </div>
+                            );
+                          }
+                          return (
+                            <span
+                              key={i}
+                              onClick={() => { setEditingSmm({ orderId: o.id, index: i }); setEditingSmmValue(s.bulkfollows_order_id ? String(s.bulkfollows_order_id) : ""); }}
+                              title="Cliquer pour modifier l'ID BulkFollows"
+                              style={{ cursor: "pointer", fontSize: "10px", padding: "2px 6px", borderRadius: "4px", backgroundColor: s.error ? "rgba(239,68,68,0.08)" : "rgba(0,180,53,0.08)", color: s.error ? "#ef4444" : green, border: `1px solid ${s.error ? "rgba(239,68,68,0.15)" : "rgba(0,210,106,0.15)"}` }}
+                            >
+                              {s.service} {s.qty} → {s.bulkfollows_order_id ? `#${s.bulkfollows_order_id}` : s.error ? `\u26A0 ${s.error.slice(0, 30)}` : "+ ID"}
                             </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span style={{ color: "rgb(107,117,111)", fontSize: "10px" }}>—</span>
-                      )}
+                          );
+                        })}
+                        {/* Add entry for cart items not yet in smm_orders */}
+                        {Array.isArray(o.cart) && o.cart.filter((c) => c.service !== "tw_live_viewers" && !(Array.isArray(o.smm_orders) && o.smm_orders.some((s) => s.service === c.service && s.qty === c.qty))).map((c, ci) => (
+                          <button
+                            key={`add-${ci}`}
+                            onClick={() => {
+                              const idStr = window.prompt(`ID BulkFollows pour ${c.service} ${c.qty} ?`, "");
+                              const id = Number(idStr);
+                              if (id > 0) addSmmEntry(o, c.service, c.qty, id);
+                            }}
+                            style={{ cursor: "pointer", fontSize: "10px", padding: "2px 6px", borderRadius: "4px", backgroundColor: "transparent", color: "rgb(169,181,174)", border: "1px dashed rgba(255,255,255,0.15)", textAlign: "left", fontFamily: "inherit" }}
+                          >
+                            + {c.service} {c.qty}
+                          </button>
+                        ))}
+                        {(!Array.isArray(o.smm_orders) || o.smm_orders.length === 0) && (!Array.isArray(o.cart) || o.cart.length === 0) && (
+                          <span style={{ color: "rgb(107,117,111)", fontSize: "10px" }}>—</span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ padding: "8px", textAlign: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>

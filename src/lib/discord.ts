@@ -22,8 +22,17 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
   }
 
   const { username, platform, email, cart, totalCents, currency } = params;
-  const sym = currency === "usd" ? "$" : "€";
-  const total = (totalCents / 100).toFixed(2);
+  const fmt = (amount: number): string => {
+    switch (currency) {
+      case "usd": return `$${amount.toFixed(2)}`;
+      case "gbp": return `\u00A3${amount.toFixed(2)}`;
+      case "cad": return `C$${amount.toFixed(2)}`;
+      case "nzd": return `NZ$${amount.toFixed(2)}`;
+      case "chf": return `CHF ${amount.toFixed(2)}`;
+      default: return `${amount.toFixed(2)}\u20AC`;
+    }
+  };
+  const total = fmt(totalCents / 100);
   const platformLabel = platform === "youtube" ? "YouTube"
     : platform === "tiktok" ? "TikTok"
     : platform === "instagram" ? "Instagram"
@@ -37,7 +46,7 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
       const liveSuffix = item.liveStartAt
         ? ` ⏰ ${new Date(item.liveStartAt).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`
         : "";
-      return `> ${fmtQty(item.qty)} ${item.label} — ${item.price.toFixed(2)}${sym}${liveSuffix}`;
+      return `> ${fmtQty(item.qty)} ${item.label} — ${fmt(item.price)}${liveSuffix}`;
     })
     .join("\n");
 
@@ -49,7 +58,7 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
     fields: [
       { name: "👤 Utilisateur", value: `@${username}`, inline: true },
       { name: "📱 Plateforme", value: platformLabel, inline: true },
-      { name: "💵 Total", value: `**${total}${sym}**`, inline: true },
+      { name: "💵 Total", value: `**${total}**`, inline: true },
       { name: "📧 Email", value: email || "Non renseigné", inline: false },
       { name: "🛒 Panier", value: cartLines, inline: false },
       ...(liveItem?.liveStartAt ? [{ name: "🔴 Début du live", value: new Date(liveItem.liveStartAt).toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }), inline: false }] : []),

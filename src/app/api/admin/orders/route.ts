@@ -59,11 +59,35 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id, cost_cents } = await req.json();
-  if (!id || cost_cents === undefined) {
-    return NextResponse.json({ error: "Missing id or cost_cents" }, { status: 400 });
+  const body = await req.json();
+  const { id, cost_cents, smm_orders } = body;
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  await sql`UPDATE orders SET cost_cents = ${Number(cost_cents)} WHERE id = ${id}`;
+  if (cost_cents !== undefined) {
+    await sql`UPDATE orders SET cost_cents = ${Number(cost_cents)} WHERE id = ${id}`;
+  }
+
+  if (smm_orders !== undefined) {
+    if (!Array.isArray(smm_orders)) {
+      return NextResponse.json({ error: "smm_orders must be an array" }, { status: 400 });
+    }
+    // Sanitize: keep only known fields
+    const cleaned = smm_orders.map((s: Record<string, unknown>) => ({
+      service: String(s.service || ""),
+      qty: Number(s.qty || 0),
+      ...(s.bulkfollows_order_id ? { bulkfollows_order_id: Number(s.bulkfollows_order_id) } : {}),
+      ...(s.charge !== undefined ? { charge: Number(s.charge) } : {}),
+      ...(s.error ? { error: String(s.error) } : {}),
+      ...(s.link ? { link: String(s.link) } : {}),
+    }));
+    await sql`UPDATE orders SET smm_orders = ${JSON.stringify(cleaned)}::jsonb WHERE id = ${id}`;
+  }
+
+  if (cost_cents === undefined && smm_orders === undefined) {
+    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+  }
+
   return NextResponse.json({ success: true });
 }
