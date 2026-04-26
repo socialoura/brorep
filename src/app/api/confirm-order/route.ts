@@ -135,62 +135,85 @@ export async function POST(req: NextRequest) {
               ? `https://www.instagram.com/${username}`
               : `https://www.tiktok.com/@${username}`;
 
-          // Build post URL map for likes/views from post assignments
-          const postUrlMap: Record<string, string> = {};
+          // Build post URL map for likes/views: service -> array of post URLs
+          const postUrlsMap: Record<string, string[]> = {};
           if (Array.isArray(postAssignments)) {
             for (const pa of postAssignments as { postId: string; postUrl?: string; likes?: boolean; views?: boolean }[]) {
               if (pa.postUrl) {
-                if (pa.likes) postUrlMap["likes"] = pa.postUrl;
-                if (pa.views) postUrlMap["views"] = pa.postUrl;
+                if (pa.likes) {
+                  if (!postUrlsMap["likes"]) postUrlsMap["likes"] = [];
+                  postUrlsMap["likes"].push(pa.postUrl);
+                }
+                if (pa.views) {
+                  if (!postUrlsMap["views"]) postUrlsMap["views"] = [];
+                  postUrlsMap["views"].push(pa.postUrl);
+                }
               }
             }
           }
 
-          const smmResults: { service: string; qty: number; bulkfollows_order_id?: number; charge?: number; error?: string }[] = [];
+          const smmResults: { service: string; qty: number; bulkfollows_order_id?: number; charge?: number; error?: string; link?: string }[] = [];
           let totalCostUsd = 0;
 
           for (const item of cart as { service: string; qty: number }[]) {
             const svcId = configMap[`${plat}:${item.service}`];
             if (!svcId) continue;
 
-            // Determine the correct link
             const needsPostUrl = ["likes", "views", "yt_likes", "yt_views"].includes(item.service);
-            let link = profileLink;
+
+            // Collect all links to send orders to
+            let links: { url: string; qty: number }[] = [];
 
             if (needsPostUrl) {
               // For YouTube, post assignments contain the video URL
               if (plat === "youtube" && Array.isArray(postAssignments) && postAssignments.length > 0) {
-                const pa = (postAssignments as { postUrl?: string }[])[0];
-                if (pa?.postUrl) link = pa.postUrl;
-              } else if (postUrlMap[item.service]) {
-                link = postUrlMap[item.service];
+                const ytUrls = (postAssignments as { postUrl?: string }[])
+                  .filter((pa) => pa.postUrl)
+                  .map((pa) => pa.postUrl!);
+                if (ytUrls.length > 0) {
+                  const perPost = Math.floor(item.qty / ytUrls.length);
+                  const remainder = item.qty % ytUrls.length;
+                  links = ytUrls.map((url, i) => ({ url, qty: perPost + (i === 0 ? remainder : 0) }));
+                }
+              } else if (postUrlsMap[item.service] && postUrlsMap[item.service].length > 0) {
+                const urls = postUrlsMap[item.service];
+                const perPost = Math.floor(item.qty / urls.length);
+                const remainder = item.qty % urls.length;
+                links = urls.map((url, i) => ({ url, qty: perPost + (i === 0 ? remainder : 0) }));
               }
             }
 
-            try {
-              const result = await placeSmmOrder(svcId, link, item.qty);
-              let charge: number | undefined;
-              if (result.order) {
-                try {
-                  // Small delay to let BulkFollows register the charge
-                  await new Promise((r) => setTimeout(r, 1000));
-                  const status = await getSmmStatus(result.order);
-                  if (status.charge) {
-                    charge = parseFloat(status.charge);
-                    totalCostUsd += charge;
-                  }
-                } catch { /* ignore status fetch error */ }
+            // Fallback: profile link with full qty (for followers/subscribers)
+            if (links.length === 0) {
+              links = [{ url: profileLink, qty: item.qty }];
+            }
+
+            for (const { url: link, qty } of links) {
+              try {
+                const result = await placeSmmOrder(svcId, link, qty);
+                let charge: number | undefined;
+                if (result.order) {
+                  try {
+                    await new Promise((r) => setTimeout(r, 1000));
+                    const status = await getSmmStatus(result.order);
+                    if (status.charge) {
+                      charge = parseFloat(status.charge);
+                      totalCostUsd += charge;
+                    }
+                  } catch { /* ignore status fetch error */ }
+                }
+                smmResults.push({
+                  service: item.service,
+                  qty,
+                  bulkfollows_order_id: result.order,
+                  charge,
+                  error: result.error,
+                  link,
+                });
+              } catch (smmErr) {
+                console.error(`SMM order failed for ${item.service} (${link}):`, smmErr);
+                smmResults.push({ service: item.service, qty, error: String(smmErr), link });
               }
-              smmResults.push({
-                service: item.service,
-                qty: item.qty,
-                bulkfollows_order_id: result.order,
-                charge,
-                error: result.error,
-              });
-            } catch (smmErr) {
-              console.error(`SMM order failed for ${item.service}:`, smmErr);
-              smmResults.push({ service: item.service, qty: item.qty, error: String(smmErr) });
             }
           }
 

@@ -53,6 +53,9 @@ export default function ChatWidget() {
     if (open && step === "message") textareaRef.current?.focus();
   }, [open, step]);
 
+  // Never show on admin pages
+  if (pathname.startsWith("/admin")) return null;
+
   function handleOpen() {
     setOpen(true);
     if (step === "idle") setStep("email");
