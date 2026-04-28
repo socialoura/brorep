@@ -14,11 +14,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Ensure popular column exists
+  try { await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS popular BOOLEAN DEFAULT false`; } catch {}
+
   let pricing;
   try {
-    pricing = await sql`SELECT id, service, qty, price, COALESCE(price_usd,0) as price_usd, COALESCE(price_gbp,0) as price_gbp, COALESCE(price_cad,0) as price_cad, COALESCE(price_nzd,0) as price_nzd, COALESCE(price_chf,0) as price_chf, active, created_at FROM pricing ORDER BY service, qty`;
+    pricing = await sql`SELECT id, service, qty, price, COALESCE(price_usd,0) as price_usd, COALESCE(price_gbp,0) as price_gbp, COALESCE(price_cad,0) as price_cad, COALESCE(price_nzd,0) as price_nzd, COALESCE(price_chf,0) as price_chf, COALESCE(popular,false) as popular, active, created_at FROM pricing ORDER BY service, qty`;
   } catch {
-    pricing = await sql`SELECT id, service, qty, price, 0 as price_usd, 0 as price_gbp, 0 as price_cad, 0 as price_nzd, 0 as price_chf, active, created_at FROM pricing ORDER BY service, qty`;
+    pricing = await sql`SELECT id, service, qty, price, 0 as price_usd, 0 as price_gbp, 0 as price_cad, 0 as price_nzd, 0 as price_chf, false as popular, active, created_at FROM pricing ORDER BY service, qty`;
   }
   return NextResponse.json({ pricing });
 }
@@ -74,7 +77,7 @@ export async function PUT(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, price, price_usd, price_gbp, price_cad, price_nzd, price_chf, active } = body;
+  const { id, price, price_usd, price_gbp, price_cad, price_nzd, price_chf, active, popular } = body;
 
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -103,6 +106,17 @@ export async function PUT(req: NextRequest) {
 
     if (active !== undefined) {
       await sql`UPDATE pricing SET active = ${active} WHERE id = ${id}`;
+    }
+
+    if (popular !== undefined) {
+      if (popular) {
+        // Get the service of this pack to clear other popular flags for the same service
+        const rows = await sql`SELECT service FROM pricing WHERE id = ${id}`;
+        if (rows.length > 0) {
+          await sql`UPDATE pricing SET popular = false WHERE service = ${rows[0].service}`;
+        }
+      }
+      await sql`UPDATE pricing SET popular = ${popular} WHERE id = ${id}`;
     }
 
     return NextResponse.json({ success: true });

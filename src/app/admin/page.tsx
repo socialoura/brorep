@@ -48,6 +48,7 @@ interface PricingItem {
   price_cad: number;
   price_nzd: number;
   price_chf: number;
+  popular: boolean;
   active: boolean;
 }
 
@@ -237,6 +238,15 @@ export default function AdminPage() {
       method: "PUT",
       headers,
       body: JSON.stringify({ id, active: !active }),
+    });
+    fetchPricing();
+  };
+
+  const togglePopular = async (id: number, popular: boolean) => {
+    await fetch("/api/admin/pricing", {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ id, popular: !popular }),
     });
     fetchPricing();
   };
@@ -820,7 +830,13 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                      <div style={{ display: "flex", gap: "4px" }}>
+                      <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                        <button
+                          onClick={() => togglePopular(item.id, item.popular)}
+                          style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: `1px solid ${item.popular ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, backgroundColor: item.popular ? "rgba(255,215,0,0.1)" : "transparent", color: item.popular ? "#ffd700" : "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit", fontWeight: item.popular ? 700 : 400 }}
+                        >
+                          {item.popular ? "★ TOP" : "☆ TOP"}
+                        </button>
                         <button
                           onClick={() => toggleActive(item.id, item.active)}
                           style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
@@ -904,7 +920,13 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                      <div style={{ display: "flex", gap: "4px" }}>
+                      <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                        <button
+                          onClick={() => togglePopular(item.id, item.popular)}
+                          style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: `1px solid ${item.popular ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, backgroundColor: item.popular ? "rgba(255,215,0,0.1)" : "transparent", color: item.popular ? "#ffd700" : "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit", fontWeight: item.popular ? 700 : 400 }}
+                        >
+                          {item.popular ? "★ TOP" : "☆ TOP"}
+                        </button>
                         <button
                           onClick={() => toggleActive(item.id, item.active)}
                           style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
@@ -980,7 +1002,13 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                <div style={{ display: "flex", gap: "4px" }}>
+                <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                  <button
+                    onClick={() => togglePopular(item.id, item.popular)}
+                    style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: `1px solid ${item.popular ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, backgroundColor: item.popular ? "rgba(255,215,0,0.1)" : "transparent", color: item.popular ? "#ffd700" : "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit", fontWeight: item.popular ? 700 : 400 }}
+                  >
+                    {item.popular ? "★ TOP" : "☆ TOP"}
+                  </button>
                   <button
                     onClick={() => toggleActive(item.id, item.active)}
                     style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}
@@ -1040,7 +1068,10 @@ export default function AdminPage() {
                           <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
                         </div>
                       )}
-                      <div style={{ display: "flex", gap: "4px" }}>
+                      <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                        <button onClick={() => togglePopular(item.id, item.popular)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: `1px solid ${item.popular ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, backgroundColor: item.popular ? "rgba(255,215,0,0.1)" : "transparent", color: item.popular ? "#ffd700" : "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit", fontWeight: item.popular ? 700 : 400 }}>
+                          {item.popular ? "★ TOP" : "☆ TOP"}
+                        </button>
                         <button onClick={() => toggleActive(item.id, item.active)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}>
                           {item.active ? "Désactiver" : "Activer"}
                         </button>
@@ -1097,7 +1128,10 @@ export default function AdminPage() {
                           <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
                         </div>
                       )}
-                      <div style={{ display: "flex", gap: "4px" }}>
+                      <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                        <button onClick={() => togglePopular(item.id, item.popular)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: `1px solid ${item.popular ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, backgroundColor: item.popular ? "rgba(255,215,0,0.1)" : "transparent", color: item.popular ? "#ffd700" : "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit", fontWeight: item.popular ? 700 : 400 }}>
+                          {item.popular ? "★ TOP" : "☆ TOP"}
+                        </button>
                         <button onClick={() => toggleActive(item.id, item.active)} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(107,117,111)", cursor: "pointer", fontFamily: "inherit" }}>
                           {item.active ? "Désactiver" : "Activer"}
                         </button>

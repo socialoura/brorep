@@ -357,15 +357,18 @@ export default function ServiceSelect({
           const svc = row.service as ServiceType;
           if (!SERVICE_KEYS.includes(svc)) continue;
           if (!grouped[svc]) grouped[svc] = [];
-          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price), priceUsd: Number(row.price_usd || 0), priceGbp: Number(row.price_gbp || 0), priceCad: Number(row.price_cad || 0), priceNzd: Number(row.price_nzd || 0), priceChf: Number(row.price_chf || 0) });
+          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price), priceUsd: Number(row.price_usd || 0), priceGbp: Number(row.price_gbp || 0), priceCad: Number(row.price_cad || 0), priceNzd: Number(row.price_nzd || 0), priceChf: Number(row.price_chf || 0), popular: !!row.popular });
         }
         setServices((prev) => {
           const next = { ...prev };
           for (const key of activeKeys) {
             if (grouped[key] && grouped[key]!.length > 0) {
               const sorted = grouped[key]!.sort((a, b) => a.qty - b.qty);
-              const popIdx = Math.floor(sorted.length / 2);
-              sorted[popIdx] = { ...sorted[popIdx], popular: true };
+              // If no pack is marked popular in DB, fall back to middle pack
+              if (!sorted.some((p) => p.popular)) {
+                const popIdx = Math.floor(sorted.length / 2);
+                sorted[popIdx] = { ...sorted[popIdx], popular: true };
+              }
               next[key] = { ...next[key]!, packs: sorted };
             }
           }
