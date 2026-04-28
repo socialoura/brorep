@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import ReactDOM from "react-dom";
 import { useTranslation, fmtPrice } from "@/lib/i18n";
 import type { Currency } from "@/lib/i18n";
 import { loadStripe } from "@stripe/stripe-js";
@@ -8,6 +9,7 @@ import { Elements, PaymentElement, ExpressCheckoutElement, useStripe, useElement
 import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import posthog from "posthog-js";
 import type { CartItem } from "@/components/ServiceSelect";
+import RecentDeliveries from "@/components/RecentDeliveries";
 import type { PostAssignment } from "@/components/PostPicker";
 
 function priceFor(item: CartItem, c: Currency): number {
@@ -101,7 +103,7 @@ function CartRecap({ cart, discount, promoPercent, finalTotal, platform, currenc
       <p style={{ margin: "0 0 8px 0", fontSize: "11px", fontWeight: 600, color: "rgb(169, 181, 174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("checkout.summary")}</p>
       {cart.map((item, i) => (
         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0" }}>
-          <span style={{ fontSize: "13px", color: "rgb(232, 247, 237)" }}>{fmtQty(item.qty)} {item.label}</span>
+          <span style={{ fontSize: "13px", color: "rgb(232, 247, 237)" }}>{/^\d/.test(item.label) ? item.label : `${fmtQty(item.qty)} ${item.label}`}</span>
           <span style={{ fontSize: "13px", fontWeight: 600, color: th.accentMid }}>{fmtPrice(priceFor(item, currency), currency)}</span>
         </div>
       ))}
@@ -269,23 +271,11 @@ function ExpressCheckout({ email, onSuccess }: { email: string; onSuccess: (orde
 }
 
 /* ----- Sub-component: Trust Badges ----- */
-function TrustBadges({ platform }: { platform?: string }) {
-  const { t } = useTranslation();
-  const th = themeFor(platform);
-  const badges = [
-    { icon: "\u{1F512}", label: t("checkout.trustSecure") },
-    { icon: "\u{26A1}", label: t("checkout.trustDelivery") },
-    { icon: "\u{2705}", label: t("checkout.trustGuarantee") },
-    { icon: "\u{1F4AC}", label: t("checkout.trustSupport") },
-  ];
+function TrustBadges() {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "20px" }}>
-      {badges.map((b, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 10px", borderRadius: "10px", backgroundColor: th.bg, border: `1px solid ${th.border}` }}>
-          <span style={{ fontSize: "14px" }}>{b.icon}</span>
-          <span style={{ fontSize: "11px", fontWeight: 600, color: "rgb(169,181,174)" }}>{b.label}</span>
-        </div>
-      ))}
+    <div style={{ marginBottom: "20px" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/badges_paiement.png" alt="Visa, Mastercard, American Express, PayPal" style={{ display: "block", margin: "0 auto", maxWidth: "240px", width: "100%", opacity: 0.7 }} />
     </div>
   );
 }
@@ -437,9 +427,19 @@ function PayForm({
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    if (typeof window === "undefined") return "";
+    try { return localStorage.getItem("fanovaly_email") || ""; } catch { return ""; }
+  });
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // Persist email locally once valid, for returning customers
+  useEffect(() => {
+    if (emailValid) {
+      try { localStorage.setItem("fanovaly_email", email); } catch { /* ignore */ }
+    }
+  }, [email, emailValid]);
   const emailRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const [emailShake, setEmailShake] = useState(false);
   const [promoPercent, setPromoPercent] = useState(0);
   const [loyaltyDiscountCents, setLoyaltyDiscountCents] = useState(0);
@@ -476,7 +476,10 @@ function PayForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+    <form ref={formRef} onSubmit={handleSubmit} style={{ width: "100%" }}>
+      {/* Recent deliveries ticker — social proof above email */}
+      <RecentDeliveries platform={platform} />
+
       {/* 1. Email first */}
       <EmailInput value={email} onChange={setEmail} inputRef={emailRef} highlight={emailShake} />
 
@@ -498,6 +501,9 @@ function PayForm({
             <span style={{ fontSize: "11px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>{t("checkout.orPayByCard")}</span>
             <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
           </div>
+
+          {/* Trust signals — reassurance right before the form */}
+          <TrustBadges />
 
           {/* Card payment form */}
           <div style={{ marginBottom: "20px" }}><PaymentElement options={{ layout: "tabs", wallets: { applePay: "never", googlePay: "never" } }} /></div>
@@ -546,6 +552,75 @@ function PayForm({
         style={{ width: "100%", marginTop: "12px", fontSize: "12px", color: "rgb(107, 117, 111)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}>
         {t("checkout.back")}
       </button>
+
+      {/* Spacer so sticky bottom bar never overlaps content on mobile */}
+      <div className="checkout-sticky-spacer" style={{ height: "76px" }} />
+
+      {/* Sticky mobile pay bar — mobile only, always shows live total */}
+      {typeof window !== "undefined" && ReactDOM.createPortal(
+        <div
+          className="checkout-sticky-bar"
+          style={{
+            position: "fixed",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            padding: "10px 14px calc(10px + env(safe-area-inset-bottom))",
+            background: "rgba(3, 8, 6, 0.94)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            borderTop: `1px solid ${th.border}`,
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            zIndex: 9999,
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
+            <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.05em", color: "rgb(107,117,111)", fontWeight: 600 }}>{t("service.total")}</span>
+            <span style={{ fontSize: "17px", fontWeight: 800, color: th.accent, lineHeight: 1.1 }}>{fmtPrice(finalTotal, currency)}</span>
+          </div>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => {
+              if (!emailValid) {
+                setEmailShake(true);
+                emailRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                const input = emailRef.current?.querySelector("input");
+                if (input) input.focus();
+                setTimeout(() => setEmailShake(false), 600);
+                return;
+              }
+              formRef.current?.requestSubmit();
+            }}
+            style={{
+              flex: 1,
+              padding: "13px 18px",
+              borderRadius: "12px",
+              border: "none",
+              cursor: loading ? "not-allowed" : "pointer",
+              fontWeight: 700,
+              fontSize: "15px",
+              fontFamily: "inherit",
+              color: th.btnText,
+              background: th.gradient,
+              boxShadow: `0 6px 20px ${th.glow}`,
+              opacity: loading ? 0.6 : 1,
+              transition: "opacity 0.2s",
+            }}
+          >
+            {loading ? t("checkout.processing") : `${t("checkout.pay")} →`}
+          </button>
+          <style>{`
+            @media (min-width: 641px) {
+              .checkout-sticky-bar { display: none !important; }
+              .checkout-sticky-spacer { display: none !important; }
+            }
+          `}</style>
+        </div>,
+        document.body
+      )}
     </form>
   );
 }
@@ -570,7 +645,7 @@ export default function CheckoutForm({
   onBack: () => void;
   onAddToCart?: (item: CartItem) => void;
 }) {
-  const { t, currency } = useTranslation();
+  const { t, lang, currency } = useTranslation();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [appliedPromo, setAppliedPromo] = useState<string>("");
@@ -586,7 +661,7 @@ export default function CheckoutForm({
       const res = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart, username, platform, postAssignments, email: "", promoCode, followersBefore: followersBefore || 0, loyaltyDiscountCents: loyaltyCents, currency }),
+        body: JSON.stringify({ cart, username, platform, postAssignments, email: "", promoCode, followersBefore: followersBefore || 0, loyaltyDiscountCents: loyaltyCents, currency, lang }),
       });
       const data = await res.json();
       if (data.error) {

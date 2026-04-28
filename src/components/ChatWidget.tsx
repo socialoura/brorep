@@ -117,7 +117,7 @@ export default function ChatWidget() {
       onClick={handleOpen}
       aria-label="Chat"
       style={{
-        position: "fixed", bottom: "20px", right: "20px", zIndex: 9999,
+        position: "fixed", bottom: "76px", right: "16px", zIndex: 10000,
         width: "40px", height: "40px", borderRadius: "50%", border: "none",
         background: theme.gradient, color: theme.text,
         boxShadow: theme.glow, cursor: "pointer",

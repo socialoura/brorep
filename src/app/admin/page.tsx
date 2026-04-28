@@ -94,6 +94,7 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersPage, setOrdersPage] = useState(1);
   const [ordersPages, setOrdersPages] = useState(1);
+  const [ordersEmailSearch, setOrdersEmailSearch] = useState("");
   const [pricing, setPricing] = useState<PricingItem[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editPrice, setEditPrice] = useState("");
@@ -120,9 +121,12 @@ export default function AdminPage() {
     setLoading(false);
   }, [password]);
 
-  const fetchOrders = useCallback(async (page = 1) => {
+  const fetchOrders = useCallback(async (page = 1, email?: string) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/orders?page=${page}`, { headers: { Authorization: `Bearer ${password}` } });
+    const q = new URLSearchParams({ page: String(page) });
+    const search = email !== undefined ? email : ordersEmailSearch;
+    if (search) q.set("email", search);
+    const res = await fetch(`/api/admin/orders?${q}`, { headers: { Authorization: `Bearer ${password}` } });
     if (res.ok) {
       const data = await res.json();
       setOrders(data.orders);
@@ -130,7 +134,7 @@ export default function AdminPage() {
       setOrdersPages(data.pages);
     }
     setLoading(false);
-  }, [password]);
+  }, [password, ordersEmailSearch]);
 
   const fetchCombos = useCallback(async () => {
     setLoading(true);
@@ -426,6 +430,31 @@ export default function AdminPage() {
       {/* Orders Tab */}
       {tab === "orders" && (
         <div>
+          {/* Email search */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+            <input
+              type="text"
+              placeholder="Rechercher par email..."
+              value={ordersEmailSearch}
+              onChange={(e) => setOrdersEmailSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") fetchOrders(1, ordersEmailSearch); }}
+              style={{ padding: "8px 14px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", width: "280px", outline: "none", fontFamily: "inherit" }}
+            />
+            <button
+              onClick={() => fetchOrders(1, ordersEmailSearch)}
+              style={{ padding: "8px 16px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "13px", color: "#000", background: "linear-gradient(135deg, rgb(0,180,53), rgb(0,255,76))", fontFamily: "inherit" }}
+            >
+              Rechercher
+            </button>
+            {ordersEmailSearch && (
+              <button
+                onClick={() => { setOrdersEmailSearch(""); fetchOrders(1, ""); }}
+                style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgb(169,181,174)", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Effacer
+              </button>
+            )}
+          </div>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>

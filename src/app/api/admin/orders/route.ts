@@ -14,23 +14,44 @@ export async function GET(req: NextRequest) {
   }
 
   const page = Number(req.nextUrl.searchParams.get("page") || "1");
+  const emailSearch = (req.nextUrl.searchParams.get("email") || "").trim();
   const limit = 20;
   const offset = (page - 1) * limit;
 
-  const orders = await sql`
-    SELECT o.*, ranked.email_order_num, ranked.email_order_total
-    FROM (
-      SELECT id,
-        ROW_NUMBER() OVER (PARTITION BY LOWER(TRIM(email)) ORDER BY created_at ASC) as email_order_num,
-        COUNT(*) OVER (PARTITION BY LOWER(TRIM(email))) as email_order_total
-      FROM orders WHERE email IS NOT NULL AND email != ''
-    ) ranked
-    RIGHT JOIN orders o ON o.id = ranked.id
-    ORDER BY o.created_at DESC LIMIT ${limit} OFFSET ${offset}
-  `;
+  let orders;
+  let total: number;
 
-  const countResult = await sql`SELECT COUNT(*) as total FROM orders`;
-  const total = Number(countResult[0].total);
+  if (emailSearch) {
+    const pattern = `%${emailSearch.toLowerCase()}%`;
+    orders = await sql`
+      SELECT o.*, ranked.email_order_num, ranked.email_order_total
+      FROM (
+        SELECT id,
+          ROW_NUMBER() OVER (PARTITION BY LOWER(TRIM(email)) ORDER BY created_at ASC) as email_order_num,
+          COUNT(*) OVER (PARTITION BY LOWER(TRIM(email))) as email_order_total
+        FROM orders WHERE email IS NOT NULL AND email != ''
+      ) ranked
+      RIGHT JOIN orders o ON o.id = ranked.id
+      WHERE LOWER(o.email) LIKE ${pattern}
+      ORDER BY o.created_at DESC LIMIT ${limit} OFFSET ${offset}
+    `;
+    const countResult = await sql`SELECT COUNT(*) as total FROM orders WHERE LOWER(email) LIKE ${pattern}`;
+    total = Number(countResult[0].total);
+  } else {
+    orders = await sql`
+      SELECT o.*, ranked.email_order_num, ranked.email_order_total
+      FROM (
+        SELECT id,
+          ROW_NUMBER() OVER (PARTITION BY LOWER(TRIM(email)) ORDER BY created_at ASC) as email_order_num,
+          COUNT(*) OVER (PARTITION BY LOWER(TRIM(email))) as email_order_total
+        FROM orders WHERE email IS NOT NULL AND email != ''
+      ) ranked
+      RIGHT JOIN orders o ON o.id = ranked.id
+      ORDER BY o.created_at DESC LIMIT ${limit} OFFSET ${offset}
+    `;
+    const countResult = await sql`SELECT COUNT(*) as total FROM orders`;
+    total = Number(countResult[0].total);
+  }
 
   return NextResponse.json({ orders, total, page, pages: Math.ceil(total / limit) });
 }

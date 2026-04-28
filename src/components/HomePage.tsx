@@ -5,6 +5,8 @@ import { usePostHog } from "posthog-js/react";
 import FanovalyLogo from "@/components/FanovalyLogo";
 import SocialProof from "@/components/SocialProof";
 import CTAButton from "@/components/CTAButton";
+import StickyMobileCTA from "@/components/StickyMobileCTA";
+import LiveOrderCounter from "@/components/LiveOrderCounter";
 import StatusBadge from "@/components/StatusBadge";
 import PlatformSelect from "@/components/PlatformSelect";
 import UsernameInput from "@/components/UsernameInput";
@@ -162,8 +164,8 @@ function HomePageInner() {
       }
       // Blur any focused input to dismiss keyboard & zoom
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-      // Hide chat widget on non-hero steps
-      if (step !== "hero") document.body.setAttribute("data-hide-chat", "");
+      // Hide chat widget only during pack selection
+      if (step === "shop") document.body.setAttribute("data-hide-chat", "");
       else document.body.removeAttribute("data-hide-chat");
     }
   }, [step, hydrated]);
@@ -223,11 +225,20 @@ function HomePageInner() {
                 </span>
               </div>
 
+              {/* Live order counter (social proof booster) */}
+              <LiveOrderCounter platform="tiktok" />
+
               {/* Social proof ABOVE CTA */}
               <SocialProof />
 
               {/* CTA */}
               <CTAButton onClick={() => { posthog?.capture("cta_clicked"); setPlatform("tiktok"); setStep("shop"); }} />
+
+              {/* Sticky mobile CTA — visible after scroll, mobile only */}
+              <StickyMobileCTA
+                platform="tiktok"
+                onClick={() => { posthog?.capture("cta_clicked", { source: "sticky_mobile" }); setPlatform("tiktok"); setStep("shop"); }}
+              />
 
               {/* Operational status */}
               <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
@@ -408,13 +419,47 @@ function HomePageInner() {
             followersBefore={scanData?.followersCount || 0}
             onSuccess={(id) => { posthog?.capture("payment_completed", { platform, total: cart.reduce((s, i) => s + i.price, 0), order_id: id }); setOrderId(id); setStep("success"); }}
             onBack={() => { setStep("shop"); }}
-            onAddToCart={(item) => {
+            onAddToCart={async (item) => {
               setCart((prev) => [...prev, item]);
               posthog?.capture("upsell_added", { service: item.service, qty: item.qty, price: item.price });
               const needsPostPick = ["likes", "views"].includes(item.service);
-              if (needsPostPick && scanData && scanData.posts.length > 0) {
+              if (!needsPostPick || !username) return;
+
+              // Already have posts → go straight to picker
+              if (scanData && scanData.posts && scanData.posts.length > 0) {
                 setStep("pickPosts");
+                return;
               }
+
+              // Fetch posts first
+              setFetchingPosts(true);
+              try {
+                const endpoint = platform === "instagram"
+                  ? `/api/scraper-instagram?username=${encodeURIComponent(username)}`
+                  : `/api/scraper-tiktok?username=${encodeURIComponent(username)}`;
+                const res = await fetch(endpoint);
+                const data = await res.json();
+                if (data.posts && data.posts.length > 0) {
+                  setScanData({
+                    username: data.username || username,
+                    fullName: data.fullName || username,
+                    avatarUrl: data.avatarUrl || "",
+                    followersCount: data.followersCount || 0,
+                    followingCount: data.followingCount || 0,
+                    likesCount: data.likesCount || 0,
+                    videoCount: data.videoCount || 0,
+                    bio: data.bio || "",
+                    verified: data.verified || false,
+                    posts: data.posts,
+                  });
+                  setFetchingPosts(false);
+                  setStep("pickPosts");
+                  return;
+                }
+              } catch (err) {
+                console.error("Failed to fetch posts for upsell pickPosts:", err);
+              }
+              setFetchingPosts(false);
             }}
           />
         );

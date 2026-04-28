@@ -7,7 +7,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency } = body;
+    const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency, lang: reqLang } = body;
+    const lang = reqLang === "en" ? "en" : "fr";
     const validCurrencies = ["eur", "usd", "gbp", "cad", "nzd", "chf"];
     const currency = validCurrencies.includes(reqCurrency) ? reqCurrency : "eur";
 
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest) {
         postsCount: postAssignments ? String(postAssignments.length) : "0",
         promoCode: appliedPromo,
         followersBefore: String(followersBefore || 0),
+        lang,
       },
       description: `Fanovaly: ${description} ${currency === "usd" ? "for" : "pour"} @${username}`,
     });

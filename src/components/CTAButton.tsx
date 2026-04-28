@@ -1,11 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslation } from "@/lib/i18n";
+import { useState, useEffect } from "react";
+import { useTranslation, fmtPrice } from "@/lib/i18n";
 
 export default function CTAButton({ onClick }: { onClick?: () => void }) {
   const [hovered, setHovered] = useState(false);
-  const { t } = useTranslation();
+  const { t, currency } = useTranslation();
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/pricing")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.pricing) return;
+        const key = currency === "usd" ? "price_usd" : currency === "gbp" ? "price_gbp" : currency === "cad" ? "price_cad" : currency === "nzd" ? "price_nzd" : currency === "chf" ? "price_chf" : "price";
+        const prices = data.pricing.map((p: Record<string, number>) => Number(p[key]) || Number(p.price)).filter((v: number) => v > 0);
+        if (prices.length > 0) setMinPrice(Math.min(...prices));
+      })
+      .catch(() => {});
+  }, [currency]);
 
   return (
     <button
@@ -60,8 +73,9 @@ export default function CTAButton({ onClick }: { onClick?: () => void }) {
         />
       </span>
 
-      <span style={{ position: "relative", zIndex: 1 }}>
-        {t("cta.launch")}
+      <span style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+        <span>{t("cta.launch")}</span>
+        {minPrice !== null && <span style={{ fontSize: "12px", fontWeight: 600, opacity: 0.75 }}>{t("cta.from")} {fmtPrice(minPrice, currency)}</span>}
       </span>
 
       <style>{`

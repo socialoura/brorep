@@ -42,6 +42,7 @@ const dict: Record<string, Record<Lang, string>> = {
 
   // ===== CTAButton =====
   "cta.launch": { fr: "Lancer ma croissance →", en: "Start my growth →" },
+  "cta.from": { fr: "à partir de", en: "from" },
 
   // ===== SocialProof =====
   "social.profilesAnalyzed": { fr: "packs vendus", en: "packs sold" },
@@ -149,6 +150,9 @@ const dict: Record<string, Record<Lang, string>> = {
   "service.usernamePlaceholder": { fr: "Ton nom d'utilisateur", en: "Your username" },
   "service.usernameLabel": { fr: "Compte à booster", en: "Account to boost" },
   "service.ordersThisWeek": { fr: "commandes cette semaine", en: "orders this week" },
+  "service.trustReal": { fr: "Vrais comptes", en: "Real accounts" },
+  "service.trustFast": { fr: "Livraison rapide", en: "Fast delivery" },
+  "service.trustNoPassword": { fr: "Sans mot de passe", en: "No password needed" },
 
   // ===== Spotify =====
   "spotify.heroTitle1": { fr: "Booste tes", en: "Boost your" },

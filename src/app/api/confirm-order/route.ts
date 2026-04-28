@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
 
     // Cart: compact {s,l,q,p} → full {service,label,qty,price}
     const piCurrency = meta.currency || (pi.currency === "usd" ? "usd" : "eur");
+    const lang = meta.lang === "en" ? "en" : "fr";
 
     const rawCart = meta.cart ? JSON.parse(meta.cart) : [];
     const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; pu?: number; ls?: string; service?: string; label?: string; qty?: number; price?: number; priceUsd?: number; liveStartAt?: string }) =>
@@ -85,6 +86,7 @@ export async function POST(req: NextRequest) {
           cart,
           totalCents: pi.amount,
           orderId: orderId || undefined,
+          lang,
         });
       } catch (emailErr) {
         console.error("Failed to send confirmation email:", emailErr);

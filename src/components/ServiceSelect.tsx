@@ -330,6 +330,7 @@ export default function ServiceSelect({
   const [previewLoading, setPreviewLoading] = useState(false);
   const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [services, setServices] = useState<Services>(DEFAULT_SERVICES as Services);
+  const [pricingLoaded, setPricingLoaded] = useState(false);
   const [toast, setToast] = useState<{ message: string; cta: string; targetTab: ServiceType } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -371,7 +372,8 @@ export default function ServiceSelect({
           return next;
         });
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setPricingLoaded(true));
   }, []);
 
   // Debounced username lookup for profile preview
@@ -409,6 +411,26 @@ export default function ServiceSelect({
     }, 800);
     return () => { if (lookupTimer.current) clearTimeout(lookupTimer.current); };
   }, [externalUsername, platform, isYouTube]);
+
+  // Pre-select TOP pack (the one with `popular: true`) once pricing is loaded.
+  // Only runs once per tab — if the user deselects, we don't re-select.
+  const autoSelectedRef = useRef<Set<ServiceType>>(new Set());
+  useEffect(() => {
+    if (!pricingLoaded) return; // wait for real packs from /api/pricing
+    if (autoSelectedRef.current.has(activeTab)) return;
+    if (selectedCombo) return; // user picked a combo, don't override
+    if (selections[activeTab] !== undefined) {
+      autoSelectedRef.current.add(activeTab);
+      return;
+    }
+    const svc = services[activeTab];
+    if (!svc || !svc.packs || svc.packs.length === 0) return;
+    const popIdx = svc.packs.findIndex((p) => p.popular);
+    if (popIdx >= 0) {
+      setSelections((prev) => (prev[activeTab] !== undefined ? prev : { ...prev, [activeTab]: popIdx }));
+      autoSelectedRef.current.add(activeTab);
+    }
+  }, [activeTab, services, selectedCombo, selections, pricingLoaded]);
 
   const service = services[activeTab]!;
   const selectedIdx = selections[activeTab] ?? null;
@@ -613,6 +635,34 @@ export default function ServiceSelect({
         </span>
       </div>
 
+      {/* Trust micro-signals near packs */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginBottom: "12px" }}>
+        {[
+          { icon: "✅", label: t("service.trustReal") },
+          { icon: "⚡", label: t("service.trustFast") },
+          { icon: "🔒", label: t("service.trustNoPassword") },
+        ].map((s) => (
+          <span
+            key={s.label}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              padding: "5px 10px",
+              borderRadius: "999px",
+              background: "rgba(255,255,255,0.03)",
+              border: `1px solid ${accentBorder}`,
+              fontSize: "11px",
+              fontWeight: 600,
+              color: "rgb(169,181,174)",
+            }}
+          >
+            <span style={{ fontSize: "11px" }}>{s.icon}</span>
+            {s.label}
+          </span>
+        ))}
+      </div>
+
       {/* Packs grid — 2 cols × 4 rows */}
       <div className="grid-packs" style={{ marginBottom: "20px" }}>
         {(() => {
@@ -647,13 +697,14 @@ export default function ServiceSelect({
                       position: "absolute",
                       top: "-7px",
                       right: "-2px",
+                      zIndex: 1,
                       padding: "2px 7px",
                       borderRadius: "9999px",
                       fontSize: "8px",
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
-                      background: isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)",
+                      background: isYouTube ? "#1a0a0a" : "#0a1a1b",
                       color: accent,
                       border: `1px solid ${accentBorderStrong}`,
                     }}
@@ -979,16 +1030,6 @@ export default function ServiceSelect({
               </div>
             );
           })()}
-        </div>
-      )}
-
-      {/* Social proof */}
-      {cart.length > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "10px" }}>
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: isYouTube ? "rgb(255,0,0)" : "rgb(105,201,208)", display: "inline-block", animation: "pulse 2s infinite" }} />
-          <span style={{ fontSize: "11px", color: "rgb(169,181,174)" }}>
-            <strong style={{ color: isYouTube ? "rgb(255,100,100)" : "rgb(105,201,208)" }}>127+</strong> {t("service.ordersThisWeek")}
-          </span>
         </div>
       )}
 
