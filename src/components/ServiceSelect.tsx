@@ -638,34 +638,6 @@ export default function ServiceSelect({
         </span>
       </div>
 
-      {/* Trust micro-signals near packs */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginBottom: "12px" }}>
-        {[
-          { icon: "✅", label: t("service.trustReal") },
-          { icon: "⚡", label: t("service.trustFast") },
-          { icon: "🔒", label: t("service.trustNoPassword") },
-        ].map((s) => (
-          <span
-            key={s.label}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              padding: "5px 10px",
-              borderRadius: "999px",
-              background: "rgba(255,255,255,0.03)",
-              border: `1px solid ${accentBorder}`,
-              fontSize: "11px",
-              fontWeight: 600,
-              color: "rgb(169,181,174)",
-            }}
-          >
-            <span style={{ fontSize: "11px" }}>{s.icon}</span>
-            {s.label}
-          </span>
-        ))}
-      </div>
-
       {/* Packs grid — 2 cols × 4 rows */}
       <div className="grid-packs" style={{ marginBottom: "20px" }}>
         {(() => {
