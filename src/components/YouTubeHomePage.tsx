@@ -10,13 +10,10 @@ import type { CartItem } from "@/components/ServiceSelect";
 import type { PostAssignment } from "@/components/PostPicker";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
-import YouTubeUrlInput from "@/components/YouTubeUrlInput";
 import type { YouTubeVideoInfo } from "@/components/YouTubeUrlInput";
-import YouTubeVideoPreview from "@/components/YouTubeVideoPreview";
-import type { ScanResult } from "@/components/ScanLoading";
 import { useTranslation } from "@/lib/i18n";
 
-type Step = "hero" | "videoUrl" | "videoPreview" | "shop" | "payment" | "success";
+type Step = "hero" | "shop" | "payment" | "success";
 
 function loadSession<T>(key: string, fallback: T): T {
   try {
@@ -29,32 +26,9 @@ function saveSession(key: string, value: unknown) {
   try { sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* ignore */ }
 }
 
-// Build a minimal ScanResult-compatible object from video info (for ServiceSelect)
-function videoToScanResult(video: YouTubeVideoInfo): ScanResult {
-  return {
-    username: video.channelName,
-    fullName: video.channelName,
-    avatarUrl: video.channelAvatar || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`,
-    followersCount: video.subscriberCount,
-    followingCount: 0,
-    likesCount: video.likeCount,
-    videoCount: 1,
-    bio: "",
-    verified: false,
-    posts: [{
-      id: video.videoId,
-      imageUrl: video.thumbnail,
-      caption: video.title,
-      likesCount: video.likeCount,
-      commentsCount: video.commentCount,
-      viewsCount: video.viewCount,
-      isVideo: true,
-    }],
-  };
-}
-
 function YouTubeHomePageInner() {
   const [step, setStep] = useState<Step>("hero");
+  const [videoUrl, setVideoUrl] = useState<string>("");
   const [videoInfo, setVideoInfo] = useState<YouTubeVideoInfo | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [postAssignments, setPostAssignments] = useState<PostAssignment[] | undefined>(undefined);
@@ -66,6 +40,7 @@ function YouTubeHomePageInner() {
 
   useEffect(() => {
     setStep(loadSession<Step>("yt_step", "hero"));
+    setVideoUrl(loadSession<string>("yt_videoUrl", ""));
     setVideoInfo(loadSession("yt_videoInfo", null));
     setCart(loadSession("yt_cart", []));
     setPostAssignments(loadSession("yt_postAssignments", undefined));
@@ -81,16 +56,15 @@ function YouTubeHomePageInner() {
       else document.body.removeAttribute("data-hide-chat");
     }
   }, [step, hydrated]);
+  useEffect(() => { if (hydrated) saveSession("yt_videoUrl", videoUrl); }, [videoUrl, hydrated]);
   useEffect(() => { if (hydrated) saveSession("yt_videoInfo", videoInfo); }, [videoInfo, hydrated]);
   useEffect(() => { if (hydrated) saveSession("yt_cart", cart); }, [cart, hydrated]);
   useEffect(() => { if (hydrated) saveSession("yt_postAssignments", postAssignments); }, [postAssignments, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
-    if (step === "videoPreview" && !videoInfo) setStep("videoUrl");
-    if (step === "shop" && !videoInfo) setStep("hero");
     if (step === "payment" && cart.length === 0) setStep("hero");
-  }, [hydrated, step, videoInfo, cart.length]);
+  }, [hydrated, step, cart.length]);
 
   // Username for order = channelName or videoId
   const username = videoInfo?.channelName || videoInfo?.videoId || "";
@@ -120,7 +94,7 @@ function YouTubeHomePageInner() {
             </p>
             <div className="mt-2">
               <button
-                onClick={() => setStep("videoUrl")}
+                onClick={() => setStep("shop")}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -205,31 +179,16 @@ function YouTubeHomePageInner() {
           </div>
         );
 
-      case "videoUrl":
-        return (
-          <YouTubeUrlInput
-            onResult={(data) => {
-              setVideoInfo(data);
-              setStep("videoPreview");
-            }}
-          />
-        );
-
-      case "videoPreview":
-        return videoInfo ? (
-          <YouTubeVideoPreview
-            video={videoInfo}
-            onConfirm={() => setStep("shop")}
-            onBack={() => { setVideoInfo(null); setStep("videoUrl"); }}
-          />
-        ) : null;
-
       case "shop":
-        return videoInfo ? (
+        return (
           <ServiceSelect
-            profile={videoToScanResult(videoInfo)}
             platform={platform}
+            username={videoUrl}
+            onUsernameChange={setVideoUrl}
+            videoInfo={videoInfo}
+            onVideoInfoChange={setVideoInfo}
             onCheckout={(items) => {
+              if (!videoInfo) return;
               setCart(items);
               // Auto-assign the video for likes/views
               const needsVideo = items.some((c) => c.service === "yt_likes" || c.service === "yt_views");
@@ -246,9 +205,9 @@ function YouTubeHomePageInner() {
               }
               setStep("payment");
             }}
-            onBack={() => setStep("videoPreview")}
+            onBack={() => setStep("hero")}
           />
-        ) : null;
+        );
 
       case "payment":
         return (
@@ -270,7 +229,7 @@ function YouTubeHomePageInner() {
             orderId={orderId}
             cart={cart}
             platform={platform}
-            onReset={() => { setStep("hero"); setVideoInfo(null); setCart([]); setPostAssignments(undefined); setOrderId(undefined); try { sessionStorage.clear(); } catch {} }}
+            onReset={() => { setStep("hero"); setVideoUrl(""); setVideoInfo(null); setCart([]); setPostAssignments(undefined); setOrderId(undefined); try { sessionStorage.clear(); } catch {} }}
           />
         );
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import posthog from "posthog-js";
 import type { ScanResult } from "@/components/ScanLoading";
+import type { YouTubeVideoInfo } from "@/components/YouTubeUrlInput";
 import { useTranslation, fmtPrice, type Currency } from "@/lib/i18n";
 
 type ServiceType = "followers" | "likes" | "views" | "yt_subscribers" | "yt_likes" | "yt_views" | "sp_streams" | "x_followers" | "x_likes" | "x_retweets" | "tw_followers" | "tw_live_viewers";
@@ -296,6 +297,8 @@ export default function ServiceSelect({
   platform = "tiktok",
   username: externalUsername,
   onUsernameChange,
+  videoInfo,
+  onVideoInfoChange,
 }: {
   profile?: ScanResult | null;
   onCheckout: (cart: CartItem[]) => void;
@@ -303,6 +306,8 @@ export default function ServiceSelect({
   platform?: string;
   username?: string;
   onUsernameChange?: (u: string) => void;
+  videoInfo?: YouTubeVideoInfo | null;
+  onVideoInfoChange?: (info: YouTubeVideoInfo | null) => void;
 }) {
   const { t, lang, currency } = useTranslation();
   const isYouTube = platform === "youtube";
@@ -326,6 +331,8 @@ export default function ServiceSelect({
   const [selectedCombo, setSelectedCombo] = useState<{ id: number; items: CartItem[] } | null>(null);
   const [usernameError, setUsernameError] = useState(false);
   const [previewProfile, setPreviewProfile] = useState<{ username: string; fullName: string; avatarUrl: string; followersCount: number } | null>(null);
+  const [previewVideo, setPreviewVideo] = useState<YouTubeVideoInfo | null>(videoInfo || null);
+  const [urlInvalid, setUrlInvalid] = useState(false);
   const [editingUsername, setEditingUsername] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -379,22 +386,47 @@ export default function ServiceSelect({
       .finally(() => setPricingLoaded(true));
   }, []);
 
-  // Debounced username lookup for profile preview
+  // Debounced lookup for profile (or YouTube video) preview based on the input value.
   useEffect(() => {
     if (lookupTimer.current) clearTimeout(lookupTimer.current);
-    const uname = (externalUsername || "").trim();
-    if (uname.length < 2) { setPreviewProfile(null); setPreviewLoading(false); return; }
+    const raw = (externalUsername || "").trim();
+
+    if (isYouTube) {
+      if (raw.length < 4) { setPreviewVideo(null); setPreviewLoading(false); setUrlInvalid(false); onVideoInfoChange?.(null); return; }
+      setUrlInvalid(false);
+      setPreviewLoading(true);
+      lookupTimer.current = setTimeout(() => {
+        fetch(`/api/youtube-video-info?url=${encodeURIComponent(raw)}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data && !data.error && data.videoId) {
+              const info = data as YouTubeVideoInfo;
+              setPreviewVideo(info);
+              setUrlInvalid(false);
+              setEditingUsername(false);
+              onVideoInfoChange?.(info);
+            } else {
+              setPreviewVideo(null);
+              setUrlInvalid(true);
+              onVideoInfoChange?.(null);
+            }
+          })
+          .catch(() => { setPreviewVideo(null); setUrlInvalid(true); onVideoInfoChange?.(null); })
+          .finally(() => setPreviewLoading(false));
+      }, 600);
+      return () => { if (lookupTimer.current) clearTimeout(lookupTimer.current); };
+    }
+
+    if (raw.length < 2) { setPreviewProfile(null); setPreviewLoading(false); return; }
     setPreviewLoading(true);
     lookupTimer.current = setTimeout(() => {
-      const endpoint = isYouTube
-        ? `/api/scraper-youtube?username=${encodeURIComponent(uname)}`
-        : isX
-          ? `/api/scraper-x?username=${encodeURIComponent(uname)}`
-          : isTwitch
-            ? `/api/scraper-twitch?username=${encodeURIComponent(uname)}`
-            : platform === "instagram"
-              ? `/api/scraper-instagram?username=${encodeURIComponent(uname)}`
-              : `/api/scraper-tiktok?username=${encodeURIComponent(uname)}`;
+      const endpoint = isX
+        ? `/api/scraper-x?username=${encodeURIComponent(raw)}`
+        : isTwitch
+          ? `/api/scraper-twitch?username=${encodeURIComponent(raw)}`
+          : platform === "instagram"
+            ? `/api/scraper-instagram?username=${encodeURIComponent(raw)}`
+            : `/api/scraper-tiktok?username=${encodeURIComponent(raw)}`;
       fetch(endpoint)
         .then((r) => r.json())
         .then((data) => {
@@ -413,7 +445,7 @@ export default function ServiceSelect({
         .finally(() => setPreviewLoading(false));
     }, 800);
     return () => { if (lookupTimer.current) clearTimeout(lookupTimer.current); };
-  }, [externalUsername, platform, isYouTube]);
+  }, [externalUsername, platform, isYouTube, isX, isTwitch, onVideoInfoChange]);
 
   // Pre-select TOP pack (the one with `popular: true`) once pricing is loaded.
   // Only runs once per tab — if the user deselects, we don't re-select.
@@ -507,7 +539,9 @@ export default function ServiceSelect({
   const total = cart.reduce((sum, item) => sum + priceForCurrency(item, currency), 0);
   const currentUsername = profile?.username || externalUsername || "";
   const hasItems = cart.length > 0;
-  const hasUsername = currentUsername.trim().length >= 2;
+  const hasUsername = isYouTube
+    ? !!(videoInfo || previewVideo)
+    : currentUsername.trim().length >= 2;
   const canCheckout = hasItems && hasUsername;
 
   function handleCheckoutClick() {
@@ -533,8 +567,8 @@ export default function ServiceSelect({
         padding: "0 16px",
       }}
     >
-      {/* Username input or mini profile recap */}
-      {profile && !editingUsername ? (
+      {/* Username input or mini profile recap (TikTok/Instagram/X/Twitch) */}
+      {!isYouTube && profile && !editingUsername ? (
         <div
           style={{
             display: "flex",
@@ -559,6 +593,42 @@ export default function ServiceSelect({
           </div>
           <button
             onClick={() => { setEditingUsername(true); onUsernameChange?.(""); }}
+            style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${accentBorder}`, background: "transparent", color: "rgb(169,181,174)", fontSize: "11px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s", flexShrink: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
+          >
+            {lang === "en" ? "Change" : "Changer"}
+          </button>
+        </div>
+      ) : null}
+
+      {/* YouTube video recap */}
+      {isYouTube && previewVideo && !editingUsername ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "10px 12px",
+            borderRadius: "12px",
+            backgroundColor: accentBg,
+            border: `1px solid ${accentBorder}`,
+            marginBottom: "20px",
+            width: "100%",
+            maxWidth: "360px",
+          }}
+        >
+          <img
+            src={previewVideo.thumbnail}
+            alt={previewVideo.title}
+            style={{ width: "60px", height: "40px", borderRadius: "6px", objectFit: "cover", border: `1px solid ${accentBorderStrong}`, flexShrink: 0 }}
+          />
+          <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{previewVideo.title}</p>
+            <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{previewVideo.channelName}</p>
+          </div>
+          <button
+            onClick={() => { setEditingUsername(true); onUsernameChange?.(""); setPreviewVideo(null); onVideoInfoChange?.(null); }}
             style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${accentBorder}`, background: "transparent", color: "rgb(169,181,174)", fontSize: "11px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s", flexShrink: 0 }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
@@ -739,24 +809,29 @@ export default function ServiceSelect({
         })()}
       </div>
 
-      {/* Username input — after packs */}
-      {(!profile || editingUsername) && (
+      {/* Username / URL input — after packs */}
+      {((!isYouTube && (!profile || editingUsername)) || (isYouTube && (!previewVideo || editingUsername))) && (
         <div id="username-input-section" style={{ width: "100%", maxWidth: "360px", marginBottom: "20px" }}>
           <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {t("service.usernameLabel")}
+            {isYouTube ? t("service.youtubeUrlLabel") : t("service.usernameLabel")}
           </label>
           <div style={{ display: "flex", alignItems: "center", gap: "0", borderRadius: "12px", border: usernameError ? `1px solid #ef4444` : `1px solid ${accentBorder}`, backgroundColor: usernameError ? "rgba(239,68,68,0.05)" : accentBg, overflow: "hidden", transition: "all 0.3s", animation: usernameError ? "shake 0.4s ease-in-out" : "none" }}>
-            <span style={{ padding: "0 0 0 14px", fontSize: "14px", color: "rgb(107,117,111)", fontWeight: 600, userSelect: "none" }}>@</span>
+            {!isYouTube && (
+              <span style={{ padding: "0 0 0 14px", fontSize: "14px", color: "rgb(107,117,111)", fontWeight: 600, userSelect: "none" }}>@</span>
+            )}
             <input
-              type="text"
+              type={isYouTube ? "url" : "text"}
               value={externalUsername || ""}
-              onChange={(e) => onUsernameChange?.(e.target.value.replace(/^@/, "").replace(/\s/g, ""))}
-              placeholder={t("service.usernamePlaceholder")}
-              style={{ flex: 1, padding: "12px 14px 12px 4px", border: "none", background: "transparent", color: "#fff", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
+              onChange={(e) => isYouTube
+                ? onUsernameChange?.(e.target.value)
+                : onUsernameChange?.(e.target.value.replace(/^@/, "").replace(/\s/g, ""))
+              }
+              placeholder={isYouTube ? t("service.youtubeUrlPlaceholder") : t("service.usernamePlaceholder")}
+              style={{ flex: 1, padding: isYouTube ? "12px 14px" : "12px 14px 12px 4px", border: "none", background: "transparent", color: "#fff", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
             />
           </div>
-          {/* Profile preview dropdown */}
-          {(previewLoading || previewProfile) && (externalUsername || "").trim().length >= 2 && (
+          {/* Preview dropdown */}
+          {!isYouTube && (previewLoading || previewProfile) && (externalUsername || "").trim().length >= 2 && (
             <div style={{
               marginTop: "6px", padding: "10px 14px", borderRadius: "10px",
               border: `1px solid ${accentBorder}`, backgroundColor: "rgba(14,21,18,0.95)",
@@ -810,9 +885,53 @@ export default function ServiceSelect({
               ) : null}
             </div>
           )}
+          {/* YouTube video preview dropdown */}
+          {isYouTube && (previewLoading || previewVideo) && (externalUsername || "").trim().length >= 4 && (
+            <div style={{
+              marginTop: "6px", padding: "10px 12px", borderRadius: "10px",
+              border: `1px solid ${accentBorder}`, backgroundColor: "rgba(14,21,18,0.95)",
+              display: "flex", alignItems: "center", gap: "10px",
+              animation: "fadeIn 0.2s ease",
+            }}>
+              {previewLoading ? (
+                <>
+                  <div style={{ width: "60px", height: "40px", borderRadius: "6px", background: "rgba(255,255,255,0.06)", flexShrink: 0, animation: "pulse 1.5s ease-in-out infinite" }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ height: "12px", width: "80%", borderRadius: "4px", background: "rgba(255,255,255,0.06)", marginBottom: "6px", animation: "pulse 1.5s ease-in-out infinite" }} />
+                    <div style={{ height: "10px", width: "50%", borderRadius: "4px", background: "rgba(255,255,255,0.04)", animation: "pulse 1.5s ease-in-out infinite" }} />
+                  </div>
+                </>
+              ) : previewVideo ? (
+                <>
+                  <img
+                    src={previewVideo.thumbnail}
+                    alt=""
+                    style={{ width: "60px", height: "40px", borderRadius: "6px", objectFit: "cover", border: `1px solid ${accent}`, flexShrink: 0 }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {previewVideo.title}
+                    </p>
+                    <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {previewVideo.channelName}
+                    </p>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </>
+              ) : null}
+            </div>
+          )}
+          {/* YouTube URL invalid hint */}
+          {isYouTube && urlInvalid && !previewLoading && (
+            <p style={{ marginTop: "6px", fontSize: "12px", color: "#ef4444", fontWeight: 500 }}>
+              {t("service.youtubeUrlInvalid")}
+            </p>
+          )}
           {usernameError && (
             <p style={{ marginTop: "6px", fontSize: "12px", color: "#ef4444", fontWeight: 500 }}>
-              {t("service.usernameRequired")}
+              {isYouTube ? t("service.youtubeUrlRequired") : t("service.usernameRequired")}
             </p>
           )}
         </div>
