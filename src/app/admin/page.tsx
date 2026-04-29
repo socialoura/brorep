@@ -112,6 +112,7 @@ export default function AdminPage() {
   const [newUpsell, setNewUpsell] = useState({ service: "followers", qty: "", label: "", labelEn: "" });
   const [editingSmm, setEditingSmm] = useState<{ orderId: number; index: number } | null>(null);
   const [editingSmmValue, setEditingSmmValue] = useState("");
+  const [retryingSmm, setRetryingSmm] = useState<{ orderId: number; index: number } | null>(null);
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
 
@@ -580,15 +581,39 @@ export default function AdminPage() {
                               </div>
                             );
                           }
+                          const isFailed = !s.bulkfollows_order_id && !!s.error;
                           return (
-                            <span
-                              key={i}
-                              onClick={() => { setEditingSmm({ orderId: o.id, index: i }); setEditingSmmValue(s.bulkfollows_order_id ? String(s.bulkfollows_order_id) : ""); }}
-                              title="Cliquer pour modifier l'ID BulkFollows"
-                              style={{ cursor: "pointer", fontSize: "10px", padding: "2px 6px", borderRadius: "4px", backgroundColor: s.error ? "rgba(239,68,68,0.08)" : "rgba(0,180,53,0.08)", color: s.error ? "#ef4444" : green, border: `1px solid ${s.error ? "rgba(239,68,68,0.15)" : "rgba(0,210,106,0.15)"}` }}
-                            >
-                              {s.service} {s.qty} → {s.bulkfollows_order_id ? `#${s.bulkfollows_order_id}` : s.error ? `\u26A0 ${s.error.slice(0, 30)}` : "+ ID"}
-                            </span>
+                            <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                              <span
+                                onClick={() => { setEditingSmm({ orderId: o.id, index: i }); setEditingSmmValue(s.bulkfollows_order_id ? String(s.bulkfollows_order_id) : ""); }}
+                                title={s.error ? `Erreur: ${s.error}` : "Cliquer pour modifier l'ID BulkFollows"}
+                                style={{ cursor: "pointer", fontSize: "10px", padding: "2px 6px", borderRadius: "4px", backgroundColor: s.error ? "rgba(239,68,68,0.08)" : "rgba(0,180,53,0.08)", color: s.error ? "#ef4444" : green, border: `1px solid ${s.error ? "rgba(239,68,68,0.15)" : "rgba(0,210,106,0.15)"}` }}
+                              >
+                                {s.service} {s.qty} → {s.bulkfollows_order_id ? `#${s.bulkfollows_order_id}` : s.error ? `\u26A0 ${s.error.slice(0, 30)}` : "+ ID"}
+                              </span>
+                              {isFailed && (
+                                <button
+                                  onClick={async () => {
+                                    if (retryingSmm) return;
+                                    setRetryingSmm({ orderId: o.id, index: i });
+                                    try {
+                                      const res = await fetch("/api/admin/orders/retry-smm", { method: "POST", headers, body: JSON.stringify({ orderId: o.id, index: i }) });
+                                      const data = await res.json();
+                                      if (!data.success) alert(`Échec du retry: ${data.error || "erreur inconnue"}`);
+                                    } catch (e) {
+                                      alert(`Erreur réseau: ${e}`);
+                                    }
+                                    setRetryingSmm(null);
+                                    fetchOrders(ordersPage);
+                                  }}
+                                  disabled={!!retryingSmm}
+                                  title="Relancer la commande BulkFollows"
+                                  style={{ cursor: retryingSmm ? "wait" : "pointer", fontSize: "11px", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(0,210,106,0.25)", backgroundColor: "rgba(0,180,53,0.08)", color: green, fontFamily: "inherit", opacity: retryingSmm && retryingSmm.orderId === o.id && retryingSmm.index === i ? 0.5 : 1 }}
+                                >
+                                  {retryingSmm && retryingSmm.orderId === o.id && retryingSmm.index === i ? "..." : "🔄"}
+                                </button>
+                              )}
+                            </div>
                           );
                         })}
                         {/* Add entry for cart items not yet in smm_orders */}

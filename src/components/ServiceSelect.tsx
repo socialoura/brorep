@@ -241,7 +241,7 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
 };
 
 const TIKTOK_KEYS: ServiceType[] = ["followers", "likes", "views"];
-const YOUTUBE_KEYS: ServiceType[] = ["yt_subscribers", "yt_likes", "yt_views"];
+const YOUTUBE_KEYS: ServiceType[] = ["yt_views", "yt_likes", "yt_subscribers"];
 const SPOTIFY_KEYS: ServiceType[] = ["sp_streams"];
 const X_KEYS: ServiceType[] = ["x_followers", "x_likes", "x_retweets"];
 const TWITCH_KEYS: ServiceType[] = ["tw_followers", "tw_live_viewers"];
