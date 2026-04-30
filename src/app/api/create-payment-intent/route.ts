@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency, lang: reqLang } = body;
     const lang = reqLang === "en" ? "en" : "fr";
-    const validCurrencies = ["eur", "usd", "gbp", "cad", "nzd", "chf"];
+    const validCurrencies = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
     const currency = validCurrencies.includes(reqCurrency) ? reqCurrency : "eur";
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Calculate total in cents based on currency
-    const currencyFieldMap: Record<string, string> = { eur: "price", usd: "priceUsd", gbp: "priceGbp", cad: "priceCad", nzd: "priceNzd", chf: "priceChf" };
+    const currencyFieldMap: Record<string, string> = { eur: "price", usd: "priceUsd", gbp: "priceGbp", cad: "priceCad", nzd: "priceNzd", aud: "priceAud", chf: "priceChf" };
     const field = currencyFieldMap[currency] || "price";
     let totalCents = Math.round(
       cart.reduce((sum: number, item: Record<string, number>) => sum + (item[field] || item.price || 0), 0) * 100

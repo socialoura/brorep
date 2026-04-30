@@ -19,6 +19,7 @@ function priceFor(item: CartItem, c: Currency): number {
     case "gbp": v = item.priceGbp || item.price; break;
     case "cad": v = item.priceCad || item.price; break;
     case "nzd": v = item.priceNzd || item.price; break;
+    case "aud": v = item.priceAud || item.price; break;
     case "chf": v = item.priceChf || item.price; break;
     default: v = item.price;
   }
@@ -288,7 +289,7 @@ function UpsellSuggestions({ cart, platform, onAdd }: {
 }) {
   const { t, lang, currency } = useTranslation();
   const th = themeFor(platform);
-  const [offers, setOffers] = useState<{ id: number; service: string; qty: number; label: string; label_en: string; price: number; price_usd: number; price_gbp?: number; price_cad?: number; price_nzd?: number; price_chf?: number }[]>([]);
+  const [offers, setOffers] = useState<{ id: number; service: string; qty: number; label: string; label_en: string; price: number; price_usd: number; price_gbp?: number; price_cad?: number; price_nzd?: number; price_aud?: number; price_chf?: number }[]>([]);
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
   const [added, setAdded] = useState<Set<number>>(new Set());
 
@@ -308,7 +309,7 @@ function UpsellSuggestions({ cart, platform, onAdd }: {
   return (
     <div style={{ marginBottom: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
       {visible.slice(0, 2).map((offer) => {
-        const priceMap: Record<string, number> = { eur: offer.price, usd: offer.price_usd, gbp: offer.price_gbp || offer.price, cad: offer.price_cad || offer.price, nzd: offer.price_nzd || offer.price, chf: offer.price_chf || offer.price };
+        const priceMap: Record<string, number> = { eur: offer.price, usd: offer.price_usd, gbp: offer.price_gbp || offer.price, cad: offer.price_cad || offer.price, nzd: offer.price_nzd || offer.price, aud: offer.price_aud || offer.price, chf: offer.price_chf || offer.price };
         const price = Number(priceMap[currency] ?? offer.price) || 0;
         const label = lang === "en" ? (offer.label_en || offer.label || `${offer.qty} ${offer.service}`) : (offer.label || `${offer.qty} ${offer.service}`);
         return (
@@ -340,6 +341,7 @@ function UpsellSuggestions({ cart, platform, onAdd }: {
                     priceGbp: Number(offer.price_gbp || offer.price) || 0,
                     priceCad: Number(offer.price_cad || offer.price) || 0,
                     priceNzd: Number(offer.price_nzd || offer.price) || 0,
+                    priceAud: Number(offer.price_aud || offer.price) || 0,
                     priceChf: Number(offer.price_chf || offer.price) || 0,
                   });
                   setAdded((prev) => new Set(prev).add(offer.id));

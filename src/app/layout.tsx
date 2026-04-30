@@ -9,14 +9,15 @@ import ChatWidget from "@/components/ChatWidget";
 import type { Currency } from "@/lib/i18n";
 import "./globals.css";
 
-const VALID_CURRENCIES: Currency[] = ["eur", "usd", "gbp", "cad", "nzd", "chf"];
+const VALID_CURRENCIES: Currency[] = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
 
 const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
   GB: "gbp", IM: "gbp", JE: "gbp", GG: "gbp",
   US: "usd", PR: "usd", VI: "usd", AS: "usd", GU: "usd", MP: "usd",
   EC: "usd", SV: "usd", PA: "usd", TL: "usd", FM: "usd", MH: "usd", PW: "usd",
   CA: "cad",
-  NZ: "nzd", AU: "nzd",
+  NZ: "nzd",
+  AU: "aud",
   CH: "chf", LI: "chf",
   AT: "eur", BE: "eur", CY: "eur", DE: "eur", EE: "eur", ES: "eur", FI: "eur",
   FR: "eur", GR: "eur", HR: "eur", IE: "eur", IT: "eur", LT: "eur", LU: "eur",

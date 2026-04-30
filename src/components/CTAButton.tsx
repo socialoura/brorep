@@ -13,7 +13,7 @@ export default function CTAButton({ onClick }: { onClick?: () => void }) {
       .then((r) => r.json())
       .then((data) => {
         if (!data.pricing) return;
-        const key = currency === "usd" ? "price_usd" : currency === "gbp" ? "price_gbp" : currency === "cad" ? "price_cad" : currency === "nzd" ? "price_nzd" : currency === "chf" ? "price_chf" : "price";
+        const key = currency === "usd" ? "price_usd" : currency === "gbp" ? "price_gbp" : currency === "cad" ? "price_cad" : currency === "nzd" ? "price_nzd" : currency === "aud" ? "price_aud" : currency === "chf" ? "price_chf" : "price";
         const prices = data.pricing.map((p: Record<string, number>) => Number(p[key]) || Number(p.price)).filter((v: number) => v > 0);
         if (prices.length > 0) setMinPrice(Math.min(...prices));
       })

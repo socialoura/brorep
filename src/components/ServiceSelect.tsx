@@ -16,6 +16,7 @@ interface Pack {
   priceGbp: number;
   priceCad: number;
   priceNzd: number;
+  priceAud: number;
   priceChf: number;
   popular?: boolean;
 }
@@ -29,6 +30,7 @@ export interface CartItem {
   priceGbp: number;
   priceCad: number;
   priceNzd: number;
+  priceAud: number;
   priceChf: number;
   liveStartAt?: string; // ISO date for Twitch live viewers (when stream starts)
 }
@@ -42,14 +44,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 5.99, priceUsd: 5.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 16.99, priceUsd: 16.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 34.99, priceUsd: 34.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 10000, price: 99.99, priceUsd: 99.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 25000, price: 199.99, priceUsd: 199.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 5.99, priceUsd: 5.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 16.99, priceUsd: 16.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 34.99, priceUsd: 34.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 10000, price: 99.99, priceUsd: 99.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 25000, price: 199.99, priceUsd: 199.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   likes: {
@@ -60,14 +62,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 1.99, priceUsd: 1.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 3.99, priceUsd: 3.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 24.99, priceUsd: 24.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 44.99, priceUsd: 44.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 10000, price: 79.99, priceUsd: 79.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 25000, price: 149.99, priceUsd: 149.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 1.99, priceUsd: 1.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 3.99, priceUsd: 3.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 24.99, priceUsd: 24.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 44.99, priceUsd: 44.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 10000, price: 79.99, priceUsd: 79.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 25000, price: 149.99, priceUsd: 149.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   views: {
@@ -78,14 +80,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 500, price: 1.99, priceUsd: 1.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 1000, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 7.99, priceUsd: 7.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 12.99, priceUsd: 12.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 10000, price: 22.99, priceUsd: 22.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 25000, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 50000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 100000, price: 149.99, priceUsd: 149.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 1.99, priceUsd: 1.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 1000, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 7.99, priceUsd: 7.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 12.99, priceUsd: 12.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 10000, price: 22.99, priceUsd: 22.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 25000, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 50000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 100000, price: 149.99, priceUsd: 149.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   yt_subscribers: {
@@ -96,12 +98,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 3.99, priceUsd: 3.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 7.99, priceUsd: 7.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 13.99, priceUsd: 13.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 24.99, priceUsd: 24.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 3.99, priceUsd: 3.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 7.99, priceUsd: 7.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 13.99, priceUsd: 13.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 24.99, priceUsd: 24.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   yt_likes: {
@@ -112,12 +114,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 8.99, priceUsd: 8.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 14.99, priceUsd: 14.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 54.99, priceUsd: 54.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 8.99, priceUsd: 8.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 14.99, priceUsd: 14.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 54.99, priceUsd: 54.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   yt_views: {
@@ -128,13 +130,13 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 500, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 1000, price: 4.49, priceUsd: 4.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 16.99, priceUsd: 16.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 10000, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 25000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 50000, price: 99.99, priceUsd: 99.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 500, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 1000, price: 4.49, priceUsd: 4.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 16.99, priceUsd: 16.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 10000, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 25000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 50000, price: 99.99, priceUsd: 99.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   sp_streams: {
@@ -145,14 +147,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 1000, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 6.49, priceUsd: 6.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 10000, price: 21.99, priceUsd: 21.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 25000, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 50000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 100000, price: 159.99, priceUsd: 159.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250000, price: 349.99, priceUsd: 349.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 1000, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 6.49, priceUsd: 6.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 10000, price: 21.99, priceUsd: 21.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 25000, price: 49.99, priceUsd: 49.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 50000, price: 89.99, priceUsd: 89.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 100000, price: 159.99, priceUsd: 159.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250000, price: 349.99, priceUsd: 349.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   x_followers: {
@@ -163,12 +165,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 19.99, priceUsd: 19.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 39.99, priceUsd: 39.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 69.99, priceUsd: 69.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 19.99, priceUsd: 19.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 39.99, priceUsd: 39.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 69.99, priceUsd: 69.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   x_likes: {
@@ -179,12 +181,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 8.99, priceUsd: 8.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 14.99, priceUsd: 14.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 54.99, priceUsd: 54.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 2.49, priceUsd: 2.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 8.99, priceUsd: 8.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 14.99, priceUsd: 14.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 54.99, priceUsd: 54.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   tw_followers: {
@@ -195,14 +197,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 19.99, priceUsd: 19.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 39.99, priceUsd: 39.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 69.99, priceUsd: 69.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 10000, price: 119.99, priceUsd: 119.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 25000, price: 249.99, priceUsd: 249.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 3.49, priceUsd: 3.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 6.99, priceUsd: 6.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 11.99, priceUsd: 11.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 19.99, priceUsd: 19.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 39.99, priceUsd: 39.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 69.99, priceUsd: 69.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 10000, price: 119.99, priceUsd: 119.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 25000, price: 249.99, priceUsd: 249.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   tw_live_viewers: {
@@ -213,14 +215,14 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 10, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 25, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 50, price: 17.99, priceUsd: 17.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 100, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 64.99, priceUsd: 64.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 119.99, priceUsd: 119.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 1000, price: 219.99, priceUsd: 219.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 499.99, priceUsd: 499.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 10, price: 4.99, priceUsd: 4.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 25, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 50, price: 17.99, priceUsd: 17.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 100, price: 29.99, priceUsd: 29.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 64.99, priceUsd: 64.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 119.99, priceUsd: 119.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 1000, price: 219.99, priceUsd: 219.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 499.99, priceUsd: 499.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
   x_retweets: {
@@ -231,12 +233,12 @@ const DEFAULT_SERVICES: Partial<Record<ServiceType, { label: string; icon: React
       </svg>
     ),
     packs: [
-      { qty: 100, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 250, price: 5.49, priceUsd: 5.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0, popular: true },
-      { qty: 1000, price: 17.99, priceUsd: 17.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 2500, price: 34.99, priceUsd: 34.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
-      { qty: 5000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceChf: 0 },
+      { qty: 100, price: 2.99, priceUsd: 2.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 250, price: 5.49, priceUsd: 5.49, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 500, price: 9.99, priceUsd: 9.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0, popular: true },
+      { qty: 1000, price: 17.99, priceUsd: 17.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 2500, price: 34.99, priceUsd: 34.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
+      { qty: 5000, price: 59.99, priceUsd: 59.99, priceGbp: 0, priceCad: 0, priceNzd: 0, priceAud: 0, priceChf: 0 },
     ],
   },
 };
@@ -260,6 +262,7 @@ function priceForCurrency(p: Pack | CartItem, c: Currency): number {
     case "gbp": return p.priceGbp || p.price;
     case "cad": return p.priceCad || p.price;
     case "nzd": return p.priceNzd || p.price;
+    case "aud": return p.priceAud || p.price;
     case "chf": return p.priceChf || p.price;
     default: return p.price;
   }
@@ -364,7 +367,7 @@ export default function ServiceSelect({
           const svc = row.service as ServiceType;
           if (!SERVICE_KEYS.includes(svc)) continue;
           if (!grouped[svc]) grouped[svc] = [];
-          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price), priceUsd: Number(row.price_usd || 0), priceGbp: Number(row.price_gbp || 0), priceCad: Number(row.price_cad || 0), priceNzd: Number(row.price_nzd || 0), priceChf: Number(row.price_chf || 0), popular: !!row.popular });
+          grouped[svc]!.push({ qty: Number(row.qty), price: Number(row.price), priceUsd: Number(row.price_usd || 0), priceGbp: Number(row.price_gbp || 0), priceCad: Number(row.price_cad || 0), priceNzd: Number(row.price_nzd || 0), priceAud: Number(row.price_aud || 0), priceChf: Number(row.price_chf || 0), popular: !!row.popular });
         }
         setServices((prev) => {
           const next = { ...prev };
@@ -524,6 +527,7 @@ export default function ServiceSelect({
           priceGbp: Number(((pack.priceGbp || pack.price) * discountMult).toFixed(2)),
           priceCad: Number(((pack.priceCad || pack.price) * discountMult).toFixed(2)),
           priceNzd: Number(((pack.priceNzd || pack.price) * discountMult).toFixed(2)),
+          priceAud: Number(((pack.priceAud || pack.price) * discountMult).toFixed(2)),
           priceChf: Number(((pack.priceChf || pack.price) * discountMult).toFixed(2)),
         };
       });

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { useDetectedCurrency } from "@/components/CurrencyProvider";
 
 export type Lang = "fr" | "en";
-export type Currency = "eur" | "usd" | "gbp" | "cad" | "nzd" | "chf";
+export type Currency = "eur" | "usd" | "gbp" | "cad" | "nzd" | "chf" | "aud";
 
 export function fmtPrice(amount: number, currency: Currency): string {
   switch (currency) {
@@ -13,6 +13,7 @@ export function fmtPrice(amount: number, currency: Currency): string {
     case "gbp": return `£${amount.toFixed(2)}`;
     case "cad": return `C$${amount.toFixed(2)}`;
     case "nzd": return `NZ$${amount.toFixed(2)}`;
+    case "aud": return `A$${amount.toFixed(2)}`;
     case "chf": return `CHF ${amount.toFixed(2)}`;
     default: return `${amount.toFixed(2)}\u20AC`;
   }
@@ -24,6 +25,7 @@ export function currencyField(currency: Currency): string {
     case "gbp": return "priceGbp";
     case "cad": return "priceCad";
     case "nzd": return "priceNzd";
+    case "aud": return "priceAud";
     case "chf": return "priceChf";
     default: return "price";
   }

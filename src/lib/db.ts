@@ -39,6 +39,7 @@ export async function initDb() {
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_gbp NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_cad NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_nzd NUMERIC(8,2) DEFAULT 0`;
+  await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_aud NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_chf NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'eur'`;
   await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS name_en VARCHAR(100) DEFAULT ''`;

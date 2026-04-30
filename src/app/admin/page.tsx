@@ -18,7 +18,7 @@ interface SmmData {
   balance: { balance?: string; currency?: string } | null;
 }
 
-const CURRENCY_SYMBOLS: Record<string, string> = { eur: "\u20AC", usd: "$", gbp: "\u00A3", cad: "C$", nzd: "NZ$", chf: "CHF" };
+const CURRENCY_SYMBOLS: Record<string, string> = { eur: "\u20AC", usd: "$", gbp: "\u00A3", cad: "C$", nzd: "NZ$", aud: "A$", chf: "CHF" };
 
 interface Order {
   id: number;
@@ -47,6 +47,7 @@ interface PricingItem {
   price_gbp: number;
   price_cad: number;
   price_nzd: number;
+  price_aud: number;
   price_chf: number;
   popular: boolean;
   active: boolean;
@@ -103,8 +104,9 @@ export default function AdminPage() {
   const [editPriceGbp, setEditPriceGbp] = useState("");
   const [editPriceCad, setEditPriceCad] = useState("");
   const [editPriceNzd, setEditPriceNzd] = useState("");
+  const [editPriceAud, setEditPriceAud] = useState("");
   const [editPriceChf, setEditPriceChf] = useState("");
-  const [newPack, setNewPack] = useState({ service: "followers", qty: "", price: "", priceUsd: "", priceGbp: "", priceCad: "", priceNzd: "", priceChf: "" });
+  const [newPack, setNewPack] = useState({ service: "followers", qty: "", price: "", priceUsd: "", priceGbp: "", priceCad: "", priceNzd: "", priceAud: "", priceChf: "" });
   const [combos, setCombos] = useState<ComboPack[]>([]);
   const [newCombo, setNewCombo] = useState({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
   const [smm, setSmm] = useState<SmmData | null>(null);
@@ -228,7 +230,7 @@ export default function AdminPage() {
     await fetch("/api/admin/pricing", {
       method: "PUT",
       headers,
-      body: JSON.stringify({ id, price: Number(editPrice), price_usd: Number(editPriceUsd), price_gbp: Number(editPriceGbp), price_cad: Number(editPriceCad), price_nzd: Number(editPriceNzd), price_chf: Number(editPriceChf) }),
+      body: JSON.stringify({ id, price: Number(editPrice), price_usd: Number(editPriceUsd), price_gbp: Number(editPriceGbp), price_cad: Number(editPriceCad), price_nzd: Number(editPriceNzd), price_aud: Number(editPriceAud), price_chf: Number(editPriceChf) }),
     });
     setEditingId(null);
     fetchPricing();
@@ -257,9 +259,9 @@ export default function AdminPage() {
     await fetch("/api/admin/pricing", {
       method: "POST",
       headers,
-      body: JSON.stringify({ service: newPack.service, qty: Number(newPack.qty), price: Number(newPack.price), price_usd: Number(newPack.priceUsd) || 0, price_gbp: Number(newPack.priceGbp) || 0, price_cad: Number(newPack.priceCad) || 0, price_nzd: Number(newPack.priceNzd) || 0, price_chf: Number(newPack.priceChf) || 0 }),
+      body: JSON.stringify({ service: newPack.service, qty: Number(newPack.qty), price: Number(newPack.price), price_usd: Number(newPack.priceUsd) || 0, price_gbp: Number(newPack.priceGbp) || 0, price_cad: Number(newPack.priceCad) || 0, price_nzd: Number(newPack.priceNzd) || 0, price_aud: Number(newPack.priceAud) || 0, price_chf: Number(newPack.priceChf) || 0 }),
     });
-    setNewPack({ service: newPack.service, qty: "", price: "", priceUsd: "", priceGbp: "", priceCad: "", priceNzd: "", priceChf: "" });
+    setNewPack({ service: newPack.service, qty: "", price: "", priceUsd: "", priceGbp: "", priceCad: "", priceNzd: "", priceAud: "", priceChf: "" });
     fetchPricing();
   };
 
@@ -830,6 +832,7 @@ export default function AdminPage() {
                             { label: "£", val: editPriceGbp, set: setEditPriceGbp },
                             { label: "C$", val: editPriceCad, set: setEditPriceCad },
                             { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "A$", val: editPriceAud, set: setEditPriceAud },
                             { label: "CHF", val: editPriceChf, set: setEditPriceChf },
                           ].map((c) => (
                             <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
@@ -847,7 +850,7 @@ export default function AdminPage() {
                         </div>
                       ) : (
                         <div
-                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
+                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceAud(String(item.price_aud || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
                           style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
                         >
                           <span style={{ color: green }}>{Number(item.price).toFixed(2)}€</span>
@@ -920,6 +923,7 @@ export default function AdminPage() {
                             { label: "£", val: editPriceGbp, set: setEditPriceGbp },
                             { label: "C$", val: editPriceCad, set: setEditPriceCad },
                             { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "A$", val: editPriceAud, set: setEditPriceAud },
                             { label: "CHF", val: editPriceChf, set: setEditPriceChf },
                           ].map((c) => (
                             <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
@@ -937,7 +941,7 @@ export default function AdminPage() {
                         </div>
                       ) : (
                         <div
-                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
+                          onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceAud(String(item.price_aud || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
                           style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
                         >
                           <span style={{ color: "#FF0000" }}>{Number(item.price).toFixed(2)}€</span>
@@ -1002,6 +1006,7 @@ export default function AdminPage() {
                       { label: "\u00A3", val: editPriceGbp, set: setEditPriceGbp },
                       { label: "C$", val: editPriceCad, set: setEditPriceCad },
                       { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                      { label: "A$", val: editPriceAud, set: setEditPriceAud },
                       { label: "CHF", val: editPriceChf, set: setEditPriceChf },
                     ].map((c) => (
                       <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
@@ -1019,7 +1024,7 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   <div
-                    onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
+                    onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceAud(String(item.price_aud || 0)); setEditPriceChf(String(item.price_chf || 0)); }}
                     style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}
                   >
                     <span style={{ color: "#1DB954" }}>{Number(item.price).toFixed(2)}{"\u20AC"}</span>
@@ -1077,6 +1082,7 @@ export default function AdminPage() {
                             { label: "\u00A3", val: editPriceGbp, set: setEditPriceGbp },
                             { label: "C$", val: editPriceCad, set: setEditPriceCad },
                             { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "A$", val: editPriceAud, set: setEditPriceAud },
                             { label: "CHF", val: editPriceChf, set: setEditPriceChf },
                           ].map((c) => (
                             <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
@@ -1088,7 +1094,7 @@ export default function AdminPage() {
                           <button onClick={() => updatePrice(item.id)} style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "rgb(29,155,240)", color: "#fff", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}>OK</button>
                         </div>
                       ) : (
-                        <div onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }} style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}>
+                        <div onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceAud(String(item.price_aud || 0)); setEditPriceChf(String(item.price_chf || 0)); }} style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}>
                           <span style={{ color: "rgb(29,155,240)" }}>{Number(item.price).toFixed(2)}{"\u20AC"}</span>
                           <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
                         </div>
@@ -1137,6 +1143,7 @@ export default function AdminPage() {
                             { label: "\u00A3", val: editPriceGbp, set: setEditPriceGbp },
                             { label: "C$", val: editPriceCad, set: setEditPriceCad },
                             { label: "NZ$", val: editPriceNzd, set: setEditPriceNzd },
+                            { label: "A$", val: editPriceAud, set: setEditPriceAud },
                             { label: "CHF", val: editPriceChf, set: setEditPriceChf },
                           ].map((c) => (
                             <div key={c.label} style={{ display: "flex", gap: "4px", alignItems: "center" }}>
@@ -1148,7 +1155,7 @@ export default function AdminPage() {
                           <button onClick={() => updatePrice(item.id)} style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "rgb(145,71,255)", color: "#fff", fontSize: "11px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: "2px" }}>OK</button>
                         </div>
                       ) : (
-                        <div onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceChf(String(item.price_chf || 0)); }} style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}>
+                        <div onClick={() => { setEditingId(item.id); setEditPrice(String(item.price)); setEditPriceUsd(String(item.price_usd || 0)); setEditPriceGbp(String(item.price_gbp || 0)); setEditPriceCad(String(item.price_cad || 0)); setEditPriceNzd(String(item.price_nzd || 0)); setEditPriceAud(String(item.price_aud || 0)); setEditPriceChf(String(item.price_chf || 0)); }} style={{ fontSize: "14px", fontWeight: 600, cursor: "pointer", marginBottom: "8px" }}>
                           <span style={{ color: "rgb(145,71,255)" }}>{Number(item.price).toFixed(2)}{"\u20AC"}</span>
                           <span style={{ color: "rgb(107,117,111)", fontSize: "11px", marginLeft: "6px" }}>${Number(item.price_usd || 0).toFixed(2)}</span>
                         </div>

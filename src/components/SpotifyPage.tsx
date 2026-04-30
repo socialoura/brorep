@@ -16,6 +16,7 @@ interface Pack {
   priceGbp: number;
   priceCad: number;
   priceNzd: number;
+  priceAud: number;
   priceChf: number;
   popular?: boolean;
 }
@@ -32,6 +33,7 @@ function priceFor(p: Pack, c: Currency): number {
     case "gbp": return p.priceGbp || p.price;
     case "cad": return p.priceCad || p.price;
     case "nzd": return p.priceNzd || p.price;
+    case "aud": return p.priceAud || p.price;
     case "chf": return p.priceChf || p.price;
     default: return p.price;
   }
@@ -97,6 +99,7 @@ function SpotifyPageInner() {
             priceGbp: Number(row.price_gbp || 0),
             priceCad: Number(row.price_cad || 0),
             priceNzd: Number(row.price_nzd || 0),
+            priceAud: Number(row.price_aud || 0),
             priceChf: Number(row.price_chf || 0),
           });
         }
@@ -191,6 +194,7 @@ function SpotifyPageInner() {
       priceGbp: pack.priceGbp || pack.price,
       priceCad: pack.priceCad || pack.price,
       priceNzd: pack.priceNzd || pack.price,
+      priceAud: pack.priceAud || pack.price,
       priceChf: pack.priceChf || pack.price,
     };
     setCart([item]);
