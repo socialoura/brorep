@@ -1,30 +1,10 @@
 import type { Metadata } from "next";
 import InstagramHomePage from "@/components/InstagramHomePage";
+import { generatePageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Booster votre compte Instagram — Followers, Likes & Vues",
-  description: "Développez votre compte Instagram avec une croissance rapide et naturelle. Boostez vos followers, likes et vues. Paiement sécurisé par Stripe, résultats visibles en 24h.",
-  keywords: [
-    "boost instagram", "croissance instagram", "augmenter followers instagram",
-    "développer compte instagram", "acheter followers instagram",
-    "plus de likes instagram", "fanovaly instagram",
-  ],
-  alternates: {
-    canonical: "https://fanovaly.com/instagram",
-  },
-  openGraph: {
-    title: "Booster votre compte Instagram — Fanovaly",
-    description: "Développez votre compte Instagram avec une croissance rapide et naturelle. Paiement sécurisé.",
-    url: "https://fanovaly.com/instagram",
-    siteName: "Fanovaly",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Booster votre compte Instagram — Fanovaly",
-    description: "Développez votre compte Instagram avec une croissance rapide et naturelle.",
-  },
-};
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  return generatePageMetadata("instagram", await searchParams);
+}
 
 export default function InstagramPage() {
   return <InstagramHomePage />;

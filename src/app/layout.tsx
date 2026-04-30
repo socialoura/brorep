@@ -50,7 +50,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Fanovaly — Boostez votre croissance sur TikTok, YouTube & Spotify",
+    default: "Fanovaly — Boostez votre croissance TikTok & YouTube",
     template: "%s | Fanovaly",
   },
   description: "Développez votre audience sur TikTok, YouTube et Spotify. Croissance rapide et naturelle, paiement sécurisé par Stripe, support 24/7.",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     canonical: "https://fanovaly.com",
   },
   openGraph: {
-    title: "Fanovaly — Boostez votre croissance sur TikTok, YouTube & Spotify",
+    title: "Fanovaly — Boostez votre croissance TikTok & YouTube",
     description: "Développez votre audience sur TikTok, YouTube et Spotify. Croissance rapide et naturelle, paiement sécurisé.",
     url: "https://fanovaly.com",
     siteName: "Fanovaly",
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fanovaly — Boostez votre croissance sur TikTok, YouTube & Spotify",
+    title: "Fanovaly — Boostez votre croissance TikTok & YouTube",
     description: "Développez votre audience sur TikTok, YouTube et Spotify. Croissance rapide et naturelle, paiement sécurisé.",
     site: "@fanovaly",
   },
@@ -155,9 +155,14 @@ export default async function RootLayout({
 
   const detectedLang: string | null = country && COUNTRY_TO_LANG[country] ? COUNTRY_TO_LANG[country] : null;
 
+  // Determine html lang from URL ?lang= param via referer header, fallback to detected or "fr"
+  const referer = headerStore.get("referer") || "";
+  const langMatch = referer.match(/[?&]lang=(en|es|pt|de)/);
+  const htmlLang = langMatch ? langMatch[1] : (detectedLang || "fr");
+
   return (
     <html
-      lang="fr"
+      lang={htmlLang}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       data-detected-lang={detectedLang || ""}
     >
