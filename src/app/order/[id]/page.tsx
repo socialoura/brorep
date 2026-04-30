@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use, Suspense } from "react";
-import { useTranslation, fmtPrice } from "@/lib/i18n";
+import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
 import type { Currency } from "@/lib/i18n";
 
 interface SmmStatus {
@@ -167,7 +167,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
             </p>
             {order.deliveredAt && (
               <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
-                {t("orderDetail.deliveredOn")} {new Date(order.deliveredAt).toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+                {t("orderDetail.deliveredOn")} {new Date(order.deliveredAt).toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
               </p>
             )}
           </div>
@@ -267,7 +267,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
               </div>
               {item.liveStartAt && (
                 <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "rgb(145,71,255)", fontWeight: 600 }}>
-                  🔴 {lang === "en" ? "Live starts" : "Début du live"}: {new Date(item.liveStartAt).toLocaleString(lang === "en" ? "en-US" : "fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+                  🔴 {t("live.liveStarts")}: {new Date(item.liveStartAt).toLocaleString(LANG_LOCALE[lang], { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
                 </p>
               )}
             </div>
@@ -277,7 +277,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
             <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>{fmtPrice(order.totalCents / 100, (order.currency || "eur") as Currency)}</span>
           </div>
           <p style={{ margin: "8px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>
-            {t("orderDetail.orderedOn")} {new Date(order.createdAt).toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            {t("orderDetail.orderedOn")} {new Date(order.createdAt).toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
 

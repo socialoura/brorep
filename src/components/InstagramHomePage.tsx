@@ -13,19 +13,9 @@ import type { PostAssignment } from "@/components/PostPicker";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
 import AnimatedBackground from "@/components/AnimatedBackground";
-import { useTranslation, fmtPrice } from "@/lib/i18n";
+import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
 
 type Step = "hero" | "shop" | "pickPosts" | "payment" | "success";
-
-const PROGRESS_STEPS_FR = [
-  { key: "shop", label: "Services" },
-  { key: "payment", label: "Paiement" },
-] as const;
-
-const PROGRESS_STEPS_EN = [
-  { key: "shop", label: "Services" },
-  { key: "payment", label: "Payment" },
-] as const;
 
 const STEP_TO_PROGRESS: Record<string, number> = {
   shop: 0,
@@ -34,7 +24,11 @@ const STEP_TO_PROGRESS: Record<string, number> = {
 };
 
 function StepProgress({ step, lang = "fr" }: { step: Step; lang?: string }) {
-  const PROGRESS_STEPS = lang === "en" ? PROGRESS_STEPS_EN : PROGRESS_STEPS_FR;
+  const { t } = useTranslation();
+  const PROGRESS_STEPS = [
+    { key: "shop", label: t("progress.services") },
+    { key: "payment", label: t("progress.payment") },
+  ];
   const currentIndex = STEP_TO_PROGRESS[step];
   if (currentIndex === undefined) return null;
 
@@ -256,7 +250,7 @@ function InstagramHomePageInner() {
               <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "#E1306C", flexShrink: 0 }} />
                 <span style={{ color: "#E1306C", fontWeight: 600 }}>{t("hero.operational")}</span>
-                <span className="text-gray-500">({new Date().toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "long", year: "numeric" })})</span>
+                <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
               </div>
 
               {/* Scroll hint arrow */}

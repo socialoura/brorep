@@ -368,6 +368,97 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "orderDetail.loadError": { fr: "Impossible de charger la commande", en: "Unable to load order", es: "No se pudo cargar el pedido", pt: "Não foi possível carregar o pedido", de: "Bestellung konnte nicht geladen werden" },
   "orderDetail.serviceStatus": { fr: "Statut par service", en: "Status per service", es: "Estado por servicio", pt: "Status por serviço", de: "Status pro Dienst" },
   "orderStatus.error": { fr: "Erreur", en: "Error", es: "Error", pt: "Erro", de: "Fehler" },
+
+  // ===== X (Twitter) HomePage =====
+  "x.hero.title1": { fr: "Accélère ta", en: "Accelerate your", es: "Acelera tu", pt: "Acelere seu", de: "Beschleunige dein" },
+  "x.hero.title2": { fr: "croissance ", en: "growth ", es: "crecimiento ", pt: "crescimento ", de: "Wachstum " },
+  "x.hero.subtitle1": { fr: "On s'occupe de ta visibilité X pendant que", en: "We handle your X visibility while", es: "Nos encargamos de tu visibilidad en X mientras", pt: "Cuidamos da sua visibilidade no X enquanto", de: "Wir kümmern uns um deine X-Sichtbarkeit, während" },
+  "x.hero.subtitle2": { fr: "tu te concentres sur ton contenu.", en: "you focus on your content.", es: "tú te concentras en tu contenido.", pt: "você foca no seu conteúdo.", de: "du dich auf deinen Content konzentrierst." },
+  "x.hero.cta": { fr: "Lancer ma croissance →", en: "Start my growth →", es: "Impulsar mi crecimiento →", pt: "Iniciar meu crescimento →", de: "Mein Wachstum starten →" },
+  "x.howItWorks.step1.title": { fr: "L'IA scanne ton profil", en: "AI scans your profile", es: "La IA escanea tu perfil", pt: "A IA analisa seu perfil", de: "KI scannt dein Profil" },
+  "x.howItWorks.step1.desc": { fr: "Entre ton @ et notre IA analyse tes stats et engagement en 30 secondes.", en: "Enter your @ and our AI analyzes your stats and engagement in 30 seconds.", es: "Ingresa tu @ y nuestra IA analiza tus stats y engagement en 30 segundos.", pt: "Digite seu @ e nossa IA analisa suas stats e engajamento em 30 segundos.", de: "Gib deinen @ ein und unsere KI analysiert deine Stats und Engagement in 30 Sekunden." },
+  "x.howItWorks.step2.title": { fr: "Stratégie personnalisée", en: "Personalized strategy", es: "Estrategia personalizada", pt: "Estratégia personalizada", de: "Personalisierte Strategie" },
+  "x.howItWorks.step2.desc": { fr: "L'IA te recommande un plan sur mesure adapté à ton profil X.", en: "AI recommends a custom plan adapted to your X profile.", es: "La IA te recomienda un plan a medida para tu perfil de X.", pt: "A IA recomenda um plano sob medida adaptado ao seu perfil X.", de: "Die KI empfiehlt einen maßgeschneiderten Plan für dein X-Profil." },
+  "x.howItWorks.step3.title": { fr: "Croissance automatique", en: "Automatic growth", es: "Crecimiento automático", pt: "Crescimento automático", de: "Automatisches Wachstum" },
+  "x.howItWorks.step3.desc": { fr: "Résultats visibles rapidement, directement sur ton compte.", en: "Results visible quickly, directly on your account.", es: "Resultados visibles rápidamente, directamente en tu cuenta.", pt: "Resultados visíveis rapidamente, diretamente na sua conta.", de: "Ergebnisse schnell sichtbar, direkt auf deinem Konto." },
+  "x.faq.q1": { fr: "Comment l'IA analyse mon profil X ?", en: "How does the AI analyze my X profile?", es: "¿Cómo analiza la IA mi perfil de X?", pt: "Como a IA analisa meu perfil X?", de: "Wie analysiert die KI mein X-Profil?" },
+  "x.faq.a1": { fr: "Notre IA scanne tes tweets, ton taux d'engagement et ton audience pour identifier les meilleurs leviers de croissance.", en: "Our AI scans your tweets, engagement rate and audience to identify the best growth levers.", es: "Nuestra IA escanea tus tweets, tasa de engagement y audiencia para identificar las mejores palancas de crecimiento.", pt: "Nossa IA analisa seus tweets, taxa de engajamento e audiência para identificar as melhores alavancas de crescimento.", de: "Unsere KI scannt deine Tweets, Engagement-Rate und Zielgruppe, um die besten Wachstumshebel zu identifizieren." },
+  "x.faq.q2": { fr: "Est-ce que c'est sûr pour mon compte ?", en: "Is it safe for my account?", es: "¿Es seguro para mi cuenta?", pt: "É seguro para minha conta?", de: "Ist das sicher für mein Konto?" },
+  "x.faq.a2": { fr: "Oui. L'IA analyse ton profil sans aucun accès à ton compte. Aucun mot de passe requis.", en: "Yes. The AI analyzes your profile without any access to your account. No password required.", es: "Sí. La IA analiza tu perfil sin acceso a tu cuenta. Sin contraseña.", pt: "Sim. A IA analisa seu perfil sem acesso à sua conta. Sem senha.", de: "Ja. Die KI analysiert dein Profil ohne Zugang zu deinem Konto. Kein Passwort nötig." },
+  "x.faq.q3": { fr: "En combien de temps je vois des résultats ?", en: "How quickly will I see results?", es: "¿En cuánto tiempo veo resultados?", pt: "Em quanto tempo vejo resultados?", de: "Wie schnell sehe ich Ergebnisse?" },
+  "x.faq.a3": { fr: "Les premiers résultats sont visibles en quelques heures. Tout est finalisé sous 24h.", en: "First results visible within hours. Everything finalized within 24h.", es: "Los primeros resultados son visibles en horas. Todo finalizado en 24h.", pt: "Os primeiros resultados são visíveis em horas. Tudo finalizado em 24h.", de: "Erste Ergebnisse in Stunden sichtbar. Alles in 24h abgeschlossen." },
+  "x.faq.q4": { fr: "Les résultats sont-ils durables ?", en: "Are results long-lasting?", es: "¿Los resultados son duraderos?", pt: "Os resultados são duradouros?", de: "Sind die Ergebnisse dauerhaft?" },
+  "x.faq.a4": { fr: "On mise sur une croissance progressive. En cas de variation, on compense gratuitement pendant 30 jours.", en: "We focus on progressive growth. In case of variation, we compensate for free for 30 days.", es: "Apostamos por un crecimiento progresivo. En caso de variación, compensamos gratis durante 30 días.", pt: "Apostamos em crescimento progressivo. Em caso de variação, compensamos gratuitamente por 30 dias.", de: "Wir setzen auf progressives Wachstum. Bei Schwankungen gleichen wir 30 Tage lang kostenlos aus." },
+  "x.linkToTikTok": { fr: "Tu cherches TikTok ou Instagram ? ", en: "Looking for TikTok or Instagram? ", es: "¿Buscas TikTok o Instagram? ", pt: "Procurando TikTok ou Instagram? ", de: "Suchst du TikTok oder Instagram? " },
+  "x.linkToTikTok.cta": { fr: "C'est par ici", en: "Click here", es: "Haz clic aquí", pt: "Clique aqui", de: "Hier klicken" },
+
+  // ===== Twitch HomePage =====
+  "tw.hero.title1": { fr: "Fais connaître ta", en: "Promote your", es: "Promociona tu", pt: "Divulgue seu", de: "Mach deinen" },
+  "tw.hero.title2": { fr: "chaîne ", en: "channel ", es: "canal ", pt: "canal ", de: "Kanal " },
+  "tw.hero.subtitle1": { fr: "Une visibilité accrue auprès d'une audience", en: "Reach a wider audience of gaming", es: "Mayor visibilidad ante una audiencia", pt: "Maior visibilidade junto a uma audiência", de: "Mehr Sichtbarkeit bei einem Publikum" },
+  "tw.hero.subtitle2": { fr: "passionnée de gaming et de streaming.", en: "and streaming enthusiasts.", es: "apasionada por gaming y streaming.", pt: "apaixonada por gaming e streaming.", de: "das Gaming und Streaming liebt." },
+  "tw.hero.cta": { fr: "Promouvoir ma chaîne →", en: "Promote my channel →", es: "Promocionar mi canal →", pt: "Promover meu canal →", de: "Meinen Kanal bewerben →" },
+  "tw.hero.delivery": { fr: "Promotion de ta chaîne Twitch", en: "Twitch channel promotion", es: "Promoción de tu canal de Twitch", pt: "Promoção do seu canal Twitch", de: "Twitch-Kanal-Promotion" },
+  "tw.howItWorks.step1.title": { fr: "Entre ton @", en: "Enter your @", es: "Ingresa tu @", pt: "Digite seu @", de: "Gib deinen @ ein" },
+  "tw.howItWorks.step1.desc": { fr: "Indique ta chaîne Twitch et choisis ta formule de promotion.", en: "Enter your Twitch channel and choose your promotion plan.", es: "Indica tu canal de Twitch y elige tu plan de promoción.", pt: "Indique seu canal Twitch e escolha seu plano de promoção.", de: "Gib deinen Twitch-Kanal ein und wähle dein Promotion-Paket." },
+  "tw.howItWorks.step2.title": { fr: "Paie en sécurité", en: "Pay securely", es: "Paga de forma segura", pt: "Pague com segurança", de: "Sicher bezahlen" },
+  "tw.howItWorks.step2.desc": { fr: "Paiement sécurisé par Stripe, en quelques secondes.", en: "Secure Stripe payment, takes only seconds.", es: "Pago seguro con Stripe, en segundos.", pt: "Pagamento seguro por Stripe, em segundos.", de: "Sichere Zahlung über Stripe in Sekunden." },
+  "tw.howItWorks.step3.title": { fr: "Audience ciblée", en: "Targeted audience", es: "Audiencia segmentada", pt: "Audiência segmentada", de: "Zielgerichtetes Publikum" },
+  "tw.howItWorks.step3.desc": { fr: "Ta chaîne est mise en avant auprès de viewers intéressés par ton contenu.", en: "Your channel is showcased to viewers interested in your content.", es: "Tu canal se destaca ante viewers interesados en tu contenido.", pt: "Seu canal é destacado para viewers interessados no seu conteúdo.", de: "Dein Kanal wird Zuschauern präsentiert, die sich für deinen Content interessieren." },
+  "tw.faq.q1": { fr: "Comment fonctionnent les viewers live ?", en: "How do live viewers work?", es: "¿Cómo funcionan los viewers en vivo?", pt: "Como funcionam os viewers ao vivo?", de: "Wie funktionieren Live-Zuschauer?" },
+  "tw.faq.a1": { fr: "Tu nous indiques l'heure exacte de ton stream. Au début du live, les viewers se connectent progressivement et restent jusqu'à la fin.", en: "You tell us the exact time of your stream. At the start, viewers connect progressively and stay until the end.", es: "Nos indicas la hora exacta de tu stream. Al inicio, los viewers se conectan progresivamente y se quedan hasta el final.", pt: "Você nos informa a hora exata do seu stream. No início, os viewers se conectam progressivamente e ficam até o final.", de: "Du gibst uns die genaue Uhrzeit deines Streams. Zum Start verbinden sich Zuschauer schrittweise und bleiben bis zum Ende." },
+  "tw.faq.q2": { fr: "Est-ce que c'est sûr pour mon compte ?", en: "Is it safe for my account?", es: "¿Es seguro para mi cuenta?", pt: "É seguro para minha conta?", de: "Ist das sicher für mein Konto?" },
+  "tw.faq.a2": { fr: "Oui. Aucun mot de passe requis, aucun accès à ton compte Twitch. On a juste besoin de ton pseudo.", en: "Yes. No password required, no access to your Twitch account. Just your username.", es: "Sí. Sin contraseña, sin acceso a tu cuenta de Twitch. Solo necesitamos tu usuario.", pt: "Sim. Sem senha, sem acesso à sua conta Twitch. Só precisamos do seu usuário.", de: "Ja. Kein Passwort nötig, kein Zugang zu deinem Twitch-Konto. Nur dein Benutzername." },
+  "tw.faq.q3": { fr: "Que se passe-t-il si je décale mon live ?", en: "What if I postpone my live?", es: "¿Qué pasa si pospongo mi live?", pt: "E se eu adiar minha live?", de: "Was passiert, wenn ich meinen Stream verschiebe?" },
+  "tw.faq.a3": { fr: "Contacte-nous au plus vite via le chat — on reprogramme la livraison sans frais.", en: "Contact us via chat asap — we'll reschedule delivery for free.", es: "Contáctanos por chat lo antes posible — reprogramamos la entrega gratis.", pt: "Entre em contato pelo chat — reagendamos a entrega gratuitamente.", de: "Kontaktiere uns schnellstmöglich per Chat — wir planen die Lieferung kostenlos um." },
+  "tw.faq.q4": { fr: "Les followers sont-ils durables ?", en: "Are followers long-lasting?", es: "¿Los seguidores son duraderos?", pt: "Os seguidores são duradouros?", de: "Sind die Follower dauerhaft?" },
+  "tw.faq.a4": { fr: "On vise une croissance progressive. Garantie 30 jours, on recharge gratuitement en cas de baisse.", en: "We aim for progressive growth. 30-day guarantee with free refill if any drop occurs.", es: "Apostamos por un crecimiento progresivo. Garantía de 30 días, recargamos gratis si hay bajada.", pt: "Apostamos em crescimento progressivo. Garantia de 30 dias, repomos gratuitamente em caso de queda.", de: "Wir setzen auf progressives Wachstum. 30 Tage Garantie, kostenlose Nachlieferung bei Rückgang." },
+  "tw.linkToTikTok": { fr: "Tu cherches TikTok ou Instagram ? ", en: "Looking for TikTok or Instagram? ", es: "¿Buscas TikTok o Instagram? ", pt: "Procurando TikTok ou Instagram? ", de: "Suchst du TikTok oder Instagram? " },
+  "tw.linkToTikTok.cta": { fr: "C'est par ici", en: "Click here", es: "Haz clic aquí", pt: "Clique aqui", de: "Hier klicken" },
+
+  // ===== LiveSchedule =====
+  "live.pickDateTime": { fr: "Sélectionne une date et une heure", en: "Pick a date and time", es: "Selecciona una fecha y hora", pt: "Selecione uma data e hora", de: "Wähle Datum und Uhrzeit" },
+  "live.invalidDateTime": { fr: "Date/heure invalide", en: "Invalid date/time", es: "Fecha/hora inválida", pt: "Data/hora inválida", de: "Ungültiges Datum/Uhrzeit" },
+  "live.mustBeFuture": { fr: "La date doit être dans le futur", en: "Date must be in the future", es: "La fecha debe ser en el futuro", pt: "A data deve ser no futuro", de: "Das Datum muss in der Zukunft liegen" },
+  "live.title1": { fr: "Quand commence ton ", en: "When does your ", es: "¿Cuándo empieza tu ", pt: "Quando começa sua ", de: "Wann startet dein " },
+  "live.title2": { fr: " ?", en: " start?", es: " ?", pt: " ?", de: " ?" },
+  "live.subtitle": { fr: "Indique précisément quand tu lances ton stream", en: "Tell us exactly when you start streaming", es: "Indica exactamente cuándo empiezas tu stream", pt: "Indique exatamente quando você inicia seu stream", de: "Gib genau an, wann du deinen Stream startest" },
+  "live.viewersDelivery": { fr: "{qty} viewers seront livrés progressivement dès le début", en: "{qty} viewers will be delivered progressively from the start", es: "{qty} viewers se entregarán progresivamente desde el inicio", pt: "{qty} viewers serão entregues progressivamente desde o início", de: "{qty} Zuschauer werden ab Start schrittweise geliefert" },
+  "live.dateLabel": { fr: "Date", en: "Date", es: "Fecha", pt: "Data", de: "Datum" },
+  "live.timeLabel": { fr: "Heure", en: "Time", es: "Hora", pt: "Hora", de: "Uhrzeit" },
+  "live.liveStarts": { fr: "Début du live", en: "Live starts", es: "Inicio del live", pt: "Início da live", de: "Live-Start" },
+  "live.continuePay": { fr: "Continuer vers le paiement", en: "Continue to payment", es: "Continuar al pago", pt: "Continuar para pagamento", de: "Weiter zur Zahlung" },
+  "live.editCart": { fr: "Modifier mon panier", en: "Edit my cart", es: "Editar mi carrito", pt: "Editar meu carrinho", de: "Warenkorb bearbeiten" },
+
+  // ===== RecentDeliveries =====
+  "recent.agoPrefix": { fr: "il y a", en: "", es: "hace", pt: "há", de: "vor" },
+  "recent.agoSuffix": { fr: "", en: "ago", es: "", pt: "", de: "" },
+  "recent.delivered": { fr: "livrés", en: "delivered", es: "entregados", pt: "entregues", de: "geliefert" },
+  "recent.deliveredFem": { fr: "livrées", en: "delivered", es: "entregadas", pt: "entregues", de: "geliefert" },
+
+  // ===== LiveOrderCounter =====
+  "liveCounter.ordersToday": { fr: "commandes aujourd'hui", en: "orders today", es: "pedidos hoy", pt: "pedidos hoje", de: "Bestellungen heute" },
+
+  // ===== Misc =====
+  "common.change": { fr: "Changer", en: "Change", es: "Cambiar", pt: "Alterar", de: "Ändern" },
+
+  // ===== Service labels =====
+  "svc.followers": { fr: "Followers", en: "Followers", es: "Seguidores", pt: "Seguidores", de: "Follower" },
+  "svc.likes": { fr: "Likes", en: "Likes", es: "Likes", pt: "Likes", de: "Likes" },
+  "svc.views": { fr: "Vues", en: "Views", es: "Vistas", pt: "Views", de: "Aufrufe" },
+  "svc.yt_subscribers": { fr: "Abonnés", en: "Subscribers", es: "Suscriptores", pt: "Inscritos", de: "Abonnenten" },
+  "svc.yt_likes": { fr: "Likes", en: "Likes", es: "Likes", pt: "Likes", de: "Likes" },
+  "svc.yt_views": { fr: "Vues", en: "Views", es: "Vistas", pt: "Views", de: "Aufrufe" },
+  "svc.sp_streams": { fr: "Streams", en: "Streams", es: "Streams", pt: "Streams", de: "Streams" },
+  "svc.x_followers": { fr: "Followers", en: "Followers", es: "Seguidores", pt: "Seguidores", de: "Follower" },
+  "svc.x_likes": { fr: "Likes", en: "Likes", es: "Likes", pt: "Likes", de: "Likes" },
+  "svc.x_retweets": { fr: "Retweets", en: "Retweets", es: "Retweets", pt: "Retweets", de: "Retweets" },
+  "svc.tw_followers": { fr: "Followers", en: "Followers", es: "Seguidores", pt: "Seguidores", de: "Follower" },
+  "svc.tw_live_viewers": { fr: "Live Viewers", en: "Live Viewers", es: "Espectadores en vivo", pt: "Espectadores ao vivo", de: "Live-Zuschauer" },
+};
+
+export const LANG_LOCALE: Record<Lang, string> = {
+  fr: "fr-FR", en: "en-US", es: "es-ES", pt: "pt-BR", de: "de-DE",
 };
 
 export function useTranslation() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, LANG_LOCALE } from "@/lib/i18n";
 
 /**
  * Pseudo-live order counter. Shows "X orders today" with a small live dot.
@@ -16,7 +16,7 @@ export default function LiveOrderCounter({
   platform?: string;
   accent?: string;
 }) {
-  const { lang } = useTranslation();
+  const { t, lang } = useTranslation();
   const accentColor = accent ?? defaultAccent(platform);
   const [count, setCount] = useState<number | null>(null);
 
@@ -49,7 +49,7 @@ export default function LiveOrderCounter({
 
   if (count == null) return null;
 
-  const label = lang === "fr" ? "commandes aujourd'hui" : "orders today";
+  const label = t("liveCounter.ordersToday");
 
   return (
     <div
@@ -77,7 +77,7 @@ export default function LiveOrderCounter({
           boxShadow: `0 0 8px ${accentColor}`,
         }}
       />
-      <span style={{ color: accentColor, fontWeight: 800 }}>{count.toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</span>
+      <span style={{ color: accentColor, fontWeight: 800 }}>{count.toLocaleString(LANG_LOCALE[lang])}</span>
       <span style={{ color: "rgb(169, 181, 174)", fontWeight: 500 }}>{label}</span>
     </div>
   );

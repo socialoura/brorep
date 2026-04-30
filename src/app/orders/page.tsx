@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useTranslation, fmtPrice } from "@/lib/i18n";
+import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
 import type { Currency } from "@/lib/i18n";
 
 interface OrderItem {
@@ -214,7 +214,7 @@ function OrdersPageInner() {
                       {fmtPrice(order.total_cents / 100, (order.currency || "eur") as Currency)}
                     </span>
                     <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
-                      {new Date(order.created_at).toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                      {new Date(order.created_at).toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   </div>
                 </a>

@@ -12,7 +12,7 @@ interface OrderEmailParams {
   promoPercent?: number;
   promoExpiresAt?: number;
   orderId?: number;
-  lang?: "fr" | "en";
+  lang?: "fr" | "en" | "es" | "pt" | "de";
 }
 
 function fmtQty(n: number): string {
@@ -70,13 +70,80 @@ const i18nEmail = {
     textPromo: (code: string, pct: number) => `🎁 Promo code: ${code}\n-${pct}% off your next order (expires in 48h)`,
     textTrack: (id: number) => `📦 Track your order: https://fanovaly.com/order/${id}`,
   },
+  es: {
+    subject: (cart: { qty: number; label: string }[]) => `✅ Pedido confirmado — ${cart.map((c) => `${fmtQty(c.qty)} ${c.label}`).join(" + ")}`,
+    thanks: "¡Gracias por tu pedido!",
+    orderRegistered: (username: string, platform: string) => `Tu pedido para <strong style="color:#00ff4c;">@${username}</strong> en ${platformLabel(platform)} ha sido registrado.`,
+    service: "Servicio",
+    price: "Precio",
+    nextSteps: "Próximos pasos",
+    step1: "Estamos procesando tu pedido (generalmente de 5 a 30 min)",
+    step2: "Los resultados aparecerán progresivamente en tu perfil",
+    step3: "¡Eso es todo! Disfruta tu boost 🚀",
+    promoGift: "🎁 Regalo para tu próximo pedido",
+    promoOff: (pct: number) => `-${pct}% en tu próximo pedido`,
+    promoExpires: "Expira en 48h",
+    trackOrder: "📦 Seguir mi pedido",
+    footer1: "Fanovaly — Impulsa tu cuenta de forma segura",
+    footer2: "Si no realizaste este pedido, ignora este correo.",
+    textRegistered: (username: string, platform: string) => `Tu pedido para @${username} en ${platformLabel(platform)} ha sido registrado.`,
+    textDetail: "Detalle:",
+    textNextSteps: "Próximos pasos:",
+    textPromo: (code: string, pct: number) => `🎁 Código promo: ${code}\n-${pct}% en tu próximo pedido (expira en 48h)`,
+    textTrack: (id: number) => `📦 Seguir tu pedido: https://fanovaly.com/order/${id}`,
+  },
+  pt: {
+    subject: (cart: { qty: number; label: string }[]) => `✅ Pedido confirmado — ${cart.map((c) => `${fmtQty(c.qty)} ${c.label}`).join(" + ")}`,
+    thanks: "Obrigado pelo seu pedido!",
+    orderRegistered: (username: string, platform: string) => `Seu pedido para <strong style="color:#00ff4c;">@${username}</strong> no ${platformLabel(platform)} foi registrado.`,
+    service: "Serviço",
+    price: "Preço",
+    nextSteps: "Próximos passos",
+    step1: "Estamos processando seu pedido (geralmente de 5 a 30 min)",
+    step2: "Os resultados aparecerão progressivamente no seu perfil",
+    step3: "É isso! Aproveite seu boost 🚀",
+    promoGift: "🎁 Presente para seu próximo pedido",
+    promoOff: (pct: number) => `-${pct}% no seu próximo pedido`,
+    promoExpires: "Expira em 48h",
+    trackOrder: "📦 Acompanhar meu pedido",
+    footer1: "Fanovaly — Impulsione sua conta com segurança",
+    footer2: "Se você não fez este pedido, ignore este e-mail.",
+    textRegistered: (username: string, platform: string) => `Seu pedido para @${username} no ${platformLabel(platform)} foi registrado.`,
+    textDetail: "Detalhe:",
+    textNextSteps: "Próximos passos:",
+    textPromo: (code: string, pct: number) => `🎁 Código promo: ${code}\n-${pct}% no seu próximo pedido (expira em 48h)`,
+    textTrack: (id: number) => `📦 Acompanhar seu pedido: https://fanovaly.com/order/${id}`,
+  },
+  de: {
+    subject: (cart: { qty: number; label: string }[]) => `✅ Bestellung bestätigt — ${cart.map((c) => `${fmtQty(c.qty)} ${c.label}`).join(" + ")}`,
+    thanks: "Danke für deine Bestellung!",
+    orderRegistered: (username: string, platform: string) => `Deine Bestellung für <strong style="color:#00ff4c;">@${username}</strong> auf ${platformLabel(platform)} wurde registriert.`,
+    service: "Dienst",
+    price: "Preis",
+    nextSteps: "Nächste Schritte",
+    step1: "Wir bearbeiten deine Bestellung (normalerweise in 5 bis 30 Min.)",
+    step2: "Die Ergebnisse erscheinen schrittweise auf deinem Profil",
+    step3: "Das war's! Genieße deinen Boost 🚀",
+    promoGift: "🎁 Geschenk für deine nächste Bestellung",
+    promoOff: (pct: number) => `-${pct}% auf deine nächste Bestellung`,
+    promoExpires: "Gültig für 48h",
+    trackOrder: "📦 Meine Bestellung verfolgen",
+    footer1: "Fanovaly — Booste dein Konto sicher",
+    footer2: "Falls du diese Bestellung nicht aufgegeben hast, ignoriere diese E-Mail.",
+    textRegistered: (username: string, platform: string) => `Deine Bestellung für @${username} auf ${platformLabel(platform)} wurde registriert.`,
+    textDetail: "Details:",
+    textNextSteps: "Nächste Schritte:",
+    textPromo: (code: string, pct: number) => `🎁 Promo-Code: ${code}\n-${pct}% auf deine nächste Bestellung (gültig für 48h)`,
+    textTrack: (id: number) => `📦 Bestellung verfolgen: https://fanovaly.com/order/${id}`,
+  },
 };
 
 export async function sendOrderConfirmationEmail(params: OrderEmailParams) {
   const { to, username, platform, cart, totalCents, promoCode, promoPercent, promoExpiresAt, orderId, lang = "fr" } = params;
   const t = i18nEmail[lang];
   const total = (totalCents / 100).toFixed(2);
-  const locale = lang === "en" ? "en-GB" : "fr-FR";
+  const localeMap: Record<string, string> = { fr: "fr-FR", en: "en-GB", es: "es-ES", pt: "pt-BR", de: "de-DE" };
+  const locale = localeMap[lang] || "fr-FR";
 
   const cartLines = cart
     .map((item) => `• ${fmtQty(item.qty)} ${item.label} — ${item.price.toFixed(2)}€`)

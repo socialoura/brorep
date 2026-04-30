@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import type { CartItem } from "@/components/ServiceSelect";
 import type { ScanResult } from "@/components/ScanLoading";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, LANG_LOCALE } from "@/lib/i18n";
 
 function pad(n: number) { return n.toString().padStart(2, "0"); }
 
@@ -48,16 +48,16 @@ export default function LiveSchedule({
 
   function handleConfirm() {
     if (!date || !time) {
-      setError(lang === "fr" ? "Sélectionne une date et une heure" : "Pick a date and time");
+      setError(t("live.pickDateTime"));
       return;
     }
     const iso = new Date(`${date}T${time}:00`);
     if (isNaN(iso.getTime())) {
-      setError(lang === "fr" ? "Date/heure invalide" : "Invalid date/time");
+      setError(t("live.invalidDateTime"));
       return;
     }
     if (iso.getTime() < Date.now() - 5 * 60 * 1000) {
-      setError(lang === "fr" ? "La date doit être dans le futur" : "Date must be in the future");
+      setError(t("live.mustBeFuture"));
       return;
     }
     setError(null);
@@ -74,20 +74,16 @@ export default function LiveSchedule({
       </div>
 
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0", textAlign: "center" }}>
-        {lang === "fr" ? "Quand commence ton " : "When does your "}
+        {t("live.title1")}
         <span style={{ color: accent, textShadow: `0 0 20px rgba(145,71,255,0.3)` }}>live</span>
-        {lang === "fr" ? " ?" : " start?"}
+        {t("live.title2")}
       </h2>
       <p style={{ fontSize: "13px", color: "rgb(169, 181, 174)", margin: "0 0 6px 0", textAlign: "center" }}>
-        {lang === "fr"
-          ? "Indique précisément quand tu lances ton stream"
-          : "Tell us exactly when you start streaming"}
+        {t("live.subtitle")}
       </p>
       {viewersItem && (
         <p style={{ fontSize: "12px", color: "rgb(107, 117, 111)", margin: "0 0 24px 0", textAlign: "center" }}>
-          {lang === "fr"
-            ? `${viewersItem.qty} viewers seront livrés progressivement dès le début`
-            : `${viewersItem.qty} viewers will be delivered progressively from the start`}
+          {t("live.viewersDelivery", { qty: viewersItem.qty })}
         </p>
       )}
 
@@ -95,7 +91,7 @@ export default function LiveSchedule({
       <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
         <div>
           <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "rgb(169,181,174)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {lang === "fr" ? "Date" : "Date"}
+            {t("live.dateLabel")}
           </label>
           <input
             type="date"
@@ -112,7 +108,7 @@ export default function LiveSchedule({
         </div>
         <div>
           <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "rgb(169,181,174)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {lang === "fr" ? "Heure" : "Time"}
+            {t("live.timeLabel")}
           </label>
           <input
             type="time"
@@ -137,10 +133,10 @@ export default function LiveSchedule({
         <span style={{ fontSize: "18px" }}>📅</span>
         <div style={{ flex: 1 }}>
           <p style={{ margin: 0, fontSize: "11px", color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
-            {lang === "fr" ? "Début du live" : "Live starts"}
+            {t("live.liveStarts")}
           </p>
           <p style={{ margin: "2px 0 0 0", fontSize: "13px", fontWeight: 600, color: "#fff" }}>
-            {date && time ? new Date(`${date}T${time}:00`).toLocaleString(lang === "fr" ? "fr-FR" : "en-US", {
+            {date && time ? new Date(`${date}T${time}:00`).toLocaleString(LANG_LOCALE[lang], {
               weekday: "long", day: "numeric", month: "long", year: "numeric",
               hour: "2-digit", minute: "2-digit",
             }) : "—"}
@@ -164,7 +160,7 @@ export default function LiveSchedule({
         onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.03)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
       >
-        {lang === "fr" ? "Continuer vers le paiement" : "Continue to payment"}
+        {t("live.continuePay")}
       </button>
 
       <button
@@ -175,7 +171,7 @@ export default function LiveSchedule({
           textDecoration: "underline", fontFamily: "inherit",
         }}
       >
-        {lang === "fr" ? "Modifier mon panier" : "Edit my cart"}
+        {t("live.editCart")}
       </button>
     </div>
   );

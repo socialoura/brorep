@@ -11,18 +11,10 @@ import LiveSchedule from "@/components/LiveSchedule";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
 import type { ScanResult } from "@/components/ScanLoading";
-import { useTranslation, fmtPrice } from "@/lib/i18n";
+import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
 
 type Step = "hero" | "shop" | "liveSchedule" | "payment" | "success";
 
-const PROGRESS_STEPS_FR = [
-  { key: "shop", label: "Services" },
-  { key: "payment", label: "Paiement" },
-] as const;
-const PROGRESS_STEPS_EN = [
-  { key: "shop", label: "Services" },
-  { key: "payment", label: "Payment" },
-] as const;
 const STEP_TO_PROGRESS: Record<string, number> = {
   shop: 0,
   liveSchedule: 0,
@@ -30,7 +22,11 @@ const STEP_TO_PROGRESS: Record<string, number> = {
 };
 
 function StepProgress({ step, lang = "fr" }: { step: Step; lang?: string }) {
-  const PROGRESS_STEPS = lang === "en" ? PROGRESS_STEPS_EN : PROGRESS_STEPS_FR;
+  const { t } = useTranslation();
+  const PROGRESS_STEPS = [
+    { key: "shop", label: t("progress.services") },
+    { key: "payment", label: t("progress.payment") },
+  ];
   const currentIndex = STEP_TO_PROGRESS[step];
   if (currentIndex === undefined) return null;
   const purple = "rgb(145, 71, 255)";
@@ -91,7 +87,7 @@ function TwitchHomePageInner() {
   const [orderId, setOrderId] = useState<number | undefined>();
   const [hydrated, setHydrated] = useState(false);
   const posthog = usePostHog();
-  const { lang, currency } = useTranslation();
+  const { t, lang, href, currency } = useTranslation();
 
   const platform = "twitch";
 
@@ -159,9 +155,9 @@ function TwitchHomePageInner() {
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
                 <FanovalyLogo />
                 <h1 style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
-                  {lang === "fr" ? "Fais connaître ta" : "Promote your"}
+                  {t("tw.hero.title1")}
                   <br />
-                  <span style={{ color: "#fff" }}>{lang === "fr" ? "chaîne " : "channel "}</span>
+                  <span style={{ color: "#fff" }}>{t("tw.hero.title2")}</span>
                   <span style={{ background: "linear-gradient(135deg, rgb(145,71,255), rgb(110,50,200))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     Twitch
                     <svg width="0.7em" height="0.7em" viewBox="0 0 24 24" fill="rgb(145,71,255)" style={{ display: "inline", verticalAlign: "middle", marginLeft: "6px", filter: "drop-shadow(0 0 12px rgba(145,71,255,0.5))" }}>
@@ -172,17 +168,15 @@ function TwitchHomePageInner() {
               </div>
 
               <p style={{ fontSize: "15px", color: "rgb(169,181,174)", maxWidth: "380px", lineHeight: 1.5, margin: 0 }}>
-                {lang === "fr"
-                  ? <>Une visibilité accrue auprès d&apos;une audience<br /><span style={{ color: "rgb(107,117,111)" }}>passionnée de gaming et de streaming.</span></>
-                  : <>Reach a wider audience of gaming<br /><span style={{ color: "rgb(107,117,111)" }}>and streaming enthusiasts.</span></>}
+                {<>{t("tw.hero.subtitle1")}<br /><span style={{ color: "rgb(107,117,111)" }}>{t("tw.hero.subtitle2")}</span></>}
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
                 <p style={{ margin: 0, fontSize: "14px", color: "rgb(169,181,174)" }}>
-                  {minPrice !== null && <>{lang === "fr" ? "À partir de" : "Starting at"} <span style={{ fontSize: "28px", fontWeight: 900, color: "rgb(145,71,255)", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
+                  {minPrice !== null && <>{t("hero.startingAt")} <span style={{ fontSize: "28px", fontWeight: 900, color: "rgb(145,71,255)", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
                 </p>
                 <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
-                  ⚡ {lang === "fr" ? "Promotion de ta chaîne Twitch" : "Twitch channel promotion"}
+                  ⚡ {t("tw.hero.delivery")}
                 </span>
               </div>
 
@@ -198,13 +192,13 @@ function TwitchHomePageInner() {
                   color: "#fff", boxShadow: "0 4px 24px rgba(145,71,255,0.3)",
                 }}
               >
-                {lang === "fr" ? "Promouvoir ma chaîne →" : "Promote my channel →"}
+                {t("tw.hero.cta")}
               </button>
 
               <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "rgb(145,71,255)", flexShrink: 0 }} />
-                <span style={{ color: "rgb(145,71,255)", fontWeight: 600 }}>{lang === "fr" ? "Tous nos services sont opérationnels" : "All our services are operational"}</span>
-                <span className="text-gray-500">({new Date().toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "long", year: "numeric" })})</span>
+                <span style={{ color: "rgb(145,71,255)", fontWeight: 600 }}>{t("hero.operational")}</span>
+                <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
               </div>
 
               <div style={{ position: "absolute", bottom: "20px", left: "50%", transform: "translateX(-50%)", animation: "bounce 2s ease-in-out infinite" }}>
@@ -216,12 +210,12 @@ function TwitchHomePageInner() {
 
             <div style={{ width: "100%", maxWidth: "540px", padding: "48px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "32px" }}>
               <div style={{ width: "100%" }}>
-                <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)", marginBottom: "16px", textAlign: "center" }}>{lang === "fr" ? "Comment ça marche" : "How it works"}</p>
+                <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)", marginBottom: "16px", textAlign: "center" }}>{t("howItWorks.title")}</p>
                 <div className="grid-steps">
                   {[
-                    { num: "1", title: lang === "fr" ? "Entre ton @" : "Enter your @", desc: lang === "fr" ? "Indique ta chaîne Twitch et choisis ta formule de promotion." : "Enter your Twitch channel and choose your promotion plan." },
-                    { num: "2", title: lang === "fr" ? "Paie en sécurité" : "Pay securely", desc: lang === "fr" ? "Paiement sécurisé par Stripe, en quelques secondes." : "Secure Stripe payment, takes only seconds." },
-                    { num: "3", title: lang === "fr" ? "Audience ciblée" : "Targeted audience", desc: lang === "fr" ? "Ta chaîne est mise en avant auprès de viewers intéressés par ton contenu." : "Your channel is showcased to viewers interested in your content." },
+                    { num: "1", title: t("tw.howItWorks.step1.title"), desc: t("tw.howItWorks.step1.desc") },
+                    { num: "2", title: t("tw.howItWorks.step2.title"), desc: t("tw.howItWorks.step2.desc") },
+                    { num: "3", title: t("tw.howItWorks.step3.title"), desc: t("tw.howItWorks.step3.desc") },
                   ].map((s) => (
                     <div key={s.num} style={{ padding: "20px 14px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", textAlign: "center" }}>
                       <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "rgba(145,71,255,0.1)", border: "1px solid rgba(145,71,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px auto", fontSize: "13px", fontWeight: 800, color: "rgb(145,71,255)" }}>{s.num}</div>
@@ -233,13 +227,13 @@ function TwitchHomePageInner() {
               </div>
 
               <div style={{ width: "100%" }}>
-                <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)", marginBottom: "16px", textAlign: "center" }}>{lang === "fr" ? "Questions fréquentes" : "FAQ"}</p>
+                <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)", marginBottom: "16px", textAlign: "center" }}>{t("faq.title")}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {[
-                    { q: lang === "fr" ? "Comment fonctionnent les viewers live ?" : "How do live viewers work?", a: lang === "fr" ? "Tu nous indiques l'heure exacte de ton stream. Au début du live, les viewers se connectent progressivement et restent jusqu'à la fin." : "You tell us the exact time of your stream. At the start, viewers connect progressively and stay until the end." },
-                    { q: lang === "fr" ? "Est-ce que c'est sûr pour mon compte ?" : "Is it safe for my account?", a: lang === "fr" ? "Oui. Aucun mot de passe requis, aucun accès à ton compte Twitch. On a juste besoin de ton pseudo." : "Yes. No password required, no access to your Twitch account. Just your username." },
-                    { q: lang === "fr" ? "Que se passe-t-il si je décale mon live ?" : "What if I postpone my live?", a: lang === "fr" ? "Contacte-nous au plus vite via le chat — on reprogramme la livraison sans frais." : "Contact us via chat asap — we'll reschedule delivery for free." },
-                    { q: lang === "fr" ? "Les followers sont-ils durables ?" : "Are followers long-lasting?", a: lang === "fr" ? "On vise une croissance progressive. Garantie 30 jours, on recharge gratuitement en cas de baisse." : "We aim for progressive growth. 30-day guarantee with free refill if any drop occurs." },
+                    { q: t("tw.faq.q1"), a: t("tw.faq.a1") },
+                    { q: t("tw.faq.q2"), a: t("tw.faq.a2") },
+                    { q: t("tw.faq.q3"), a: t("tw.faq.a3") },
+                    { q: t("tw.faq.q4"), a: t("tw.faq.a4") },
                   ].map((faq) => (
                     <details key={faq.q} style={{ borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", overflow: "hidden" }}>
                       <summary style={{ padding: "14px 16px", fontSize: "13px", fontWeight: 600, color: "#fff", cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -255,9 +249,9 @@ function TwitchHomePageInner() {
               </div>
 
               <p style={{ fontSize: "12px", color: "rgb(107,117,111)", textAlign: "center", paddingBottom: "32px" }}>
-                {lang === "fr" ? "Tu cherches TikTok ou Instagram ? " : "Looking for TikTok or Instagram? "}
-                <a href={lang === "en" ? "/?lang=en" : "/"} style={{ color: "rgb(145,71,255)", textDecoration: "underline" }}>
-                  {lang === "fr" ? "C'est par ici" : "Click here"}
+                {t("tw.linkToTikTok")}
+                <a href={href("/")} style={{ color: "rgb(145,71,255)", textDecoration: "underline" }}>
+                  {t("tw.linkToTikTok.cta")}
                 </a>
               </p>
             </div>

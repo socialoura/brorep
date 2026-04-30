@@ -313,6 +313,7 @@ export default function ServiceSelect({
   onVideoInfoChange?: (info: YouTubeVideoInfo | null) => void;
 }) {
   const { t, lang, currency } = useTranslation();
+  const svcLabel = (key: string) => t(`svc.${key}` as Parameters<typeof t>[0]) || key;
   const isYouTube = platform === "youtube";
   const isInstagram = platform === "instagram";
   const isX = platform === "x";
@@ -496,7 +497,7 @@ export default function ServiceSelect({
         const missing = activeKeys.filter((k) => k !== activeTab && copy[k] === undefined);
         if (missing.length > 0) {
           const suggest = missing[0];
-          const suggestLabel = services[suggest]?.label || suggest;
+          const suggestLabel = svcLabel(suggest);
           showToast(
             t("service.toastMsg").replace("{service}", suggestLabel),
             `${t("service.toastCta")} ${suggestLabel} →`,
@@ -521,7 +522,7 @@ export default function ServiceSelect({
         const discountMult = hasMultiDiscount ? (1 - MULTI_DISCOUNT) : 1;
         return {
           service: k,
-          label: services[k]!.label,
+          label: svcLabel(k),
           qty: pack.qty,
           price: Number((pack.price * discountMult).toFixed(2)),
           priceUsd: Number(((pack.priceUsd || pack.price) * discountMult).toFixed(2)),
@@ -602,7 +603,7 @@ export default function ServiceSelect({
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
           >
-            {lang === "en" ? "Change" : "Changer"}
+            {t("common.change")}
           </button>
         </div>
       ) : null}
@@ -638,7 +639,7 @@ export default function ServiceSelect({
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
           >
-            {lang === "en" ? "Change" : "Changer"}
+            {t("common.change")}
           </button>
         </div>
       ) : null}
@@ -678,7 +679,7 @@ export default function ServiceSelect({
               }}
             >
               <span style={{ display: "flex", opacity: isActive ? 1 : 0.6 }}>{DEFAULT_SERVICES[key]?.icon}</span>
-              {services[key]?.label}
+              {svcLabel(key)}
               {hasSelection && !isActive && (
                 <span
                   style={{
@@ -786,7 +787,7 @@ export default function ServiceSelect({
                   {fmtQty(pack.qty)}
                 </span>
                 <span style={{ fontSize: "10px", color: "rgb(107, 117, 111)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
-                  {service.label}
+                  {svcLabel(activeTab)}
                 </span>
                 <span
                   style={{
@@ -884,7 +885,7 @@ export default function ServiceSelect({
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
                   >
-                    {lang === "en" ? "Change" : "Changer"}
+                    {t("common.change")}
                   </button>
                 </>
               ) : null}
@@ -969,7 +970,7 @@ export default function ServiceSelect({
                   const svc = ci.service as ServiceType;
                   const pack = findClosestPack(svc, ci.qty, services);
                   if (!pack) return null;
-                  return { service: svc, label: services[svc]?.label ?? svc, qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd || pack.price, priceGbp: pack.priceGbp || pack.price, priceCad: pack.priceCad || pack.price, priceNzd: pack.priceNzd || pack.price, priceChf: pack.priceChf || pack.price };
+                  return { service: svc, label: svcLabel(svc), qty: pack.qty, price: pack.price, priceUsd: pack.priceUsd || pack.price, priceGbp: pack.priceGbp || pack.price, priceCad: pack.priceCad || pack.price, priceNzd: pack.priceNzd || pack.price, priceChf: pack.priceChf || pack.price };
                 })
                 .filter(Boolean) as CartItem[];
 
@@ -1027,7 +1028,7 @@ export default function ServiceSelect({
                   }}>
                     -{combo.discount_percent}%
                   </span>
-                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#fff" }}>{lang === "en" && combo.name_en ? combo.name_en : combo.name}</p>
+                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#fff" }}>{lang === "fr" ? combo.name : (combo.name_en || combo.name.replace("CRÉATEUR", "CREATOR").replace("DÉBUTANT", "STARTER"))}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                     {comboItems.map((item, i) => (
                       <span key={i} style={{ padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, backgroundColor: "rgba(255,255,255,0.04)", color: "rgb(169, 181, 174)", border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -1122,7 +1123,7 @@ export default function ServiceSelect({
                       onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                     >
                       <span style={{ display: "flex", opacity: 0.7 }}>{DEFAULT_SERVICES[key]?.icon}</span>
-                      + {services[key]?.label}
+                      + {svcLabel(key)}
                     </button>
                   ))}
                 </div>

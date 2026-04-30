@@ -74,61 +74,70 @@ function themeFor(platform?: string): Theme {
 
 type Entry = { qty: number; serviceLabel: string };
 
+const SVC: Record<string, Record<string, string>> = {
+  subscribers: { fr: "abonnés", en: "subscribers", es: "suscriptores", pt: "inscritos", de: "Abonnenten" },
+  views:       { fr: "vues", en: "views", es: "vistas", pt: "views", de: "Aufrufe" },
+  likes:       { fr: "likes", en: "likes", es: "likes", pt: "likes", de: "Likes" },
+  followers:   { fr: "followers", en: "followers", es: "seguidores", pt: "seguidores", de: "Follower" },
+  retweets:    { fr: "retweets", en: "retweets", es: "retweets", pt: "retweets", de: "Retweets" },
+  streams:     { fr: "streams", en: "streams", es: "streams", pt: "streams", de: "Streams" },
+};
+function svc(key: string, lang: string): string { return SVC[key]?.[lang] || SVC[key]?.en || key; }
+
 function entriesFor(platform?: string, lang: string = "fr"): Entry[] {
-  const fr = lang === "fr";
   switch (platform) {
     case "youtube":
       return [
-        { qty: 100, serviceLabel: fr ? "abonnés" : "subscribers" },
-        { qty: 1000, serviceLabel: fr ? "vues" : "views" },
-        { qty: 250, serviceLabel: fr ? "likes" : "likes" },
-        { qty: 500, serviceLabel: fr ? "abonnés" : "subscribers" },
-        { qty: 5000, serviceLabel: fr ? "vues" : "views" },
-        { qty: 1000, serviceLabel: fr ? "abonnés" : "subscribers" },
+        { qty: 100, serviceLabel: svc("subscribers", lang) },
+        { qty: 1000, serviceLabel: svc("views", lang) },
+        { qty: 250, serviceLabel: svc("likes", lang) },
+        { qty: 500, serviceLabel: svc("subscribers", lang) },
+        { qty: 5000, serviceLabel: svc("views", lang) },
+        { qty: 1000, serviceLabel: svc("subscribers", lang) },
       ];
     case "x":
       return [
-        { qty: 100, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 250, serviceLabel: fr ? "likes" : "likes" },
-        { qty: 50, serviceLabel: fr ? "retweets" : "retweets" },
-        { qty: 1000, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 500, serviceLabel: fr ? "likes" : "likes" },
+        { qty: 100, serviceLabel: svc("followers", lang) },
+        { qty: 250, serviceLabel: svc("likes", lang) },
+        { qty: 50, serviceLabel: svc("retweets", lang) },
+        { qty: 1000, serviceLabel: svc("followers", lang) },
+        { qty: 500, serviceLabel: svc("likes", lang) },
       ];
     case "twitch":
       return [
-        { qty: 100, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 250, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 500, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 1000, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 2500, serviceLabel: fr ? "followers" : "followers" },
+        { qty: 100, serviceLabel: svc("followers", lang) },
+        { qty: 250, serviceLabel: svc("followers", lang) },
+        { qty: 500, serviceLabel: svc("followers", lang) },
+        { qty: 1000, serviceLabel: svc("followers", lang) },
+        { qty: 2500, serviceLabel: svc("followers", lang) },
       ];
     case "spotify":
       return [
-        { qty: 1000, serviceLabel: fr ? "streams" : "streams" },
-        { qty: 5000, serviceLabel: fr ? "streams" : "streams" },
-        { qty: 10000, serviceLabel: fr ? "streams" : "streams" },
-        { qty: 25000, serviceLabel: fr ? "streams" : "streams" },
+        { qty: 1000, serviceLabel: svc("streams", lang) },
+        { qty: 5000, serviceLabel: svc("streams", lang) },
+        { qty: 10000, serviceLabel: svc("streams", lang) },
+        { qty: 25000, serviceLabel: svc("streams", lang) },
       ];
     case "instagram":
       return [
-        { qty: 250, serviceLabel: fr ? "likes" : "likes" },
-        { qty: 100, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 5000, serviceLabel: fr ? "vues" : "views" },
-        { qty: 500, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 1000, serviceLabel: fr ? "likes" : "likes" },
-        { qty: 1000, serviceLabel: fr ? "followers" : "followers" },
+        { qty: 250, serviceLabel: svc("likes", lang) },
+        { qty: 100, serviceLabel: svc("followers", lang) },
+        { qty: 5000, serviceLabel: svc("views", lang) },
+        { qty: 500, serviceLabel: svc("followers", lang) },
+        { qty: 1000, serviceLabel: svc("likes", lang) },
+        { qty: 1000, serviceLabel: svc("followers", lang) },
       ];
     default:
       // tiktok
       return [
-        { qty: 250, serviceLabel: fr ? "likes" : "likes" },
-        { qty: 100, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 5000, serviceLabel: fr ? "vues" : "views" },
-        { qty: 300, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 1000, serviceLabel: fr ? "likes" : "likes" },
-        { qty: 5000, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 500, serviceLabel: fr ? "followers" : "followers" },
-        { qty: 1000, serviceLabel: fr ? "followers" : "followers" },
+        { qty: 250, serviceLabel: svc("likes", lang) },
+        { qty: 100, serviceLabel: svc("followers", lang) },
+        { qty: 5000, serviceLabel: svc("views", lang) },
+        { qty: 300, serviceLabel: svc("followers", lang) },
+        { qty: 1000, serviceLabel: svc("likes", lang) },
+        { qty: 5000, serviceLabel: svc("followers", lang) },
+        { qty: 500, serviceLabel: svc("followers", lang) },
+        { qty: 1000, serviceLabel: svc("followers", lang) },
       ];
   }
 }
@@ -140,7 +149,7 @@ const ROW_HEIGHT = 54;
  * to reassure customers right before payment. Adapted to platform colors.
  */
 export default function RecentDeliveries({ platform = "tiktok" }: { platform?: string }) {
-  const { lang } = useTranslation();
+  const { t, lang } = useTranslation();
   const th = themeFor(platform);
   const entries = useMemo(() => entriesFor(platform, lang), [platform, lang]);
   // Stable random "X min ago" times for each entry, generated client-side
@@ -156,9 +165,9 @@ export default function RecentDeliveries({ platform = "tiktok" }: { platform?: s
     return () => window.clearInterval(id);
   }, [entries.length]);
 
-  const minLabel = lang === "fr" ? "min" : "min";
-  const agoLabel = lang === "fr" ? "il y a" : "";
-  const agoSuffix = lang === "fr" ? "" : "ago";
+  const minLabel = "min";
+  const agoLabel = t("recent.agoPrefix");
+  const agoSuffix = t("recent.agoSuffix");
 
   if (entries.length === 0) return null;
 
@@ -195,7 +204,7 @@ export default function RecentDeliveries({ platform = "tiktok" }: { platform?: s
             serviceLabel={e.serviceLabel}
             minutes={times[i] ?? 5}
             theme={th}
-            verbDelivered={lang === "fr" ? deliveredFr(e.serviceLabel) : "delivered"}
+            verbDelivered={(lang === "fr" && (e.serviceLabel === "likes" || e.serviceLabel === "vues")) ? t("recent.deliveredFem") : t("recent.delivered")}
             agoLabel={agoLabel}
             agoSuffix={agoSuffix}
             minLabel={minLabel}

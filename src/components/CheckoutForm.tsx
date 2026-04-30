@@ -311,7 +311,7 @@ function UpsellSuggestions({ cart, platform, onAdd }: {
       {visible.slice(0, 2).map((offer) => {
         const priceMap: Record<string, number> = { eur: offer.price, usd: offer.price_usd, gbp: offer.price_gbp || offer.price, cad: offer.price_cad || offer.price, nzd: offer.price_nzd || offer.price, aud: offer.price_aud || offer.price, chf: offer.price_chf || offer.price };
         const price = Number(priceMap[currency] ?? offer.price) || 0;
-        const label = lang === "en" ? (offer.label_en || offer.label || `${offer.qty} ${offer.service}`) : (offer.label || `${offer.qty} ${offer.service}`);
+        const label = lang === "fr" ? (offer.label || `${offer.qty} ${offer.service}`) : (offer.label_en || offer.label || `${offer.qty} ${offer.service}`);
         return (
           <div key={offer.id} style={{
             padding: "12px 14px", borderRadius: "12px",

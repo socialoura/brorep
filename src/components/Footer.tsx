@@ -25,7 +25,7 @@ function FooterInner() {
       sp.set("lang", code);
     }
     const qs = sp.toString();
-    return qs ? `?${qs}` : window.location.pathname;
+    return qs ? `?${qs}` : (typeof window !== "undefined" ? window.location.pathname : "/");
   }
 
   return (

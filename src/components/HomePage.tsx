@@ -20,19 +20,9 @@ import PostPicker from "@/components/PostPicker";
 import type { PostAssignment } from "@/components/PostPicker";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
-import { useTranslation, fmtPrice } from "@/lib/i18n";
+import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
 
 type Step = "hero" | "platform" | "username" | "scanning" | "results" | "shop" | "pickPosts" | "payment" | "success";
-
-const PROGRESS_STEPS_FR = [
-  { key: "shop", label: "Services" },
-  { key: "payment", label: "Paiement" },
-] as const;
-
-const PROGRESS_STEPS_EN = [
-  { key: "shop", label: "Services" },
-  { key: "payment", label: "Payment" },
-] as const;
 
 const STEP_TO_PROGRESS: Record<string, number> = {
   shop: 0,
@@ -41,7 +31,11 @@ const STEP_TO_PROGRESS: Record<string, number> = {
 };
 
 function StepProgress({ step, lang = "fr" }: { step: Step; lang?: string }) {
-  const PROGRESS_STEPS = lang === "en" ? PROGRESS_STEPS_EN : PROGRESS_STEPS_FR;
+  const { t } = useTranslation();
+  const PROGRESS_STEPS = [
+    { key: "shop", label: t("progress.services") },
+    { key: "payment", label: t("progress.payment") },
+  ];
   const currentIndex = STEP_TO_PROGRESS[step];
   if (currentIndex === undefined) return null;
 
@@ -196,9 +190,9 @@ function HomePageInner() {
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
                 <FanovalyLogo />
                 <h1 style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
-                  {lang === "fr" ? "Accélère ta" : "Accelerate your"}
+                  {t("hero.title1")}
                   <br />
-                  <span style={{ color: "#fff" }}>{lang === "fr" ? "croissance " : "growth "}</span>
+                  <span style={{ color: "#fff" }}>{t("hero.title2")}</span>
                   <span style={{ background: "linear-gradient(135deg, #69C9D0, #4FB3BA)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     TikTok
                     <svg width="0.7em" height="0.7em" viewBox="0 0 24 24" fill="#69C9D0" style={{ display: "inline", verticalAlign: "middle", marginLeft: "4px", filter: "drop-shadow(0 0 12px rgba(105,201,208,0.5))" }}>
@@ -244,7 +238,7 @@ function HomePageInner() {
               <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "#69C9D0", flexShrink: 0 }} />
                 <span style={{ color: "#69C9D0", fontWeight: 600 }}>{t("hero.operational")}</span>
-                <span className="text-gray-500">({new Date().toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "long", year: "numeric" })})</span>
+                <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
               </div>
 
               {/* Scroll hint arrow */}

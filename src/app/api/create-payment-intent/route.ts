@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency, lang: reqLang } = body;
-    const lang = reqLang === "en" ? "en" : "fr";
+    const lang = (["en","es","pt","de"].includes(reqLang)) ? reqLang : "fr";
     const validCurrencies = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
     const currency = validCurrencies.includes(reqCurrency) ? reqCurrency : "eur";
 

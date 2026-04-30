@@ -6,7 +6,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
 import type { CartItem } from "@/components/ServiceSelect";
-import { useTranslation, fmtPrice, type Currency } from "@/lib/i18n";
+import { useTranslation, fmtPrice, LANG_LOCALE, type Currency } from "@/lib/i18n";
 
 /* ---- helpers ---- */
 interface Pack {
@@ -549,7 +549,7 @@ function SpotifyPageInner() {
             <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
               <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: G, flexShrink: 0 }} />
               <span style={{ color: G, fontWeight: 600 }}>{t("hero.operational")}</span>
-              <span className="text-gray-500">({new Date().toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "long", year: "numeric" })})</span>
+              <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
             </div>
           </div>
 
