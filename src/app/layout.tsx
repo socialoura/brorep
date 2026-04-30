@@ -11,6 +11,12 @@ import "./globals.css";
 
 const VALID_CURRENCIES: Currency[] = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
 
+const COUNTRY_TO_LANG: Record<string, string> = {
+  ES: "es", MX: "es", AR: "es", CO: "es", CL: "es", PE: "es", VE: "es",
+  BR: "pt", PT: "pt",
+  DE: "de", AT: "de",
+};
+
 const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
   GB: "gbp", IM: "gbp", JE: "gbp", GG: "gbp",
   US: "usd", PR: "usd", VI: "usd", AS: "usd", GU: "usd", MP: "usd",
@@ -105,7 +111,7 @@ const jsonLd = {
       contactPoint: {
         "@type": "ContactPoint",
         contactType: "customer service",
-        availableLanguage: ["French", "English"],
+        availableLanguage: ["French", "English", "Spanish", "Portuguese", "German"],
       },
     },
     {
@@ -134,23 +140,26 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const country = (headerStore.get("x-vercel-ip-country") || "").toUpperCase();
+
   const cookieCurrency = cookieStore.get("currency")?.value;
   let detectedCurrency: Currency | null = null;
   if (cookieCurrency && VALID_CURRENCIES.includes(cookieCurrency as Currency)) {
     detectedCurrency = cookieCurrency as Currency;
   } else {
-    // First visit: detect from Vercel geo IP header
-    const headerStore = await headers();
-    const country = (headerStore.get("x-vercel-ip-country") || "").toUpperCase();
     if (country && COUNTRY_TO_CURRENCY[country]) {
       detectedCurrency = COUNTRY_TO_CURRENCY[country];
     }
   }
 
+  const detectedLang: string | null = country && COUNTRY_TO_LANG[country] ? COUNTRY_TO_LANG[country] : null;
+
   return (
     <html
       lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-detected-lang={detectedLang || ""}
     >
       <body className="min-h-full flex flex-col">
         <script
@@ -172,6 +181,23 @@ export default async function RootLayout({
               `}
             </Script>
           </>
+        )}
+        {/* Auto-redirect first-time visitors to their detected language */}
+        {detectedLang && (
+          <Script id="lang-redirect" strategy="beforeInteractive">
+            {`
+              (function(){
+                try {
+                  if (sessionStorage.getItem('lang_redirected')) return;
+                  var sp = new URLSearchParams(window.location.search);
+                  if (sp.get('lang')) return;
+                  sessionStorage.setItem('lang_redirected','1');
+                  sp.set('lang','${detectedLang}');
+                  window.location.replace(window.location.pathname + '?' + sp.toString() + window.location.hash);
+                } catch(e){}
+              })();
+            `}
+          </Script>
         )}
         <CurrencyProvider initial={detectedCurrency}>
           <PostHogProviderWrapper>

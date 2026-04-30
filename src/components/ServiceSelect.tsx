@@ -314,17 +314,18 @@ export default function ServiceSelect({
 }) {
   const { t, lang, currency } = useTranslation();
   const isYouTube = platform === "youtube";
+  const isInstagram = platform === "instagram";
   const isX = platform === "x";
   const isTwitch = platform === "twitch";
   // Theme colors
-  const accent = isYouTube ? "rgb(255, 0, 0)" : isX ? "rgb(29, 155, 240)" : isTwitch ? "rgb(145, 71, 255)" : "rgb(105, 201, 208)";
-  const accentMid = isYouTube ? "rgb(204, 0, 0)" : isX ? "rgb(29, 155, 240)" : isTwitch ? "rgb(145, 71, 255)" : "rgb(105, 201, 208)";
-  const accentDark = isYouTube ? "rgb(153, 0, 0)" : isX ? "rgb(20, 120, 200)" : isTwitch ? "rgb(110, 50, 200)" : "rgb(79, 179, 186)";
-  const accentBg = isYouTube ? "rgba(255, 0, 0, 0.05)" : isX ? "rgba(29, 155, 240, 0.05)" : isTwitch ? "rgba(145, 71, 255, 0.05)" : "rgba(79, 179, 186, 0.05)";
-  const accentBorder = isYouTube ? "rgba(255, 0, 0, 0.12)" : isX ? "rgba(29, 155, 240, 0.12)" : isTwitch ? "rgba(145, 71, 255, 0.12)" : "rgba(105, 201, 208, 0.12)";
-  const accentBorderStrong = isYouTube ? "rgba(255, 0, 0, 0.2)" : isX ? "rgba(29, 155, 240, 0.2)" : isTwitch ? "rgba(145, 71, 255, 0.2)" : "rgba(105, 201, 208, 0.2)";
-  const accentGlow = isYouTube ? "rgba(255, 0, 0, 0.25)" : isX ? "rgba(29, 155, 240, 0.25)" : isTwitch ? "rgba(145, 71, 255, 0.25)" : "rgba(105, 201, 208, 0.25)";
-  const gradientBg = isYouTube ? "linear-gradient(135deg, rgb(153, 0, 0), rgb(255, 0, 0))" : isX ? "linear-gradient(135deg, rgb(20, 120, 200), rgb(29, 155, 240))" : isTwitch ? "linear-gradient(135deg, rgb(110, 50, 200), rgb(145, 71, 255))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
+  const accent = isYouTube ? "rgb(255, 0, 0)" : isInstagram ? "rgb(225, 48, 108)" : isX ? "rgb(29, 155, 240)" : isTwitch ? "rgb(145, 71, 255)" : "rgb(105, 201, 208)";
+  const accentMid = isYouTube ? "rgb(204, 0, 0)" : isInstagram ? "rgb(193, 53, 132)" : isX ? "rgb(29, 155, 240)" : isTwitch ? "rgb(145, 71, 255)" : "rgb(105, 201, 208)";
+  const accentDark = isYouTube ? "rgb(153, 0, 0)" : isInstagram ? "rgb(131, 58, 180)" : isX ? "rgb(20, 120, 200)" : isTwitch ? "rgb(110, 50, 200)" : "rgb(79, 179, 186)";
+  const accentBg = isYouTube ? "rgba(255, 0, 0, 0.05)" : isInstagram ? "rgba(225, 48, 108, 0.05)" : isX ? "rgba(29, 155, 240, 0.05)" : isTwitch ? "rgba(145, 71, 255, 0.05)" : "rgba(79, 179, 186, 0.05)";
+  const accentBorder = isYouTube ? "rgba(255, 0, 0, 0.12)" : isInstagram ? "rgba(225, 48, 108, 0.12)" : isX ? "rgba(29, 155, 240, 0.12)" : isTwitch ? "rgba(145, 71, 255, 0.12)" : "rgba(105, 201, 208, 0.12)";
+  const accentBorderStrong = isYouTube ? "rgba(255, 0, 0, 0.2)" : isInstagram ? "rgba(225, 48, 108, 0.2)" : isX ? "rgba(29, 155, 240, 0.2)" : isTwitch ? "rgba(145, 71, 255, 0.2)" : "rgba(105, 201, 208, 0.2)";
+  const accentGlow = isYouTube ? "rgba(255, 0, 0, 0.25)" : isInstagram ? "rgba(225, 48, 108, 0.25)" : isX ? "rgba(29, 155, 240, 0.25)" : isTwitch ? "rgba(145, 71, 255, 0.25)" : "rgba(105, 201, 208, 0.25)";
+  const gradientBg = isYouTube ? "linear-gradient(135deg, rgb(153, 0, 0), rgb(255, 0, 0))" : isInstagram ? "linear-gradient(135deg, rgb(131, 58, 180), rgb(225, 48, 108))" : isX ? "linear-gradient(135deg, rgb(20, 120, 200), rgb(29, 155, 240))" : isTwitch ? "linear-gradient(135deg, rgb(110, 50, 200), rgb(145, 71, 255))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
   const activeKeys = isYouTube ? YOUTUBE_KEYS : isX ? X_KEYS : isTwitch ? TWITCH_KEYS : TIKTOK_KEYS;
   const [activeTab, setActiveTab] = useState<ServiceType>(activeKeys[0]);
   // One selected pack index per service type
