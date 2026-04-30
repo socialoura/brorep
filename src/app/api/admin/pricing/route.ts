@@ -83,28 +83,19 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  try {
-    if (price !== undefined) {
-      await sql`UPDATE pricing SET price = ${price} WHERE id = ${id}`;
-    }
+  // Ensure currency columns exist before updating
+  try { await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_usd NUMERIC(8,2) DEFAULT 0`; } catch {}
+  try { await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_gbp NUMERIC(8,2) DEFAULT 0`; } catch {}
+  try { await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_cad NUMERIC(8,2) DEFAULT 0`; } catch {}
+  try { await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_nzd NUMERIC(8,2) DEFAULT 0`; } catch {}
+  try { await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_aud NUMERIC(8,2) DEFAULT 0`; } catch {}
+  try { await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_chf NUMERIC(8,2) DEFAULT 0`; } catch {}
 
-    if (price_usd !== undefined) {
-      try { await sql`UPDATE pricing SET price_usd = ${price_usd} WHERE id = ${id}`; } catch (e) { console.warn("price_usd update:", e); }
-    }
-    if (price_gbp !== undefined) {
-      try { await sql`UPDATE pricing SET price_gbp = ${price_gbp} WHERE id = ${id}`; } catch (e) { console.warn("price_gbp update:", e); }
-    }
-    if (price_cad !== undefined) {
-      try { await sql`UPDATE pricing SET price_cad = ${price_cad} WHERE id = ${id}`; } catch (e) { console.warn("price_cad update:", e); }
-    }
-    if (price_nzd !== undefined) {
-      try { await sql`UPDATE pricing SET price_nzd = ${price_nzd} WHERE id = ${id}`; } catch (e) { console.warn("price_nzd update:", e); }
-    }
-    if (price_aud !== undefined) {
-      try { await sql`UPDATE pricing SET price_aud = ${price_aud} WHERE id = ${id}`; } catch (e) { console.warn("price_aud update:", e); }
-    }
-    if (price_chf !== undefined) {
-      try { await sql`UPDATE pricing SET price_chf = ${price_chf} WHERE id = ${id}`; } catch (e) { console.warn("price_chf update:", e); }
+  try {
+    if (price !== undefined && price_usd !== undefined) {
+      await sql`UPDATE pricing SET price = ${Number(price)}, price_usd = ${Number(price_usd)}, price_gbp = ${Number(price_gbp)}, price_cad = ${Number(price_cad)}, price_nzd = ${Number(price_nzd)}, price_aud = ${Number(price_aud)}, price_chf = ${Number(price_chf)} WHERE id = ${id}`;
+    } else if (price !== undefined) {
+      await sql`UPDATE pricing SET price = ${Number(price)} WHERE id = ${id}`;
     }
 
     if (active !== undefined) {

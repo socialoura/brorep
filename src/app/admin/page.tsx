@@ -233,7 +233,7 @@ export default function AdminPage() {
       body: JSON.stringify({ id, price: Number(editPrice), price_usd: Number(editPriceUsd), price_gbp: Number(editPriceGbp), price_cad: Number(editPriceCad), price_nzd: Number(editPriceNzd), price_aud: Number(editPriceAud), price_chf: Number(editPriceChf) }),
     });
     setEditingId(null);
-    fetchPricing();
+    await fetchPricing();
   };
 
   const toggleActive = async (id: number, active: boolean) => {
