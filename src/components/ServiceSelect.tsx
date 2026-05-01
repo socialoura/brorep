@@ -608,41 +608,7 @@ export default function ServiceSelect({
         </div>
       ) : null}
 
-      {/* YouTube video recap */}
-      {isYouTube && previewVideo && !editingUsername ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "10px 12px",
-            borderRadius: "12px",
-            backgroundColor: accentBg,
-            border: `1px solid ${accentBorder}`,
-            marginBottom: "20px",
-            width: "100%",
-            maxWidth: "360px",
-          }}
-        >
-          <img
-            src={previewVideo.thumbnail}
-            alt={previewVideo.title}
-            style={{ width: "60px", height: "40px", borderRadius: "6px", objectFit: "cover", border: `1px solid ${accentBorderStrong}`, flexShrink: 0 }}
-          />
-          <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{previewVideo.title}</p>
-            <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{previewVideo.channelName}</p>
-          </div>
-          <button
-            onClick={() => { setEditingUsername(true); onUsernameChange?.(""); setPreviewVideo(null); onVideoInfoChange?.(null); }}
-            style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${accentBorder}`, background: "transparent", color: "rgb(169,181,174)", fontSize: "11px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s", flexShrink: 0 }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = accentBorder; e.currentTarget.style.color = "rgb(169,181,174)"; }}
-          >
-            {t("common.change")}
-          </button>
-        </div>
-      ) : null}
+      {/* YouTube: the video preview is shown inline below the URL input further down (no top recap, to avoid layout shift) */}
 
       {/* Title */}
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", margin: "0 0 4px 0" }}>
@@ -815,8 +781,8 @@ export default function ServiceSelect({
         })()}
       </div>
 
-      {/* Username / URL input — after packs */}
-      {((!isYouTube && (!profile || editingUsername)) || (isYouTube && (!previewVideo || editingUsername))) && (
+      {/* Username / URL input — after packs. For YouTube the input stays visible even once a video is loaded so the layout doesn't shift. */}
+      {((!isYouTube && (!profile || editingUsername)) || isYouTube) && (
         <div id="username-input-section" style={{ width: "100%", maxWidth: "360px", marginBottom: "20px" }}>
           <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {isYouTube ? t("service.youtubeUrlLabel") : t("service.usernameLabel")}

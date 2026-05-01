@@ -242,6 +242,7 @@ function YouTubeHomePageInner() {
             platform={platform}
             postAssignments={postAssignments}
             followersBefore={0}
+            videoInfo={videoInfo}
             onSuccess={(id) => { setOrderId(id); setStep("success"); }}
             onBack={() => setStep("shop")}
           />

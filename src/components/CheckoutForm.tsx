@@ -11,6 +11,7 @@ import posthog from "posthog-js";
 import type { CartItem } from "@/components/ServiceSelect";
 import RecentDeliveries from "@/components/RecentDeliveries";
 import type { PostAssignment } from "@/components/PostPicker";
+import type { YouTubeVideoInfo } from "@/components/YouTubeUrlInput";
 
 function priceFor(item: CartItem, c: Currency): number {
   let v: number;
@@ -403,6 +404,36 @@ function UrgencyTimer({ platform }: { platform?: string }) {
   );
 }
 
+/* ===== Sub-component: YouTube Video Recap ===== */
+function YouTubeVideoRecap({ video, platform }: { video: YouTubeVideoInfo; platform: string }) {
+  const th = themeFor(platform);
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "10px 12px",
+        borderRadius: "12px",
+        backgroundColor: th.bg,
+        border: `1px solid ${th.border}`,
+        marginBottom: "16px",
+        width: "100%",
+      }}
+    >
+      <img
+        src={video.thumbnail}
+        alt={video.title}
+        style={{ width: "72px", height: "48px", borderRadius: "8px", objectFit: "cover", border: `1px solid ${th.borderStrong}`, flexShrink: 0 }}
+      />
+      <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
+        <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{video.title}</p>
+        <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{video.channelName}</p>
+      </div>
+    </div>
+  );
+}
+
 /* ----- Inner form (inside Elements provider) ----- */
 function PayForm({
   cart,
@@ -413,6 +444,7 @@ function PayForm({
   onLoyaltyRedeemed,
   onAddToCart,
   platform,
+  videoInfo,
 }: {
   cart: CartItem[];
   total: number;
@@ -422,6 +454,7 @@ function PayForm({
   onLoyaltyRedeemed: (cents: number) => void;
   onAddToCart?: (item: CartItem) => void;
   platform?: string;
+  videoInfo?: YouTubeVideoInfo | null;
 }) {
   const { t, currency } = useTranslation();
   const th = themeFor(platform);
@@ -481,6 +514,9 @@ function PayForm({
     <form ref={formRef} onSubmit={handleSubmit} style={{ width: "100%" }}>
       {/* Recent deliveries ticker — social proof above email */}
       <RecentDeliveries platform={platform} />
+
+      {/* YouTube video recap — visible throughout checkout */}
+      {platform === "youtube" && videoInfo && <YouTubeVideoRecap video={videoInfo} platform={platform} />}
 
       {/* 1. Email first */}
       <EmailInput value={email} onChange={setEmail} inputRef={emailRef} highlight={emailShake} />
@@ -637,6 +673,7 @@ export default function CheckoutForm({
   onSuccess,
   onBack,
   onAddToCart,
+  videoInfo,
 }: {
   cart: CartItem[];
   username: string;
@@ -646,6 +683,7 @@ export default function CheckoutForm({
   onSuccess: (orderId?: number) => void;
   onBack: () => void;
   onAddToCart?: (item: CartItem) => void;
+  videoInfo?: YouTubeVideoInfo | null;
 }) {
   const { t, lang, currency } = useTranslation();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -773,7 +811,7 @@ export default function CheckoutForm({
           },
         }}
       >
-        <PayForm cart={cart} total={total} onSuccess={onSuccess} onBack={onBack} onPromoApplied={handlePromoApplied} onLoyaltyRedeemed={handleLoyaltyRedeemed} onAddToCart={onAddToCart} platform={platform} />
+        <PayForm cart={cart} total={total} onSuccess={onSuccess} onBack={onBack} onPromoApplied={handlePromoApplied} onLoyaltyRedeemed={handleLoyaltyRedeemed} onAddToCart={onAddToCart} platform={platform} videoInfo={videoInfo} />
       </Elements>
     </div>
   );
