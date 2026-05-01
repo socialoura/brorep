@@ -209,6 +209,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "posts.selectAll": { fr: "Tout sélectionner", en: "Select all", es: "Seleccionar todo", pt: "Selecionar tudo", de: "Alle auswählen" },
   "posts.deselectAll": { fr: "Tout désélectionner", en: "Deselect all", es: "Deseleccionar todo", pt: "Desmarcar tudo", de: "Alle abwählen" },
   "posts.noPosts": { fr: "Aucun post récupéré pour ce profil.", en: "No posts found for this profile.", es: "No se encontraron posts para este perfil.", pt: "Nenhum post encontrado para este perfil.", de: "Keine Posts für dieses Profil gefunden." },
+  "posts.fetchFailed": { fr: "Impossible de récupérer tes posts. Vérifie ton nom d'utilisateur ou réessaie.", en: "Unable to fetch your posts. Check your username or try again.", es: "No se pudieron obtener tus posts. Verifica tu nombre de usuario o inténtalo de nuevo.", pt: "Não foi possível obter seus posts. Verifique seu nome de usuário ou tente novamente.", de: "Deine Posts konnten nicht abgerufen werden. Überprüfe deinen Benutzernamen oder versuche es erneut." },
   "posts.validate": { fr: "Valider", en: "Confirm", es: "Validar", pt: "Validar", de: "Bestätigen" },
   "posts.selectAtLeast": { fr: "Sélectionne au moins un post", en: "Select at least one post", es: "Selecciona al menos un post", pt: "Selecione pelo menos um post", de: "Wähle mindestens einen Post" },
   "posts.editCart": { fr: "Modifier mon panier", en: "Edit my cart", es: "Editar mi carrito", pt: "Editar meu carrinho", de: "Warenkorb bearbeiten" },

@@ -323,6 +323,9 @@ function XHomePageInner() {
                   console.error("Failed to fetch tweets for pickPosts:", err);
                 }
                 setFetchingPosts(false);
+                // Posts fetch failed or empty — block payment to prevent paying for likes/retweets without post assignments
+                alert(t("posts.fetchFailed"));
+                return;
               }
               setStep("payment");
             }}
@@ -356,10 +359,15 @@ function XHomePageInner() {
             onSuccess={(id) => { posthog?.capture("payment_completed", { platform, total: cart.reduce((s, i) => s + i.price, 0), order_id: id }); setOrderId(id); setStep("success"); }}
             onBack={() => { setStep("shop"); }}
             onAddToCart={(item) => {
+              const needsPostPick = ["x_likes", "x_retweets"].includes(item.service);
+              // If upsell needs posts but we don't have them, refuse and alert
+              if (needsPostPick && (!scanData || !scanData.posts || scanData.posts.length === 0)) {
+                alert(t("posts.fetchFailed"));
+                return;
+              }
               setCart((prev) => [...prev, item]);
               posthog?.capture("upsell_added", { service: item.service, qty: item.qty, price: item.price });
-              const needsPostPick = ["x_likes", "x_retweets"].includes(item.service);
-              if (needsPostPick && scanData && scanData.posts.length > 0) {
+              if (needsPostPick) {
                 setStep("pickPosts");
               }
             }}

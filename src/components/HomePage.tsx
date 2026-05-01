@@ -380,6 +380,9 @@ function HomePageInner() {
                   console.error("Failed to fetch posts for pickPosts:", err);
                 }
                 setFetchingPosts(false);
+                // Posts fetch failed or empty — cannot proceed to payment without post assignments
+                alert(t("posts.fetchFailed"));
+                return;
               }
               setStep("payment");
             }}
@@ -413,9 +416,10 @@ function HomePageInner() {
             onSuccess={(id) => { posthog?.capture("payment_completed", { platform, total: cart.reduce((s, i) => s + i.price, 0), order_id: id }); setOrderId(id); setStep("success"); }}
             onBack={() => { setStep("shop"); }}
             onAddToCart={async (item) => {
+              const needsPostPick = ["likes", "views"].includes(item.service);
+              // Add to cart optimistically; we'll roll back if posts can't be fetched
               setCart((prev) => [...prev, item]);
               posthog?.capture("upsell_added", { service: item.service, qty: item.qty, price: item.price });
-              const needsPostPick = ["likes", "views"].includes(item.service);
               if (!needsPostPick || !username) return;
 
               // Already have posts → go straight to picker
@@ -453,6 +457,15 @@ function HomePageInner() {
                 console.error("Failed to fetch posts for upsell pickPosts:", err);
               }
               setFetchingPosts(false);
+              // Posts fetch failed — roll back cart addition and alert
+              setCart((prev) => {
+                const idx = prev.findIndex((c) => c.service === item.service && c.qty === item.qty && c.price === item.price);
+                if (idx === -1) return prev;
+                const copy = [...prev];
+                copy.splice(idx, 1);
+                return copy;
+              });
+              alert(t("posts.fetchFailed"));
             }}
           />
         );
