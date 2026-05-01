@@ -11,7 +11,7 @@ import type { PostAssignment } from "@/components/PostPicker";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
 import type { YouTubeVideoInfo } from "@/components/YouTubeUrlInput";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, fmtPrice } from "@/lib/i18n";
 
 type Step = "hero" | "shop" | "payment" | "success";
 
@@ -35,8 +35,21 @@ function YouTubeHomePageInner() {
   const [orderId, setOrderId] = useState<number | undefined>();
   const [hydrated, setHydrated] = useState(false);
 
-  const { t, href } = useTranslation();
+  const { t, href, currency } = useTranslation();
   const platform = "youtube";
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/pricing")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.pricing) return;
+        const key = currency === "usd" ? "price_usd" : currency === "gbp" ? "price_gbp" : currency === "cad" ? "price_cad" : currency === "nzd" ? "price_nzd" : currency === "aud" ? "price_aud" : currency === "chf" ? "price_chf" : "price";
+        const prices = data.pricing.map((p: Record<string, number>) => Number(p[key]) || Number(p.price)).filter((v: number) => v > 0);
+        if (prices.length > 0) setMinPrice(Math.min(...prices));
+      })
+      .catch(() => {});
+  }, [currency]);
 
   useEffect(() => {
     setStep(loadSession<Step>("yt_step", "hero"));
@@ -96,28 +109,40 @@ function YouTubeHomePageInner() {
               <button
                 onClick={() => setStep("shop")}
                 style={{
+                  position: "relative",
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "10px",
+                  justifyContent: "center",
                   padding: "16px 36px",
-                  borderRadius: "14px",
+                  borderRadius: "16px",
                   border: "none",
                   cursor: "pointer",
                   fontWeight: 700,
-                  fontSize: "15px",
+                  fontSize: "18px",
                   fontFamily: "inherit",
                   color: "#fff",
                   background: "linear-gradient(135deg, #c00, #f00)",
                   boxShadow: "0 10px 40px rgba(255, 0, 0, 0.25)",
                   transition: "transform 0.15s, box-shadow 0.15s",
+                  overflow: "hidden",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.04)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.04)"; e.currentTarget.style.boxShadow = "0 14px 50px rgba(255, 0, 0, 0.4)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 10px 40px rgba(255, 0, 0, 0.25)"; }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.546 12 3.546 12 3.546s-7.505 0-9.377.504A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.504 9.376.504 9.376.504s7.505 0 9.377-.504a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                </svg>
-                {t("yt.hero.cta")}
+                <span style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden", pointerEvents: "none" }}>
+                  <span style={{ position: "absolute", top: 0, left: 0, width: "40%", height: "100%", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)", animation: "yt-cta-shine 3s ease-in-out infinite" }} />
+                </span>
+                <span style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                  <span>{t("yt.hero.cta")}</span>
+                  {minPrice !== null && <span style={{ fontSize: "12px", fontWeight: 600, opacity: 0.75 }}>{t("cta.from")} {fmtPrice(minPrice, currency)}</span>}
+                </span>
+                <style>{`
+                  @keyframes yt-cta-shine {
+                    0% { transform: translateX(-150%); }
+                    50% { transform: translateX(350%); }
+                    100% { transform: translateX(350%); }
+                  }
+                `}</style>
               </button>
             </div>
             <div className="mt-4 flex flex-col items-center gap-3">

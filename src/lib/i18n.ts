@@ -269,7 +269,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "yt.hero.title2": { fr: "ta vidéo en 30s", en: "your video in 30s", es: "tu video en 30s", pt: "seu vídeo em 30s", de: "dein Video in 30s" },
   "yt.hero.subtitle1": { fr: "Notre IA scanne ta vidéo et te propose", en: "Our AI scans your video and suggests", es: "Nuestra IA escanea tu video y te propone", pt: "Nossa IA analisa seu vídeo e sugere", de: "Unsere KI scannt dein Video und schlägt vor" },
   "yt.hero.subtitle2": { fr: "une stratégie de croissance personnalisée", en: "a personalized growth strategy", es: "una estrategia de crecimiento personalizada", pt: "uma estratégia de crescimento personalizada", de: "eine personalisierte Wachstumsstrategie" },
-  "yt.hero.cta": { fr: "Lancer l'IA →", en: "Launch AI →", es: "Lanzar la IA →", pt: "Lançar a IA →", de: "KI starten →" },
+  "yt.hero.cta": { fr: "Lancer la croissance →", en: "Start my growth →", es: "Impulsar mi crecimiento →", pt: "Iniciar meu crescimento →", de: "Mein Wachstum starten →" },
   "yt.hero.morePercent": { fr: "20% plus", en: "20% more", es: "20% más", pt: "20% mais", de: "20% mehr" },
   "yt.hero.moreProfiles": { fr: "de vidéos analysées par notre IA qu'hier", en: "more videos analyzed by our AI than yesterday", es: "más videos analizados por nuestra IA que ayer", pt: "mais vídeos analisados pela nossa IA que ontem", de: "mehr Videos von unserer KI analysiert als gestern" },
   "yt.howItWorks.step1.title": { fr: "L'IA scanne ta vidéo", en: "AI scans your video", es: "La IA escanea tu video", pt: "A IA analisa seu vídeo", de: "KI scannt dein Video" },
