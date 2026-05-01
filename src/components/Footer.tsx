@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n";
 
@@ -16,6 +16,7 @@ const LANGS: { code: Lang; flag: string; label: string }[] = [
 function FooterInner() {
   const { t, href, lang } = useTranslation();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   function langHref(code: Lang) {
     const sp = new URLSearchParams(searchParams.toString());
@@ -25,7 +26,7 @@ function FooterInner() {
       sp.set("lang", code);
     }
     const qs = sp.toString();
-    return qs ? `?${qs}` : (typeof window !== "undefined" ? window.location.pathname : "/");
+    return qs ? `${pathname}?${qs}` : pathname;
   }
 
   return (

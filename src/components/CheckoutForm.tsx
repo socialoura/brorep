@@ -40,6 +40,16 @@ function themeFor(platform?: string) {
     tabBorder: "1px solid rgba(29,185,84,0.12)", tabSelectedBorder: "1px solid rgba(29,185,84,0.4)",
     tabSelectedBg: "rgba(29,185,84,0.08)",
   };
+  if (platform === "instagram") return {
+    accent: "rgb(225,48,108)", accentMid: "rgb(193,53,132)", accentDark: "rgb(131,58,180)",
+    bg: "rgba(225,48,108,0.06)", border: "rgba(225,48,108,0.15)", borderStrong: "rgba(225,48,108,0.4)",
+    glow: "rgba(225,48,108,0.25)", stripeBg: "#1a0a12", stripeText: "#f7e8f0",
+    gradient: "linear-gradient(135deg, rgb(131,58,180), rgb(225,48,108))", btnText: "#fff",
+    inputBorder: "1px solid rgba(225,48,108,0.15)", inputBorderFocus: "1px solid rgba(225,48,108,0.4)",
+    inputBg: "rgba(225,48,108,0.04)", inputFocusShadow: "0 0 8px rgba(225,48,108,0.1)",
+    tabBorder: "1px solid rgba(225,48,108,0.12)", tabSelectedBorder: "1px solid rgba(225,48,108,0.4)",
+    tabSelectedBg: "rgba(225,48,108,0.08)",
+  };
   if (platform === "youtube") return {
     accent: "rgb(255,0,0)", accentMid: "rgb(204,0,0)", accentDark: "rgb(153,0,0)",
     bg: "rgba(255,0,0,0.06)", border: "rgba(255,0,0,0.15)", borderStrong: "rgba(255,0,0,0.4)",

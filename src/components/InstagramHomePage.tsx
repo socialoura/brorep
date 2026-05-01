@@ -337,24 +337,37 @@ function InstagramHomePageInner() {
                 // Fetch posts to let user pick which ones to boost
                 setFetchingPosts(true);
                 try {
-                  const res = await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
-                  const data = await res.json();
-                  if (data.posts && data.posts.length > 0) {
+                  // 1. Trigger background posts fetch via profile endpoint
+                  const profileRes = await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
+                  const profileData = await profileRes.json();
+
+                  // 2. Poll posts endpoint until done/error (max ~15s)
+                  let posts: unknown[] = [];
+                  for (let i = 0; i < 15; i++) {
+                    await new Promise((r) => setTimeout(r, 1000));
+                    const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
+                    const pollData = await pollRes.json();
+                    if (pollData.status === "done" && pollData.posts?.length > 0) {
+                      posts = pollData.posts;
+                      break;
+                    }
+                    if (pollData.status === "error") break;
+                  }
+
+                  if (posts.length > 0) {
                     setFetchingPosts(false);
-                    // Store posts in a minimal scanData-like shape for PostPicker
                     setStep("pickPosts");
-                    // We need scanData for PostPicker — store it transiently
                     setScanData({
-                      username: data.username || username,
-                      fullName: data.fullName || username,
-                      avatarUrl: data.avatarUrl || "",
-                      followersCount: data.followersCount || 0,
-                      followingCount: data.followingCount || 0,
-                      likesCount: data.likesCount || 0,
-                      videoCount: data.videoCount || 0,
-                      bio: data.bio || "",
-                      verified: data.verified || false,
-                      posts: data.posts,
+                      username: profileData.username || username,
+                      fullName: profileData.fullName || username,
+                      avatarUrl: profileData.avatarUrl || "",
+                      followersCount: profileData.followersCount || 0,
+                      followingCount: profileData.followingCount || 0,
+                      likesCount: profileData.likesCount || 0,
+                      videoCount: profileData.videoCount || 0,
+                      bio: profileData.bio || "",
+                      verified: profileData.verified || false,
+                      posts,
                     });
                     return;
                   }
@@ -411,20 +424,35 @@ function InstagramHomePageInner() {
 
               setFetchingPosts(true);
               try {
-                const res = await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
-                const data = await res.json();
-                if (data.posts && data.posts.length > 0) {
+                // 1. Trigger background posts fetch via profile endpoint
+                const profileRes = await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
+                const profileData = await profileRes.json();
+
+                // 2. Poll posts endpoint until done/error (max ~15s)
+                let posts: unknown[] = [];
+                for (let i = 0; i < 15; i++) {
+                  await new Promise((r) => setTimeout(r, 1000));
+                  const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
+                  const pollData = await pollRes.json();
+                  if (pollData.status === "done" && pollData.posts?.length > 0) {
+                    posts = pollData.posts;
+                    break;
+                  }
+                  if (pollData.status === "error") break;
+                }
+
+                if (posts.length > 0) {
                   setScanData({
-                    username: data.username || username,
-                    fullName: data.fullName || username,
-                    avatarUrl: data.avatarUrl || "",
-                    followersCount: data.followersCount || 0,
-                    followingCount: data.followingCount || 0,
-                    likesCount: data.likesCount || 0,
-                    videoCount: data.videoCount || 0,
-                    bio: data.bio || "",
-                    verified: data.verified || false,
-                    posts: data.posts,
+                    username: profileData.username || username,
+                    fullName: profileData.fullName || username,
+                    avatarUrl: profileData.avatarUrl || "",
+                    followersCount: profileData.followersCount || 0,
+                    followingCount: profileData.followingCount || 0,
+                    likesCount: profileData.likesCount || 0,
+                    videoCount: profileData.videoCount || 0,
+                    bio: profileData.bio || "",
+                    verified: profileData.verified || false,
+                    posts,
                   });
                   setFetchingPosts(false);
                   setStep("pickPosts");

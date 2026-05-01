@@ -166,11 +166,13 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       data-detected-lang={detectedLang || ""}
     >
-      <body className="min-h-full flex flex-col">
+      <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+      </head>
+      <body className="min-h-full flex flex-col">
         {process.env.NEXT_PUBLIC_GOOGLE_ADS_ID && (
           <>
             <Script

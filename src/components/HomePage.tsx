@@ -359,7 +359,24 @@ function HomePageInner() {
                     : `/api/scraper-tiktok?username=${encodeURIComponent(username)}`;
                   const res = await fetch(endpoint);
                   const data = await res.json();
-                  if (data.posts && data.posts.length > 0) {
+
+                  let fetchedPosts = data.posts && data.posts.length > 0 ? data.posts : null;
+
+                  // Instagram returns posts asynchronously — poll until ready
+                  if (!fetchedPosts && platform === "instagram") {
+                    for (let i = 0; i < 15; i++) {
+                      await new Promise((r) => setTimeout(r, 1000));
+                      const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
+                      const pollData = await pollRes.json();
+                      if (pollData.status === "done" && pollData.posts?.length > 0) {
+                        fetchedPosts = pollData.posts;
+                        break;
+                      }
+                      if (pollData.status === "error") break;
+                    }
+                  }
+
+                  if (fetchedPosts && fetchedPosts.length > 0) {
                     setScanData({
                       username: data.username || username,
                       fullName: data.fullName || username,
@@ -370,7 +387,7 @@ function HomePageInner() {
                       videoCount: data.videoCount || 0,
                       bio: data.bio || "",
                       verified: data.verified || false,
-                      posts: data.posts,
+                      posts: fetchedPosts,
                     });
                     setFetchingPosts(false);
                     setStep("pickPosts");
@@ -436,7 +453,24 @@ function HomePageInner() {
                   : `/api/scraper-tiktok?username=${encodeURIComponent(username)}`;
                 const res = await fetch(endpoint);
                 const data = await res.json();
-                if (data.posts && data.posts.length > 0) {
+
+                let fetchedPosts = data.posts && data.posts.length > 0 ? data.posts : null;
+
+                // Instagram returns posts asynchronously — poll until ready
+                if (!fetchedPosts && platform === "instagram") {
+                  for (let i = 0; i < 15; i++) {
+                    await new Promise((r) => setTimeout(r, 1000));
+                    const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
+                    const pollData = await pollRes.json();
+                    if (pollData.status === "done" && pollData.posts?.length > 0) {
+                      fetchedPosts = pollData.posts;
+                      break;
+                    }
+                    if (pollData.status === "error") break;
+                  }
+                }
+
+                if (fetchedPosts && fetchedPosts.length > 0) {
                   setScanData({
                     username: data.username || username,
                     fullName: data.fullName || username,
@@ -447,7 +481,7 @@ function HomePageInner() {
                     videoCount: data.videoCount || 0,
                     bio: data.bio || "",
                     verified: data.verified || false,
-                    posts: data.posts,
+                    posts: fetchedPosts,
                   });
                   setFetchingPosts(false);
                   setStep("pickPosts");
