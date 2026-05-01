@@ -12,6 +12,7 @@ import PostPicker from "@/components/PostPicker";
 import type { PostAssignment } from "@/components/PostPicker";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
+import type { ScanResult } from "@/components/ScanLoading";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
 
@@ -342,13 +343,13 @@ function InstagramHomePageInner() {
                   const profileData = await profileRes.json();
 
                   // 2. Poll posts endpoint until done/error (max ~15s)
-                  let posts: unknown[] = [];
+                  let posts: ScanResult["posts"] = [];
                   for (let i = 0; i < 15; i++) {
                     await new Promise((r) => setTimeout(r, 1000));
                     const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
                     const pollData = await pollRes.json();
                     if (pollData.status === "done" && pollData.posts?.length > 0) {
-                      posts = pollData.posts;
+                      posts = pollData.posts as ScanResult["posts"];
                       break;
                     }
                     if (pollData.status === "error") break;
@@ -429,13 +430,13 @@ function InstagramHomePageInner() {
                 const profileData = await profileRes.json();
 
                 // 2. Poll posts endpoint until done/error (max ~15s)
-                let posts: unknown[] = [];
+                let posts: ScanResult["posts"] = [];
                 for (let i = 0; i < 15; i++) {
                   await new Promise((r) => setTimeout(r, 1000));
                   const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
                   const pollData = await pollRes.json();
                   if (pollData.status === "done" && pollData.posts?.length > 0) {
-                    posts = pollData.posts;
+                    posts = pollData.posts as ScanResult["posts"];
                     break;
                   }
                   if (pollData.status === "error") break;
