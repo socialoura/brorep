@@ -265,8 +265,8 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "success.newAnalysis": { fr: "Nouvelle analyse", en: "New analysis", es: "Nuevo análisis", pt: "Nova análise", de: "Neue Analyse" },
 
   // ===== YouTube HomePage =====
-  "yt.hero.title1": { fr: "Notre IA analyse", en: "Our AI analyzes", es: "Nuestra IA analiza", pt: "Nossa IA analisa", de: "Unsere KI analysiert" },
-  "yt.hero.title2": { fr: "ta vidéo en 30s", en: "your video in 30s", es: "tu video en 30s", pt: "seu vídeo em 30s", de: "dein Video in 30s" },
+  "yt.hero.title1": { fr: "Notre IA booste", en: "Our AI boosts", es: "Nuestra IA impulsa", pt: "Nossa IA impulsiona", de: "Unsere KI boosted" },
+  "yt.hero.title2": { fr: "la croissance de votre vidéo", en: "your video growth", es: "el crecimiento de tu video", pt: "o crescimento do seu vídeo", de: "das Wachstum deines Videos" },
   "yt.hero.subtitle1": { fr: "Notre IA scanne ta vidéo et te propose", en: "Our AI scans your video and suggests", es: "Nuestra IA escanea tu video y te propone", pt: "Nossa IA analisa seu vídeo e sugere", de: "Unsere KI scannt dein Video und schlägt vor" },
   "yt.hero.subtitle2": { fr: "une stratégie de croissance personnalisée", en: "a personalized growth strategy", es: "una estrategia de crecimiento personalizada", pt: "uma estratégia de crescimento personalizada", de: "eine personalisierte Wachstumsstrategie" },
   "yt.hero.cta": { fr: "Lancer la croissance →", en: "Start my growth →", es: "Impulsar mi crecimiento →", pt: "Iniciar meu crescimento →", de: "Mein Wachstum starten →" },
