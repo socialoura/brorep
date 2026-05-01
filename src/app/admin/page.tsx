@@ -718,10 +718,12 @@ export default function AdminPage() {
                       <td colSpan={10} style={{ padding: "4px 8px 10px 8px" }}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
                           <span style={{ fontSize: "10px", fontWeight: 700, color: "rgb(107,117,111)", textTransform: "uppercase", marginRight: "4px" }}>Posts:</span>
-                          {(o.post_assignments as { postId: string; postUrl?: string; imageUrl?: string; likes: boolean; views: boolean }[]).map((pa, i) => (
+                          {(o.post_assignments as { postId: string; postUrl?: string; imageUrl?: string; likes: boolean; views: boolean }[]).map((pa, i) => {
+                            const url = pa.postUrl || (o.platform === "youtube" ? `https://www.youtube.com/watch?v=${pa.postId}` : o.platform === "instagram" ? `https://www.instagram.com/p/${pa.postId}/` : o.platform === "tiktok" ? `https://www.tiktok.com/@${o.username}/video/${pa.postId}` : "#");
+                            return (
                             <a
                               key={i}
-                              href={pa.postUrl || "#"}
+                              href={url}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
@@ -730,7 +732,7 @@ export default function AdminPage() {
                                 fontSize: "10px", fontWeight: 600,
                                 backgroundColor: "rgba(0,180,53,0.06)",
                                 border: "1px solid rgba(0,210,106,0.15)",
-                                color: pa.postUrl ? green : "rgb(169,181,174)",
+                                color: url !== "#" ? green : "rgb(169,181,174)",
                                 textDecoration: "none",
                               }}
                             >
@@ -739,7 +741,8 @@ export default function AdminPage() {
                                 {[pa.likes && "♥", pa.views && "👁"].filter(Boolean).join("")}
                               </span>
                             </a>
-                          ))}
+                            );
+                          })}
                         </div>
                       </td>
                     </tr>

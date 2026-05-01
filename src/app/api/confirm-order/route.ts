@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
     function buildPostUrl(plat: string, user: string, postId: string): string {
       if (plat === "tiktok") return `https://www.tiktok.com/@${user}/video/${postId}`;
       if (plat === "instagram") return `https://www.instagram.com/p/${postId}/`;
+      if (plat === "youtube") return `https://www.youtube.com/watch?v=${postId}`;
       return "";
     }
     const rawPosts = meta.postAssignments ? JSON.parse(meta.postAssignments) : null;
