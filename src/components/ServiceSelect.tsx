@@ -802,6 +802,9 @@ export default function ServiceSelect({
               style={{ flex: 1, padding: isYouTube ? "12px 14px" : "12px 14px 12px 4px", border: "none", background: "transparent", color: "#fff", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
             />
           </div>
+          {isInstagram && (
+            <p style={{ margin: "6px 0 0", fontSize: "11px", color: "rgb(225,48,108)", opacity: 0.8 }}>{t("service.igPublicHint")}</p>
+          )}
           {/* Preview dropdown */}
           {!isYouTube && (previewLoading || previewProfile) && (externalUsername || "").trim().length >= 2 && (
             <div style={{

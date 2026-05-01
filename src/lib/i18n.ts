@@ -153,6 +153,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "service.backToProfile": { fr: "Retour", en: "Back", es: "Volver", pt: "Voltar", de: "Zurück" },
   "service.usernamePlaceholder": { fr: "Ton nom d'utilisateur", en: "Your username", es: "Tu nombre de usuario", pt: "Seu nome de usuário", de: "Dein Benutzername" },
   "service.usernameLabel": { fr: "Compte à booster", en: "Account to boost", es: "Cuenta a impulsar", pt: "Conta para impulsionar", de: "Konto zum Boosten" },
+  "service.igPublicHint": { fr: "⚠️ Ton compte Instagram doit être public", en: "⚠️ Your Instagram account must be public", es: "⚠️ Tu cuenta de Instagram debe ser pública", pt: "⚠️ Sua conta do Instagram deve ser pública", de: "⚠️ Dein Instagram-Konto muss öffentlich sein" },
   "service.youtubeUrlLabel": { fr: "Vidéo YouTube à booster", en: "YouTube video to boost", es: "Video de YouTube a impulsar", pt: "Vídeo do YouTube para impulsionar", de: "YouTube-Video zum Boosten" },
   "service.youtubeUrlPlaceholder": { fr: "Colle l'URL de ta vidéo YouTube", en: "Paste your YouTube video URL", es: "Pega la URL de tu video de YouTube", pt: "Cole a URL do seu vídeo do YouTube", de: "Füge die URL deines YouTube-Videos ein" },
   "service.youtubeUrlInvalid": { fr: "Lien invalide ou vidéo introuvable", en: "Invalid link or video not found", es: "Enlace inválido o video no encontrado", pt: "Link inválido ou vídeo não encontrado", de: "Ungültiger Link oder Video nicht gefunden" },
