@@ -54,8 +54,8 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "social.thisMonth": { fr: "ce mois-ci", en: "this month", es: "este mes", pt: "este mês", de: "diesen Monat" },
 
   // ===== HomePage hero =====
-  "hero.title1": { fr: "Accélère ta croissance TikTok", en: "Accelerate your TikTok growth", es: "Acelera tu crecimiento en TikTok", pt: "Acelere seu crescimento no TikTok", de: "Beschleunige dein TikTok-Wachstum" },
-  "hero.title2": { fr: "TikTok", en: "TikTok", es: "TikTok", pt: "TikTok", de: "TikTok" },
+  "hero.title1": { fr: "Accélère ta croissance", en: "Accelerate your growth", es: "Acelera tu crecimiento", pt: "Acelere seu crescimento", de: "Beschleunige dein Wachstum" },
+  "hero.title2": { fr: "", en: "", es: "", pt: "", de: "" },
   "hero.subtitle1": { fr: "On s'occupe de ta visibilité TikTok pendant que", en: "We handle your TikTok visibility while", es: "Nos encargamos de tu visibilidad en TikTok mientras", pt: "Cuidamos da sua visibilidade no TikTok enquanto", de: "Wir kümmern uns um deine TikTok-Sichtbarkeit, während" },
   "hero.subtitle2": { fr: "tu te concentres sur ton contenu.", en: "you focus on your content.", es: "tú te concentras en tu contenido.", pt: "você foca no seu conteúdo.", de: "du dich auf deinen Content konzentrierst." },
   "hero.moreProfiles": { fr: "de packs vendus de plus qu'hier", en: "more packs sold than yesterday", es: "más packs vendidos que ayer", pt: "mais packs vendidos que ontem", de: "mehr Pakete verkauft als gestern" },

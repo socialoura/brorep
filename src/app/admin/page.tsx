@@ -115,6 +115,7 @@ export default function AdminPage() {
   const [editingSmm, setEditingSmm] = useState<{ orderId: number; index: number } | null>(null);
   const [editingSmmValue, setEditingSmmValue] = useState("");
   const [retryingSmm, setRetryingSmm] = useState<{ orderId: number; index: number } | null>(null);
+  const [runningSmm, setRunningSmm] = useState<number | null>(null);
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
 
@@ -618,6 +619,44 @@ export default function AdminPage() {
                             </div>
                           );
                         })}
+                        {/* Run all SMM orders button — visible when cart items have no SMM entry */}
+                        {Array.isArray(o.cart) && o.cart.some((c) => c.service !== "tw_live_viewers" && !(Array.isArray(o.smm_orders) && o.smm_orders.some((s) => s.service === c.service && s.qty === c.qty && s.bulkfollows_order_id))) && (
+                          <button
+                            onClick={async () => {
+                              if (runningSmm) return;
+                              setRunningSmm(o.id);
+                              try {
+                                const res = await fetch("/api/admin/orders/run-smm", { method: "POST", headers, body: JSON.stringify({ orderId: o.id }) });
+                                const data = await res.json();
+                                if (data.success) {
+                                  alert(`SMM lancé : ${data.placed} commande(s) passée(s)${data.errors ? `, ${data.errors} erreur(s)` : ""}`);
+                                } else {
+                                  alert(`Erreur : ${data.error || "inconnue"}`);
+                                }
+                              } catch (e) {
+                                alert(`Erreur réseau: ${e}`);
+                              }
+                              setRunningSmm(null);
+                              fetchOrders(ordersPage);
+                            }}
+                            disabled={runningSmm === o.id}
+                            title="Lancer les commandes SMM pour cette commande"
+                            style={{
+                              cursor: runningSmm === o.id ? "wait" : "pointer",
+                              fontSize: "10px",
+                              padding: "4px 10px",
+                              borderRadius: "6px",
+                              border: "1px solid rgba(255,184,0,0.3)",
+                              backgroundColor: "rgba(255,184,0,0.08)",
+                              color: "#ffb800",
+                              fontWeight: 700,
+                              fontFamily: "inherit",
+                              opacity: runningSmm === o.id ? 0.5 : 1,
+                            }}
+                          >
+                            {runningSmm === o.id ? "⏳ En cours..." : "▶ Run SMM"}
+                          </button>
+                        )}
                         {/* Add entry for cart items not yet in smm_orders */}
                         {Array.isArray(o.cart) && o.cart.filter((c) => c.service !== "tw_live_viewers" && !(Array.isArray(o.smm_orders) && o.smm_orders.some((s) => s.service === c.service && s.qty === c.qty))).map((c, ci) => (
                           <button
