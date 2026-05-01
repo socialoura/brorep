@@ -192,7 +192,6 @@ function HomePageInner() {
                 <h1 style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
                   {t("hero.title1")}
                   <br />
-                  <span style={{ color: "#fff" }}>{t("hero.title2")}</span>
                   <span style={{ background: "linear-gradient(135deg, #69C9D0, #4FB3BA)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     TikTok
                     <svg width="0.7em" height="0.7em" viewBox="0 0 24 24" fill="#69C9D0" style={{ display: "inline", verticalAlign: "middle", marginLeft: "4px", filter: "drop-shadow(0 0 12px rgba(105,201,208,0.5))" }}>
