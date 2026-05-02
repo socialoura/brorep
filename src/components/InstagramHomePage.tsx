@@ -99,6 +99,12 @@ function InstagramHomePageInner() {
 
   const platform = "instagram";
 
+  // Track page view on mount
+  useEffect(() => {
+    posthog?.capture("page_viewed", { platform, lang, currency });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Compute minimum price across IG services (same as TikTok: followers, likes, views)
   const [minPrice, setMinPrice] = useState<number | null>(null);
   const [minPriceUsd, setMinPriceUsd] = useState<number | null>(null);
@@ -147,8 +153,9 @@ function InstagramHomePageInner() {
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       if (step === "shop") document.body.setAttribute("data-hide-chat", "");
       else document.body.removeAttribute("data-hide-chat");
+      if (step === "pickPosts") posthog?.capture("posts_picker_shown", { platform });
     }
-  }, [step, hydrated]);
+  }, [step, hydrated, posthog]);
   useEffect(() => { if (hydrated) saveSession("ig_username", username); }, [username, hydrated]);
   useEffect(() => { if (hydrated) saveSession("ig_cart", cart); }, [cart, hydrated]);
   useEffect(() => { if (hydrated) saveSession("ig_postAssignments", postAssignments); }, [postAssignments, hydrated]);
@@ -170,7 +177,7 @@ function InstagramHomePageInner() {
             <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "32px 24px 40px", width: "100%", maxWidth: "672px", textAlign: "center", position: "relative" }}>
               {/* Logo + Title group */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-                <FanovalyLogo />
+                <FanovalyLogo variant="red" />
                 <h1 style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
                   {t("ig.hero.title1")}
                   <br />
@@ -330,22 +337,17 @@ function InstagramHomePageInner() {
             onUsernameChange={setUsername}
             onCheckout={async (items) => {
               setCart(items);
-              posthog?.capture("checkout_started", { platform, cart_total: items.reduce((s, i) => s + i.price, 0), cart_items_count: items.length });
+              posthog?.capture("checkout_started", { platform, cart_total: items.reduce((s, i) => s + i.price, 0), cart_items_count: items.length, has_combo: items.length > 1 });
               setPostAssignments(undefined);
 
               const needsPosts = items.some((i) => ["likes", "views"].includes(i.service));
               if (needsPosts && username) {
-                // Fetch posts to let user pick which ones to boost
+                // Posts are already being fetched in background since ServiceSelect called /api/scraper-instagram
                 setFetchingPosts(true);
                 try {
-                  // 1. Trigger background posts fetch via profile endpoint
-                  const profileRes = await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
-                  const profileData = await profileRes.json();
-
-                  // 2. Poll posts endpoint until done/error (max ~15s)
+                  // Poll posts endpoint (already triggered by profile lookup) — fast poll, max ~6s
                   let posts: ScanResult["posts"] = [];
-                  for (let i = 0; i < 15; i++) {
-                    await new Promise((r) => setTimeout(r, 1000));
+                  for (let i = 0; i < 12; i++) {
                     const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
                     const pollData = await pollRes.json();
                     if (pollData.status === "done" && pollData.posts?.length > 0) {
@@ -353,21 +355,37 @@ function InstagramHomePageInner() {
                       break;
                     }
                     if (pollData.status === "error") break;
+                    await new Promise((r) => setTimeout(r, 500));
+                  }
+
+                  // If not found yet, trigger a fresh fetch and poll a bit more
+                  if (posts.length === 0) {
+                    await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
+                    for (let i = 0; i < 10; i++) {
+                      await new Promise((r) => setTimeout(r, 500));
+                      const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
+                      const pollData = await pollRes.json();
+                      if (pollData.status === "done" && pollData.posts?.length > 0) {
+                        posts = pollData.posts as ScanResult["posts"];
+                        break;
+                      }
+                      if (pollData.status === "error") break;
+                    }
                   }
 
                   if (posts.length > 0) {
                     setFetchingPosts(false);
                     setStep("pickPosts");
                     setScanData({
-                      username: profileData.username || username,
-                      fullName: profileData.fullName || username,
-                      avatarUrl: profileData.avatarUrl || "",
-                      followersCount: profileData.followersCount || 0,
-                      followingCount: profileData.followingCount || 0,
-                      likesCount: profileData.likesCount || 0,
-                      videoCount: profileData.videoCount || 0,
-                      bio: profileData.bio || "",
-                      verified: profileData.verified || false,
+                      username,
+                      fullName: username,
+                      avatarUrl: "",
+                      followersCount: 0,
+                      followingCount: 0,
+                      likesCount: 0,
+                      videoCount: 0,
+                      bio: "",
+                      verified: false,
                       posts,
                     });
                     return;
@@ -377,12 +395,13 @@ function InstagramHomePageInner() {
                 }
                 setFetchingPosts(false);
                 // Posts fetch failed or empty — block payment to prevent paying for likes/views without post assignments
+                posthog?.capture("posts_fetch_failed", { platform, username });
                 alert(t("posts.fetchFailed"));
                 return;
               }
               setStep("payment");
             }}
-            onBack={() => { posthog?.capture("back_clicked", { from_step: "shop" }); setStep("hero"); }}
+            onBack={() => { posthog?.capture("back_clicked", { platform, from_step: "shop" }); setStep("hero"); }}
           />
           </>
         );
@@ -394,6 +413,7 @@ function InstagramHomePageInner() {
             platform={platform}
             cart={cart}
             onConfirm={(assignments) => {
+              posthog?.capture("posts_assigned", { platform, assignments_count: assignments.length });
               setPostAssignments(assignments);
               setStep("payment");
             }}
@@ -409,8 +429,8 @@ function InstagramHomePageInner() {
             platform={platform}
             postAssignments={postAssignments}
             followersBefore={0}
-            onSuccess={(id) => { posthog?.capture("payment_completed", { platform, total: cart.reduce((s, i) => s + i.price, 0), order_id: id }); setOrderId(id); setStep("success"); }}
-            onBack={() => { setStep("shop"); }}
+            onSuccess={(id) => { posthog?.capture("payment_success", { platform, total: cart.reduce((s, i) => s + i.price, 0), order_id: id, currency, items: cart.map(i => ({ service: i.service, qty: i.qty })) }); setOrderId(id); setStep("success"); }}
+            onBack={() => { posthog?.capture("back_to_packs_clicked", { platform }); setStep("shop"); }}
             onAddToCart={async (item) => {
               const needsPostPick = ["likes", "views"].includes(item.service);
               // Add to cart optimistically; we'll roll back if posts can't be fetched
@@ -425,14 +445,9 @@ function InstagramHomePageInner() {
 
               setFetchingPosts(true);
               try {
-                // 1. Trigger background posts fetch via profile endpoint
-                const profileRes = await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
-                const profileData = await profileRes.json();
-
-                // 2. Poll posts endpoint until done/error (max ~15s)
+                // Poll posts endpoint first (likely already cached from profile lookup)
                 let posts: ScanResult["posts"] = [];
-                for (let i = 0; i < 15; i++) {
-                  await new Promise((r) => setTimeout(r, 1000));
+                for (let i = 0; i < 12; i++) {
                   const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
                   const pollData = await pollRes.json();
                   if (pollData.status === "done" && pollData.posts?.length > 0) {
@@ -440,19 +455,35 @@ function InstagramHomePageInner() {
                     break;
                   }
                   if (pollData.status === "error") break;
+                  await new Promise((r) => setTimeout(r, 500));
+                }
+
+                // If not found, trigger a fresh fetch
+                if (posts.length === 0) {
+                  await fetch(`/api/scraper-instagram?username=${encodeURIComponent(username)}`);
+                  for (let i = 0; i < 10; i++) {
+                    await new Promise((r) => setTimeout(r, 500));
+                    const pollRes = await fetch(`/api/scraper-instagram/posts?username=${encodeURIComponent(username)}`);
+                    const pollData = await pollRes.json();
+                    if (pollData.status === "done" && pollData.posts?.length > 0) {
+                      posts = pollData.posts as ScanResult["posts"];
+                      break;
+                    }
+                    if (pollData.status === "error") break;
+                  }
                 }
 
                 if (posts.length > 0) {
                   setScanData({
-                    username: profileData.username || username,
-                    fullName: profileData.fullName || username,
-                    avatarUrl: profileData.avatarUrl || "",
-                    followersCount: profileData.followersCount || 0,
-                    followingCount: profileData.followingCount || 0,
-                    likesCount: profileData.likesCount || 0,
-                    videoCount: profileData.videoCount || 0,
-                    bio: profileData.bio || "",
-                    verified: profileData.verified || false,
+                    username,
+                    fullName: username,
+                    avatarUrl: "",
+                    followersCount: 0,
+                    followingCount: 0,
+                    likesCount: 0,
+                    videoCount: 0,
+                    bio: "",
+                    verified: false,
                     posts,
                   });
                   setFetchingPosts(false);
@@ -512,7 +543,7 @@ function InstagramHomePageInner() {
               onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.7"; }}
               title="Retour à l'accueil"
             >
-              <FanovalyLogo />
+              <FanovalyLogo variant="red" />
             </button>
           )}
           <div key={step} className="step-fade-in" style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>

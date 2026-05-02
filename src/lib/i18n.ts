@@ -62,7 +62,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "hero.morePercent": { fr: "20% plus", en: "20% more", es: "20% más", pt: "20% mais", de: "20% mehr" },
   "hero.operational": { fr: "Tous nos services sont opérationnels", en: "All our services are operational", es: "Todos nuestros servicios están operativos", pt: "Todos os nossos serviços estão operacionais", de: "Alle unsere Dienste sind betriebsbereit" },
   "hero.startingAt": { fr: "À partir de", en: "Starting at", es: "Desde", pt: "A partir de", de: "Ab" },
-  "hero.delivery": { fr: "Livraison sous 24h", en: "Delivery within 24h", es: "Entrega en 24h", pt: "Entrega em 24h", de: "Lieferung innerhalb von 24h" },
+  "hero.delivery": { fr: "Livraison en 10 minutes", en: "Delivery within 10 minutes", es: "Entrega en 10 minutos", pt: "Entrega em 10 minutos", de: "Lieferung in 10 Minuten" },
 
   // ===== How it works =====
   "howItWorks.title": { fr: "Comment ça marche", en: "How it works", es: "Cómo funciona", pt: "Como funciona", de: "So funktioniert's" },
@@ -162,6 +162,12 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "service.trustReal": { fr: "Vrais comptes", en: "Real accounts", es: "Cuentas reales", pt: "Contas reais", de: "Echte Konten" },
   "service.trustFast": { fr: "Livraison rapide", en: "Fast delivery", es: "Entrega rápida", pt: "Entrega rápida", de: "Schnelle Lieferung" },
   "service.trustNoPassword": { fr: "Sans mot de passe", en: "No password needed", es: "Sin contraseña", pt: "Sem senha", de: "Kein Passwort nötig" },
+  "service.guarantee": { fr: "Garanti 30j — Relivraison gratuite", en: "30-day guarantee — Free redelivery", es: "Garantía 30 días — Reenvío gratis", pt: "Garantia 30 dias — Reenvio grátis", de: "30-Tage-Garantie — Kostenlose Nachlieferung" },
+  "service.aiReco": { fr: "Recommandation pour", en: "Recommendation for", es: "Recomendación para", pt: "Recomendação para", de: "Empfehlung für" },
+  "service.aiRecoFollowers": { fr: "Avec {count} followers, booste ta crédibilité avec un pack followers pour attirer plus d'engagement.", en: "With {count} followers, boost your credibility with a followers pack to attract more engagement.", es: "Con {count} seguidores, impulsa tu credibilidad con un pack de seguidores para atraer más interacciones.", pt: "Com {count} seguidores, aumente sua credibilidade com um pacote de seguidores para atrair mais engajamento.", de: "Mit {count} Followern, steigere deine Glaubwürdigkeit mit einem Follower-Paket für mehr Engagement." },
+  "service.aiRecoLikes": { fr: "Ton ratio likes/followers est faible — un boost de likes augmentera ton taux d'engagement.", en: "Your likes/followers ratio is low — a likes boost will increase your engagement rate.", es: "Tu ratio likes/seguidores es bajo — un boost de likes aumentará tu tasa de engagement.", pt: "Sua proporção likes/seguidores é baixa — um boost de likes aumentará sua taxa de engajamento.", de: "Dein Likes/Follower-Verhältnis ist niedrig — ein Likes-Boost erhöht deine Engagement-Rate." },
+  "service.aiRecoCombo": { fr: "Ton profil est prêt pour un pack combo — followers + likes + vues pour un boost complet.", en: "Your profile is ready for a combo pack — followers + likes + views for a full boost.", es: "Tu perfil está listo para un pack combo — seguidores + likes + vistas para un impulso completo.", pt: "Seu perfil está pronto para um pacote combo — seguidores + likes + visualizações para um boost completo.", de: "Dein Profil ist bereit für ein Kombi-Paket — Follower + Likes + Views für einen kompletten Boost." },
+  "service.aiRecoSelect": { fr: "Sélectionner ce pack", en: "Select this pack", es: "Seleccionar este pack", pt: "Selecionar este pacote", de: "Dieses Paket wählen" },
 
   // ===== Spotify =====
   "spotify.heroTitle1": { fr: "Booste tes", en: "Boost your", es: "Impulsa tus", pt: "Impulsione suas", de: "Booste deine" },

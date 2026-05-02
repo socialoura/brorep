@@ -16,11 +16,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   if (!checkAuth(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { name, nameEn, items, discountPercent } = await req.json();
+  const { name, nameEn, items, discountPercent, platform } = await req.json();
   if (!name || !items || !Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
-  const id = await createCombo({ name, nameEn: nameEn || '', items, discountPercent: discountPercent || 20 });
+  const id = await createCombo({ name, nameEn: nameEn || '', items, discountPercent: discountPercent || 20, platform: platform || 'tiktok' });
   return NextResponse.json({ id });
 }
 

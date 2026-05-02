@@ -281,6 +281,7 @@ interface ComboPack {
   name_en?: string;
   items: ComboItem[];
   discount_percent: number;
+  platform: string;
 }
 
 function findClosestPack(service: ServiceType, qty: number, servicesData: Services = DEFAULT_SERVICES as Services): Pack | null {
@@ -346,19 +347,15 @@ export default function ServiceSelect({
   const [toast, setToast] = useState<{ message: string; cta: string; targetTab: ServiceType } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showCombos = platform === "tiktok";
+  const showCombos = true;
 
   useEffect(() => {
-    // Fetch combos + dynamic pricing in parallel — combos only on TikTok
-    if (showCombos) {
-      fetch("/api/combos")
-        .then((r) => r.json())
-        .then((data) => { if (data.combos) setCombos(data.combos); })
-        .catch(() => {})
-        .finally(() => setCombosLoading(false));
-    } else {
-      setCombosLoading(false);
-    }
+    // Fetch combos filtered by platform
+    fetch(`/api/combos?platform=${platform}`)
+      .then((r) => r.json())
+      .then((data) => { if (data.combos) setCombos(data.combos); })
+      .catch(() => {})
+      .finally(() => setCombosLoading(false));
 
     fetch("/api/pricing")
       .then((r) => r.json())
@@ -442,11 +439,13 @@ export default function ServiceSelect({
               avatarUrl: data.avatarUrl || "",
               followersCount: data.followersCount || 0,
             });
+            posthog.capture("username_submitted", { platform, username: data.username, followers_count: data.followersCount || 0 });
           } else {
             setPreviewProfile(null);
+            posthog.capture("profile_scan_failed", { platform, username: raw, error_type: "not_found" });
           }
         })
-        .catch(() => setPreviewProfile(null))
+        .catch(() => { setPreviewProfile(null); posthog.capture("profile_scan_failed", { platform, username: raw, error_type: "network_error" }); })
         .finally(() => setPreviewLoading(false));
     }, 800);
     return () => { if (lookupTimer.current) clearTimeout(lookupTimer.current); };
@@ -488,11 +487,13 @@ export default function ServiceSelect({
     setSelections((prev) => {
       const copy = { ...prev };
       if (copy[activeTab] === idx) {
+        const pack = service.packs[idx];
+        if (pack) posthog.capture("pack_deselected", { platform, service: activeTab, qty: pack.qty });
         delete copy[activeTab];
       } else {
         copy[activeTab] = idx;
         const pack = service.packs[idx];
-        if (pack) posthog.capture("service_selected", { platform, service: activeTab, qty: pack.qty, price: pack.price });
+        if (pack) posthog.capture("pack_selected", { platform, service: activeTab, qty: pack.qty, price: pack.price });
         // Show toast suggesting another service
         const missing = activeKeys.filter((k) => k !== activeTab && copy[k] === undefined);
         if (missing.length > 0) {
@@ -781,6 +782,16 @@ export default function ServiceSelect({
         })()}
       </div>
 
+      {/* Guarantee badge */}
+      <div style={{
+        width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+        padding: "8px 0", marginBottom: "14px",
+        fontSize: "11px", fontWeight: 600, color: "rgb(169,181,174)", letterSpacing: "0.02em",
+      }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        {t("service.guarantee")}
+      </div>
+
       {/* Username / URL input — after packs. For YouTube the input stays visible even once a video is loaded so the layout doesn't shift. */}
       {((!isYouTube && (!profile || editingUsername)) || isYouTube) && (
         <div id="username-input-section" style={{ width: "100%", maxWidth: "360px", marginBottom: "20px" }}>
@@ -802,7 +813,7 @@ export default function ServiceSelect({
               style={{ flex: 1, padding: isYouTube ? "12px 14px" : "12px 14px 12px 4px", border: "none", background: "transparent", color: "#fff", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
             />
           </div>
-          {isInstagram && (
+          {isInstagram && !previewProfile && (
             <p style={{ margin: "6px 0 0", fontSize: "11px", color: "rgb(225,48,108)", opacity: 0.8 }}>{t("service.igPublicHint")}</p>
           )}
           {/* Preview dropdown */}
@@ -951,6 +962,7 @@ export default function ServiceSelect({
                   key={combo.id}
                   onClick={() => {
                     if (selectedCombo?.id === combo.id) {
+                      posthog.capture("combo_deselected", { platform, combo_name: combo.name });
                       setSelectedCombo(null); // deselect
                     } else {
                       const dm = 1 - combo.discount_percent / 100;
@@ -965,7 +977,7 @@ export default function ServiceSelect({
                       }));
                       setSelections({}); // clear individual selections
                       setSelectedCombo({ id: combo.id, items: discountedItems });
-                      posthog.capture("combo_selected", { combo_name: combo.name, discount_percent: combo.discount_percent, total: discountedItems.reduce((s, i) => s + i.price, 0) });
+                      posthog.capture("combo_selected", { platform, combo_name: combo.name, discount_percent: combo.discount_percent, total: discountedItems.reduce((s, i) => s + i.price, 0) });
                     }
                   }}
                   style={{
@@ -977,16 +989,16 @@ export default function ServiceSelect({
                     borderRadius: "14px",
                     border: selectedCombo?.id === combo.id ? `2px solid ${accent}` : `1px solid ${accentBorderStrong}`,
                     background: selectedCombo?.id === combo.id
-                      ? (isYouTube ? "rgba(255, 0, 0, 0.12)" : "rgba(105, 201, 208, 0.12)")
-                      : (isYouTube ? "linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 0, 0, 0.02))" : "linear-gradient(135deg, rgba(79, 179, 186, 0.08), rgba(105, 201, 208, 0.02))"),
+                      ? accentBg
+                      : `linear-gradient(135deg, ${accentBg}, transparent)`,
                     boxShadow: selectedCombo?.id === combo.id ? `0 0 20px ${accentGlow}` : "none",
                     cursor: "pointer",
                     fontFamily: "inherit",
                     textAlign: "left",
                     transition: "all 0.2s",
                   }}
-                  onMouseEnter={(e) => { if (selectedCombo?.id !== combo.id) { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.4)" : "rgba(105, 201, 208, 0.4)"; e.currentTarget.style.transform = "scale(1.02)"; } }}
-                  onMouseLeave={(e) => { if (selectedCombo?.id !== combo.id) { e.currentTarget.style.borderColor = isYouTube ? "rgba(255, 0, 0, 0.2)" : "rgba(105, 201, 208, 0.2)"; e.currentTarget.style.transform = "scale(1)"; } }}
+                  onMouseEnter={(e) => { if (selectedCombo?.id !== combo.id) { e.currentTarget.style.borderColor = accentBorderStrong.replace("0.2)", "0.4)"); e.currentTarget.style.transform = "scale(1.02)"; } }}
+                  onMouseLeave={(e) => { if (selectedCombo?.id !== combo.id) { e.currentTarget.style.borderColor = accentBorderStrong; e.currentTarget.style.transform = "scale(1)"; } }}
                 >
                   <span style={{
                     position: "absolute", top: "-8px", right: "10px",
@@ -1023,8 +1035,8 @@ export default function ServiceSelect({
             width: "100%",
             padding: "12px 16px",
             borderRadius: "12px",
-            backgroundColor: isYouTube ? "rgba(255, 0, 0, 0.06)" : "rgba(79, 179, 186, 0.06)",
-            border: `1px solid ${isYouTube ? 'rgba(255,0,0,0.15)' : 'rgba(105,201,208,0.15)'}`,
+            backgroundColor: accentBg,
+            border: `1px solid ${accentBorder}`,
             marginBottom: "20px",
           }}
         >

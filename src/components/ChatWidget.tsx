@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
+import posthog from "posthog-js";
 
 type WidgetStep = "idle" | "email" | "message" | "sending" | "done";
 
@@ -20,6 +21,11 @@ function getTheme(pathname: string) {
     accent: "rgb(145,71,255)", bg: "rgba(145,71,255,0.08)", border: "rgba(145,71,255,0.25)",
     gradient: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))", text: "#fff",
     glow: "0 4px 20px rgba(145,71,255,0.3)",
+  };
+  if (pathname.startsWith("/instagram")) return {
+    accent: "rgb(225,48,108)", bg: "rgba(225,48,108,0.08)", border: "rgba(225,48,108,0.25)",
+    gradient: "linear-gradient(135deg, rgb(131,58,180), rgb(225,48,108), rgb(247,119,55))", text: "#fff",
+    glow: "0 4px 20px rgba(225,48,108,0.3)",
   };
   if (pathname === "/" || pathname.startsWith("/tiktok")) return {
     accent: "rgb(105,201,208)", bg: "rgba(79,179,186,0.08)", border: "rgba(105,201,208,0.25)",
@@ -69,6 +75,7 @@ export default function ChatWidget() {
   function handleOpen() {
     setOpen(true);
     if (step === "idle") setStep("email");
+    posthog.capture("chat_opened", { page: pathname });
   }
 
   function handleClose() {
@@ -98,6 +105,7 @@ export default function ChatWidget() {
         body: JSON.stringify({ email, message: message.trim() }),
       });
       if (!res.ok) throw new Error();
+      posthog.capture("chat_message_sent", { page: pathname });
       setStep("done");
       setTimeout(() => {
         setOpen(false);

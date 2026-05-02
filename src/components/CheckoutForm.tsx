@@ -148,7 +148,8 @@ function PromoCodeInput({ onValidated }: { onValidated: (code: string, percentOf
       const data = await res.json();
       setResult(data);
       if (data.valid && data.percentOff) onValidated(input.trim().toUpperCase(), data.percentOff);
-    } catch { setResult({ valid: false }); }
+      else posthog.capture("promo_code_failed", { code: input.trim().toUpperCase() });
+    } catch { setResult({ valid: false }); posthog.capture("promo_code_failed", { code: input.trim().toUpperCase() }); }
     setLoading(false);
   }
 
@@ -185,6 +186,14 @@ function LoyaltyBanner({ email, onRedeemed }: { email: string; onRedeemed: (cent
     fetch("/api/loyalty", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) })
       .then((r) => r.json()).then((d) => setPoints(d.points ?? 0)).catch(() => setPoints(0));
   }, [email]);
+
+  const loyaltyTrackedRef = useRef(false);
+  useEffect(() => {
+    if (points !== null && points > 0 && !loyaltyTrackedRef.current) {
+      posthog.capture("loyalty_points_shown", { points });
+      loyaltyTrackedRef.current = true;
+    }
+  }, [points]);
 
   if (points === null || points <= 0) return null;
 
@@ -236,7 +245,7 @@ function EmailInput({ value, onChange, inputRef, highlight }: { value: string; o
 }
 
 /* ----- Express Checkout (Apple Pay / Google Pay native button) ----- */
-function ExpressCheckout({ email, onSuccess }: { email: string; onSuccess: (orderId?: number) => void }) {
+function ExpressCheckout({ email, onSuccess, platform }: { email: string; onSuccess: (orderId?: number) => void; platform?: string }) {
   const { t } = useTranslation();
   const stripe = useStripe();
   const elements = useElements();
@@ -254,7 +263,7 @@ function ExpressCheckout({ email, onSuccess }: { email: string; onSuccess: (orde
 
     if (error) {
       const msg = error.message || t("checkout.paymentError");
-      posthog.capture("payment_failed", { error_message: msg, method: "express" });
+      posthog.capture("payment_failed", { platform, error_message: msg, method: "express" });
       setExpressError(msg);
       return;
     }
@@ -314,6 +323,13 @@ function UpsellSuggestions({ cart, platform, onAdd }: {
   // Filter: only show upsells for services NOT already in cart
   const cartServices = new Set(cart.map((c) => c.service as string));
   const visible = offers.filter((o) => !cartServices.has(o.service) && !dismissed.has(o.id) && !added.has(o.id) && o.price);
+  const upsellTrackedRef = useRef(false);
+  useEffect(() => {
+    if (visible.length > 0 && !upsellTrackedRef.current) {
+      posthog.capture("upsell_shown", { platform, count: visible.length });
+      upsellTrackedRef.current = true;
+    }
+  }, [visible.length, platform]);
 
   if (visible.length === 0) return null;
 
@@ -367,7 +383,7 @@ function UpsellSuggestions({ cart, platform, onAdd }: {
               </button>
               <button
                 type="button"
-                onClick={() => setDismissed((prev) => new Set(prev).add(offer.id))}
+                onClick={() => { posthog.capture("upsell_dismissed", { platform, service: offer.service }); setDismissed((prev) => new Set(prev).add(offer.id)); }}
                 style={{ padding: "6px 8px", borderRadius: "8px", border: "none", background: "transparent", color: "rgb(107,117,111)", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}
               >
                 ✕
@@ -477,12 +493,17 @@ function PayForm({
     try { return localStorage.getItem("fanovaly_email") || ""; } catch { return ""; }
   });
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const emailTrackedRef = useRef(false);
   // Persist email locally once valid, for returning customers
   useEffect(() => {
     if (emailValid) {
       try { localStorage.setItem("fanovaly_email", email); } catch { /* ignore */ }
+      if (!emailTrackedRef.current) {
+        posthog.capture("email_entered", { platform });
+        emailTrackedRef.current = true;
+      }
     }
-  }, [email, emailValid]);
+  }, [email, emailValid, platform]);
   const emailRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [emailShake, setEmailShake] = useState(false);
@@ -506,8 +527,9 @@ function PayForm({
     }
     setLoading(true);
     setError(null);
+    posthog.capture("payment_submitted", { platform });
     const result = await stripe.confirmPayment({ elements, confirmParams: { return_url: window.location.origin + "?payment=success", receipt_email: email }, redirect: "if_required" });
-    if (result.error) { const msg = result.error.message || t("checkout.paymentError"); posthog.capture("payment_failed", { error_message: msg }); setError(msg); setLoading(false); }
+    if (result.error) { const msg = result.error.message || t("checkout.paymentError"); posthog.capture("payment_failed", { platform, error_message: msg }); setError(msg); setLoading(false); }
     else {
       const piId = result.paymentIntent?.id;
       if (piId) {
@@ -541,7 +563,7 @@ function PayForm({
       {emailValid ? (
         <>
           {/* Express checkout (Apple/Google Pay) */}
-          <ExpressCheckout email={email} onSuccess={onSuccess} />
+          <ExpressCheckout email={email} onSuccess={onSuccess} platform={platform} />
 
           {/* Separator */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "0 0 16px 0" }}>
@@ -573,6 +595,15 @@ function PayForm({
               </>
             )}
           </button>
+
+          {/* Guarantee badge */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+            padding: "10px 0 0", fontSize: "11px", fontWeight: 600, color: "rgb(169,181,174)", letterSpacing: "0.02em",
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={th.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            {t("service.guarantee")}
+          </div>
         </>
       ) : (
         <p style={{ fontSize: "12px", color: "rgb(107,117,111)", textAlign: "center", margin: "16px 0", lineHeight: 1.5 }}>
@@ -624,6 +655,27 @@ function PayForm({
             zIndex: 9999,
           }}
         >
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back"
+            style={{
+              flexShrink: 0,
+              width: "36px",
+              height: "36px",
+              borderRadius: "10px",
+              border: `1px solid ${th.border}`,
+              background: "transparent",
+              color: "rgb(169,181,174)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "border-color 0.2s",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="m12 19-7-7 7-7" /></svg>
+          </button>
           <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
             <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.05em", color: "rgb(107,117,111)", fontWeight: 600 }}>{t("service.total")}</span>
             <span style={{ fontSize: "17px", fontWeight: 800, color: th.accent, lineHeight: 1.1 }}>{fmtPrice(finalTotal, currency)}</span>

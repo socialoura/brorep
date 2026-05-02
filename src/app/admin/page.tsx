@@ -65,6 +65,7 @@ interface ComboPack {
   items: ComboItem[];
   discount_percent: number;
   active: boolean;
+  platform: string;
 }
 
 interface Analytics {
@@ -108,7 +109,7 @@ export default function AdminPage() {
   const [editPriceChf, setEditPriceChf] = useState("");
   const [newPack, setNewPack] = useState({ service: "followers", qty: "", price: "", priceUsd: "", priceGbp: "", priceCad: "", priceNzd: "", priceAud: "", priceChf: "" });
   const [combos, setCombos] = useState<ComboPack[]>([]);
-  const [newCombo, setNewCombo] = useState({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
+  const [newCombo, setNewCombo] = useState({ name: "", nameEn: "", discount: "20", platform: "tiktok", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
   const [smm, setSmm] = useState<SmmData | null>(null);
   const [upsells, setUpsells] = useState<{ id: number; service: string; qty: number; label: string; label_en: string; active: boolean; sort_order: number }[]>([]);
   const [newUpsell, setNewUpsell] = useState({ service: "followers", qty: "", label: "", labelEn: "" });
@@ -1231,6 +1232,17 @@ export default function AdminPage() {
           <div style={{ marginBottom: "24px", padding: "16px", borderRadius: "14px", border: "1px solid rgba(0,210,106,0.12)", backgroundColor: "rgba(0,180,53,0.03)" }}>
             <p style={{ margin: "0 0 12px 0", fontSize: "13px", fontWeight: 600, color: "#fff" }}>Nouveau combo</p>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
+              <select
+                value={newCombo.platform}
+                onChange={(e) => setNewCombo({ ...newCombo, platform: e.target.value })}
+                style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid rgba(0,210,106,0.2)", backgroundColor: "rgba(0,180,53,0.04)", color: "#e8f7ed", fontSize: "13px", fontFamily: "inherit", colorScheme: "dark" }}
+              >
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+                <option value="x">X / Twitter</option>
+                <option value="twitch">Twitch</option>
+              </select>
               <input
                 placeholder="Nom FR (ex: Pack Croissance)"
                 value={newCombo.name}
@@ -1305,9 +1317,9 @@ export default function AdminPage() {
                   await fetch("/api/admin/combos", {
                     method: "POST",
                     headers,
-                    body: JSON.stringify({ name: newCombo.name, nameEn: newCombo.nameEn, items, discountPercent: Number(newCombo.discount) || 20 }),
+                    body: JSON.stringify({ name: newCombo.name, nameEn: newCombo.nameEn, items, discountPercent: Number(newCombo.discount) || 20, platform: newCombo.platform }),
                   });
-                  setNewCombo({ name: "", nameEn: "", discount: "20", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
+                  setNewCombo({ name: "", nameEn: "", discount: "20", platform: "tiktok", items: [{ service: "followers", qty: "500" }, { service: "likes", qty: "500" }, { service: "views", qty: "5000" }] });
                   fetchCombos();
                 }}
                 style={{ padding: "6px 16px", borderRadius: "8px", border: "none", backgroundColor: green, color: "#000", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
@@ -1333,7 +1345,10 @@ export default function AdminPage() {
                     <p style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>{combo.name}</p>
                     {combo.name_en && <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "rgb(107,117,111)" }}>EN: {combo.name_en}</p>}
                   </div>
-                  <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 700, backgroundColor: "rgba(0,255,76,0.1)", color: green, border: "1px solid rgba(0,255,76,0.2)" }}>-{combo.discount_percent}%</span>
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                    <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "10px", fontWeight: 600, backgroundColor: "rgba(255,255,255,0.05)", color: "rgb(169,181,174)", border: "1px solid rgba(255,255,255,0.08)" }}>{combo.platform || "tiktok"}</span>
+                    <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 700, backgroundColor: "rgba(0,255,76,0.1)", color: green, border: "1px solid rgba(0,255,76,0.2)" }}>-{combo.discount_percent}%</span>
+                  </div>
                 </div>
                 <div style={{ marginBottom: "10px" }}>
                   {Array.isArray(combo.items) && combo.items.map((item, i) => (

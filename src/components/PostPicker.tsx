@@ -87,12 +87,13 @@ export default function PostPicker({
   }
 
   const isX = platform === "x";
-  const accent = isX ? "rgb(29, 155, 240)" : "rgb(105, 201, 208)";
-  const accentBg = isX ? "rgba(29, 155, 240, 0.1)" : "rgba(79, 179, 186, 0.1)";
-  const accentBorder = isX ? "rgba(29, 155, 240, 0.2)" : "rgba(105, 201, 208, 0.2)";
-  const accentGlow = isX ? "rgba(29, 155, 240, 0.15)" : "rgba(105, 201, 208, 0.15)";
-  const accentShadow = isX ? "rgba(29, 155, 240, 0.25)" : "rgba(105, 201, 208, 0.25)";
-  const gradientBg = isX ? "linear-gradient(135deg, rgb(20, 120, 200), rgb(29, 155, 240))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
+  const isInstagram = platform === "instagram";
+  const accent = isInstagram ? "rgb(225, 48, 108)" : isX ? "rgb(29, 155, 240)" : "rgb(105, 201, 208)";
+  const accentBg = isInstagram ? "rgba(225, 48, 108, 0.1)" : isX ? "rgba(29, 155, 240, 0.1)" : "rgba(79, 179, 186, 0.1)";
+  const accentBorder = isInstagram ? "rgba(225, 48, 108, 0.2)" : isX ? "rgba(29, 155, 240, 0.2)" : "rgba(105, 201, 208, 0.2)";
+  const accentGlow = isInstagram ? "rgba(225, 48, 108, 0.15)" : isX ? "rgba(29, 155, 240, 0.15)" : "rgba(105, 201, 208, 0.15)";
+  const accentShadow = isInstagram ? "rgba(225, 48, 108, 0.25)" : isX ? "rgba(29, 155, 240, 0.25)" : "rgba(105, 201, 208, 0.25)";
+  const gradientBg = isInstagram ? "linear-gradient(135deg, rgb(131, 58, 180), rgb(225, 48, 108), rgb(247, 119, 55))" : isX ? "linear-gradient(135deg, rgb(20, 120, 200), rgb(29, 155, 240))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))";
   const services = isX
     ? [hasLikes && "likes", hasViews && "retweets"].filter(Boolean).join(" + ")
     : [hasLikes && "likes", hasViews && "vues"].filter(Boolean).join(" + ");
@@ -211,7 +212,7 @@ export default function PostPicker({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: isX ? "rgba(29, 155, 240, 0.05)" : "rgba(79, 179, 186, 0.05)",
+                      backgroundColor: isInstagram ? "rgba(225, 48, 108, 0.05)" : isX ? "rgba(29, 155, 240, 0.05)" : "rgba(79, 179, 186, 0.05)",
                       opacity: isOn ? 1 : 0.5,
                     }}
                   >

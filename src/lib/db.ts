@@ -43,6 +43,7 @@ export async function initDb() {
   await sql`ALTER TABLE pricing ADD COLUMN IF NOT EXISTS price_chf NUMERIC(8,2) DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'eur'`;
   await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS name_en VARCHAR(100) DEFAULT ''`;
+  await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS platform VARCHAR(20) DEFAULT 'tiktok'`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cost_cents INTEGER DEFAULT 0`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS smm_orders JSONB DEFAULT '[]'`;
 
@@ -408,7 +409,10 @@ export async function addLoyaltyPoints(email: string, points: number) {
 
 // ── Combo Packs ──
 
-export async function getActiveCombos() {
+export async function getActiveCombos(platform?: string) {
+  if (platform) {
+    return await sql`SELECT * FROM combo_packs WHERE active = true AND platform = ${platform} ORDER BY created_at DESC`;
+  }
   return await sql`SELECT * FROM combo_packs WHERE active = true ORDER BY created_at DESC`;
 }
 
@@ -416,21 +420,22 @@ export async function getAllCombos() {
   return await sql`SELECT * FROM combo_packs ORDER BY created_at DESC`;
 }
 
-export async function createCombo(params: { name: string; nameEn?: string; items: unknown; discountPercent: number }) {
+export async function createCombo(params: { name: string; nameEn?: string; items: unknown; discountPercent: number; platform?: string }) {
   const result = await sql`
-    INSERT INTO combo_packs (name, name_en, items, discount_percent)
-    VALUES (${params.name}, ${params.nameEn || ''}, ${JSON.stringify(params.items)}, ${params.discountPercent})
+    INSERT INTO combo_packs (name, name_en, items, discount_percent, platform)
+    VALUES (${params.name}, ${params.nameEn || ''}, ${JSON.stringify(params.items)}, ${params.discountPercent}, ${params.platform || 'tiktok'})
     RETURNING id
   `;
   return result[0].id;
 }
 
-export async function updateCombo(id: number, params: { name?: string; nameEn?: string; items?: unknown; discountPercent?: number; active?: boolean }) {
+export async function updateCombo(id: number, params: { name?: string; nameEn?: string; items?: unknown; discountPercent?: number; active?: boolean; platform?: string }) {
   if (params.name !== undefined) await sql`UPDATE combo_packs SET name = ${params.name} WHERE id = ${id}`;
   if (params.nameEn !== undefined) await sql`UPDATE combo_packs SET name_en = ${params.nameEn} WHERE id = ${id}`;
   if (params.items !== undefined) await sql`UPDATE combo_packs SET items = ${JSON.stringify(params.items)} WHERE id = ${id}`;
   if (params.discountPercent !== undefined) await sql`UPDATE combo_packs SET discount_percent = ${params.discountPercent} WHERE id = ${id}`;
   if (params.active !== undefined) await sql`UPDATE combo_packs SET active = ${params.active} WHERE id = ${id}`;
+  if (params.platform !== undefined) await sql`UPDATE combo_packs SET platform = ${params.platform} WHERE id = ${id}`;
 }
 
 export async function deleteCombo(id: number) {
