@@ -25,6 +25,15 @@ interface OrderData {
   currency?: string;
 }
 
+const PLATFORM_COLORS: Record<string, { accent: string; dim: string; bg: string; border: string; gradient: string; textOnGrad: string; glow: string }> = {
+  youtube:   { accent: "rgb(255,0,0)",     dim: "rgb(204,0,0)",     bg: "rgba(255,0,0,0.1)",       border: "rgba(255,0,0,0.15)",       gradient: "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))",             textOnGrad: "#fff", glow: "rgba(255,0,0,0.25)" },
+  instagram: { accent: "#E1306C",          dim: "#C1358C",          bg: "rgba(225,48,108,0.1)",     border: "rgba(225,48,108,0.15)",     gradient: "linear-gradient(135deg, #833AB4, #E1306C, #F77737)",              textOnGrad: "#fff", glow: "rgba(225,48,108,0.25)" },
+  tiktok:    { accent: "rgb(105,201,208)", dim: "rgb(79,179,186)",  bg: "rgba(105,201,208,0.1)",    border: "rgba(105,201,208,0.15)",    gradient: "linear-gradient(135deg, rgb(79,179,186), rgb(105,201,208))",      textOnGrad: "#000", glow: "rgba(105,201,208,0.25)" },
+  x:         { accent: "#1D9BF0",          dim: "#1A8CD8",          bg: "rgba(29,155,240,0.1)",     border: "rgba(29,155,240,0.15)",     gradient: "linear-gradient(135deg, #1A8CD8, #1D9BF0)",                      textOnGrad: "#fff", glow: "rgba(29,155,240,0.25)" },
+  twitch:    { accent: "rgb(145,71,255)",  dim: "rgb(110,50,200)",  bg: "rgba(145,71,255,0.1)",     border: "rgba(145,71,255,0.15)",     gradient: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))",       textOnGrad: "#fff", glow: "rgba(145,71,255,0.25)" },
+  spotify:   { accent: "rgb(29,185,84)",   dim: "rgb(22,140,63)",   bg: "rgba(29,185,84,0.1)",      border: "rgba(29,185,84,0.15)",      gradient: "linear-gradient(135deg, rgb(22,140,63), rgb(30,215,96))",         textOnGrad: "#000", glow: "rgba(29,185,84,0.25)" },
+};
+
 function fmtQty(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
   if (n >= 1000) return (n / 1000) + "K";
@@ -81,8 +90,9 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
       .finally(() => setScanning(false));
   }, [order]);
 
-  const green = "rgb(105, 201, 208)";
-  const greenDim = "rgb(79, 179, 186)";
+  const pc = PLATFORM_COLORS[order?.platform || "tiktok"] || PLATFORM_COLORS.tiktok;
+  const green = pc.accent;
+  const greenDim = pc.dim;
 
   if (error) {
     return (
@@ -90,7 +100,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
         <div style={{ textAlign: "center", padding: "32px" }}>
           <p style={{ fontSize: "40px", marginBottom: "16px" }}>😕</p>
           <p style={{ fontSize: "16px", color: "#ef4444", fontWeight: 600 }}>{error}</p>
-          <a href={href("/")} style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", color: greenDim, textDecoration: "underline" }}>{t("orders.backHome")}</a>
+          <a href={href("/")} style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", color: pc.dim, textDecoration: "underline" }}>{t("orders.backHome")}</a>
         </div>
       </div>
     );
@@ -99,12 +109,21 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
   if (!order) {
     return (
       <div style={{ minHeight: "100vh", background: "#050505", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: "32px", height: "32px", border: "3px solid rgba(105,201,208,0.2)", borderTopColor: greenDim, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <div style={{ width: "32px", height: "32px", border: `3px solid ${pc.border}`, borderTopColor: pc.dim, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
       </div>
     );
   }
 
   const stepIndex = getStepIndex(order.status);
+
+  // Derive timestamps for each timeline step
+  const fmtTime = (iso: string) => new Date(iso).toLocaleString(LANG_LOCALE[lang], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const stepTimestamps: (string | null)[] = [
+    order.createdAt ? fmtTime(order.createdAt) : null,  // pending/received
+    order.createdAt ? fmtTime(order.createdAt) : null,  // paid (same as created)
+    stepIndex >= 2 && order.createdAt ? fmtTime(order.createdAt) : null, // processing — approximated
+    order.deliveredAt ? fmtTime(order.deliveredAt) : null, // delivered
+  ];
   const gain = followersNow !== null && order.followersBefore > 0
     ? followersNow - order.followersBefore
     : null;
@@ -124,7 +143,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         {/* Status bar */}
-        <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "#0e1512", border: `1px solid ${pc.border}`, borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", position: "relative", marginBottom: "16px" }}>
             {/* Progress line */}
             <div style={{ position: "absolute", top: "14px", left: "16px", right: "16px", height: "2px", background: "rgba(255,255,255,0.06)" }} />
@@ -140,18 +159,23 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
                     background: active ? green : "rgba(255,255,255,0.06)",
                     border: current ? `2px solid ${green}` : "2px solid transparent",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: current ? `0 0 12px rgba(105,201,208,0.3)` : "none",
+                    boxShadow: current ? `0 0 12px ${pc.glow}` : "none",
                     transition: "all 0.3s",
                   }}>
                     {active && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={pc.textOnGrad} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     )}
                   </div>
-                  <span style={{ marginTop: "8px", fontSize: "10px", fontWeight: 600, color: active ? green : "rgb(107,117,111)", textAlign: "center", whiteSpace: "nowrap" }}>
+                  <span style={{ marginTop: "6px", fontSize: "10px", fontWeight: 600, color: active ? green : "rgb(107,117,111)", textAlign: "center", whiteSpace: "nowrap" }}>
                     {step.label}
                   </span>
+                  {stepTimestamps[i] && (
+                    <span style={{ marginTop: "2px", fontSize: "9px", color: "rgb(107,117,111)", textAlign: "center", whiteSpace: "nowrap" }}>
+                      {stepTimestamps[i]}
+                    </span>
+                  )}
                 </div>
               );
             })}
@@ -175,7 +199,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Before/After card */}
         {order.followersBefore > 0 && (
-          <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+          <div style={{ background: "#0e1512", border: `1px solid ${pc.border}`, borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <p style={{ margin: "0 0 16px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center" }}>
               📊 {t("orderDetail.evolution")} @{order.username}
             </p>
@@ -219,7 +243,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
 
             {/* Gain bar */}
             {gain !== null && gain > 0 && (
-              <div style={{ marginTop: "16px", padding: "12px", background: "rgba(105,201,208,0.06)", borderRadius: "10px", textAlign: "center" }}>
+              <div style={{ marginTop: "16px", padding: "12px", background: pc.bg, borderRadius: "10px", textAlign: "center" }}>
                 <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>+{fmtQty(gain)} {t("orderDetail.followers")}</span>
                 <span style={{ fontSize: "12px", color: "rgb(169,181,174)", marginLeft: "8px" }}>(+{gainPercent}%)</span>
               </div>
@@ -229,7 +253,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Per-service live status */}
         {order.smmStatuses && order.smmStatuses.length > 0 && (
-          <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+          <div style={{ background: "#0e1512", border: `1px solid ${pc.border}`, borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <p style={{ margin: "0 0 12px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               {t("orderDetail.serviceStatus")}
             </p>
@@ -255,7 +279,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
         )}
 
         {/* Cart recap */}
-        <div style={{ background: "#0e1512", border: "1px solid rgba(105,201,208,0.15)", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "#0e1512", border: `1px solid ${pc.border}`, borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
           <p style={{ margin: "0 0 12px 0", fontSize: "12px", fontWeight: 600, color: "rgb(169,181,174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("orderDetail.orderDetail")}
           </p>
@@ -272,7 +296,7 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
               )}
             </div>
           ))}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(105,201,208,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px", paddingTop: "12px", borderTop: `1px solid ${pc.border}` }}>
             <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{t("service.total")}</span>
             <span style={{ fontSize: "16px", fontWeight: 700, color: green }}>{fmtPrice(order.totalCents / 100, (order.currency || "eur") as Currency)}</span>
           </div>
@@ -289,9 +313,9 @@ function OrderPageInner({ params }: { params: Promise<{ id: string }> }) {
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "14px 32px", borderRadius: "14px", border: "none",
               fontWeight: 700, fontSize: "15px", fontFamily: "inherit",
-              color: "#000", textDecoration: "none",
-              background: "linear-gradient(135deg, rgb(79,179,186), rgb(105,201,208))",
-              boxShadow: "0 10px 30px rgba(105,201,208,0.25)",
+              color: pc.textOnGrad, textDecoration: "none",
+              background: pc.gradient,
+              boxShadow: `0 10px 30px ${pc.glow}`,
             }}
           >
             🚀 {t("orderDetail.relaunchBoost")}

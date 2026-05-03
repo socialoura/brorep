@@ -1,6 +1,7 @@
 "use client";
 
-import { useTranslation } from "@/lib/i18n";
+import { useState, useEffect } from "react";
+import { useTranslation, LANG_LOCALE } from "@/lib/i18n";
 
 const avatars = [
   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face",
@@ -19,9 +20,38 @@ const avatarStyle: React.CSSProperties = {
   boxShadow: "0 0 8px rgba(0, 0, 0, 0.5)",
 };
 
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+function pseudoRand(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
 export default function SocialProof({ variant = "default" }: { variant?: "default" | "youtube" }) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const isYt = variant === "youtube";
+
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const now = new Date();
+    const dayKey = `social-${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}`;
+    const seed = hashStr(dayKey);
+    const hour = now.getHours() + now.getMinutes() / 60;
+    const ramp = 0.3 + 0.7 * Math.min(1, hour / 22);
+    const base = 11000 + Math.floor(3000 * ramp * (0.85 + 0.3 * pseudoRand(seed)));
+    setCount(base);
+  }, []);
+
+  const formatted = count !== null ? `+${count.toLocaleString(LANG_LOCALE[lang])}` : "+12 000";
+
   return (
     <div
       style={{
@@ -63,7 +93,7 @@ export default function SocialProof({ variant = "default" }: { variant?: "defaul
             lineHeight: 1.4,
           }}
         >
-          +12 955{" "}
+          {formatted}{" "}
           <span style={{ fontWeight: 400, color: "rgb(169, 181, 174)" }}>
             {isYt ? t("social.videosAnalyzed") : t("social.profilesAnalyzed")}
           </span>

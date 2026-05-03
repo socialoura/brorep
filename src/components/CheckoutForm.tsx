@@ -6,6 +6,7 @@ import { useTranslation, fmtPrice } from "@/lib/i18n";
 import type { Currency } from "@/lib/i18n";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, ExpressCheckoutElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import Image from "next/image";
 import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import posthog from "posthog-js";
 import type { CartItem } from "@/components/ServiceSelect";
@@ -27,7 +28,11 @@ function priceFor(item: CartItem, c: Currency): number {
   return Number(v) || 0;
 }
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+let _stripePromise: ReturnType<typeof loadStripe> | null = null;
+function getStripe() {
+  if (!_stripePromise) _stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+  return _stripePromise;
+}
 
 function themeFor(platform?: string) {
   if (platform === "spotify") return {
@@ -295,8 +300,7 @@ function ExpressCheckout({ email, onSuccess, platform }: { email: string; onSucc
 function TrustBadges() {
   return (
     <div style={{ marginBottom: "20px" }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/badges_paiement.png" alt="Visa, Mastercard, American Express, PayPal" style={{ display: "block", margin: "0 auto", maxWidth: "240px", width: "100%", opacity: 0.7 }} />
+      <Image src="/badges_paiement.png" alt="Visa, Mastercard, American Express, PayPal" width={240} height={40} style={{ display: "block", margin: "0 auto", maxWidth: "240px", width: "100%", height: "auto", opacity: 0.7 }} loading="lazy" />
     </div>
   );
 }
@@ -834,7 +838,7 @@ export default function CheckoutForm({
       </h2>
       <Elements
         key={intentKey}
-        stripe={stripePromise}
+        stripe={getStripe()}
         options={{
           clientSecret,
           appearance: {

@@ -22,15 +22,15 @@ function getTheme(pathname: string) {
     gradient: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))", text: "#fff",
     glow: "0 4px 20px rgba(145,71,255,0.3)",
   };
-  if (pathname.startsWith("/instagram")) return {
-    accent: "rgb(225,48,108)", bg: "rgba(225,48,108,0.08)", border: "rgba(225,48,108,0.25)",
-    gradient: "linear-gradient(135deg, rgb(131,58,180), rgb(225,48,108), rgb(247,119,55))", text: "#fff",
-    glow: "0 4px 20px rgba(225,48,108,0.3)",
-  };
-  if (pathname === "/" || pathname.startsWith("/tiktok")) return {
+  if (pathname.startsWith("/tiktok")) return {
     accent: "rgb(105,201,208)", bg: "rgba(79,179,186,0.08)", border: "rgba(105,201,208,0.25)",
     gradient: "linear-gradient(135deg, rgb(79,179,186), rgb(105,201,208))", text: "#000",
     glow: "0 4px 20px rgba(105,201,208,0.3)",
+  };
+  if (pathname === "/" || pathname.startsWith("/instagram")) return {
+    accent: "rgb(225,48,108)", bg: "rgba(225,48,108,0.08)", border: "rgba(225,48,108,0.25)",
+    gradient: "linear-gradient(135deg, rgb(131,58,180), rgb(225,48,108), rgb(247,119,55))", text: "#fff",
+    glow: "0 4px 20px rgba(225,48,108,0.3)",
   };
   // youtube or other
   return {

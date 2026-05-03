@@ -345,6 +345,7 @@ export default function ServiceSelect({
   const [services, setServices] = useState<Services>(DEFAULT_SERVICES as Services);
   const [pricingLoaded, setPricingLoaded] = useState(false);
   const [toast, setToast] = useState<{ message: string; cta: string; targetTab: ServiceType } | null>(null);
+  const [stickyCartOpen, setStickyCartOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showCombos = true;
@@ -565,6 +566,7 @@ export default function ServiceSelect({
 
   return (
     <div
+      className="service-container-desktop"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -692,6 +694,7 @@ export default function ServiceSelect({
             return (
               <button
                 key={i}
+                className="pack-card"
                 onClick={() => togglePack(i)}
                 style={{
                   position: "relative",
@@ -706,7 +709,6 @@ export default function ServiceSelect({
                   border: isSelected ? `2px solid ${accent}` : `1px solid ${accentBorder}`,
                   backgroundColor: isSelected ? (isYouTube ? "rgba(255, 0, 0, 0.1)" : "rgba(79, 179, 186, 0.1)") : "rgba(255, 255, 255, 0.02)",
                   boxShadow: isSelected ? (isYouTube ? "0 0 20px rgba(255,0,0,0.1), inset 0 0 20px rgba(255,0,0,0.05)" : "0 0 20px rgba(105, 201, 208, 0.1), inset 0 0 20px rgba(79, 179, 186, 0.05)") : "none",
-                  transition: "all 0.2s",
                 }}
               >
                 {pack.popular && (
@@ -1218,7 +1220,7 @@ export default function ServiceSelect({
         document.body
       )}
 
-      {/* Fixed bottom cart bar — always visible */}
+      {/* Fixed bottom cart bar — always visible, expandable */}
       {typeof window !== "undefined" && ReactDOM.createPortal(
         <div
           style={{
@@ -1226,41 +1228,80 @@ export default function ServiceSelect({
             bottom: 0,
             left: 0,
             right: 0,
-            padding: "10px 16px",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
             background: "linear-gradient(180deg, rgba(5,10,12,0.97), rgba(3,7,8,1))",
             borderTop: `1px solid ${accentBorder}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            zIndex: 9999,
             backdropFilter: "blur(16px)",
+            transition: "all 0.3s ease",
           }}
         >
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{cart.length > 0 ? `${cart.length} ${cart.length > 1 ? "articles" : "article"}` : t("service.emptyCart")}</span>
-              {cart.length > 0 && <span style={{ fontSize: "15px", fontWeight: 700, color: accent, marginLeft: "8px" }}>{fmtPrice(total, currency)}</span>}
+          {/* Expandable cart detail — only when items exist and bar is tapped */}
+          {cart.length > 0 && stickyCartOpen && (
+            <div style={{ padding: "12px 16px 0", maxHeight: "180px", overflowY: "auto" }}>
+              {cart.map((item, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: i < cart.length - 1 ? `1px solid ${accentBorder}` : "none" }}>
+                  <span style={{ fontSize: "12px", color: "rgb(232,247,237)" }}>
+                    {fmtQty(item.qty)} {item.label}
+                  </span>
+                  <span style={{ fontSize: "12px", fontWeight: 600, color: accentMid }}>
+                    {fmtPrice(priceForCurrency(item, currency), currency)}
+                  </span>
+                </div>
+              ))}
+              {hasMultiDiscount && (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#00d26a" }}>Combo -10%</span>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#00d26a" }}>-{fmtPrice(totalBeforeDiscount - total, currency)}</span>
+                </div>
+              )}
             </div>
+          )}
+
+          {/* Main bar row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px" }}>
+            <button
+              type="button"
+              onClick={() => cart.length > 0 && setStickyCartOpen((v) => !v)}
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                background: "none", border: "none", cursor: cart.length > 0 ? "pointer" : "default",
+                padding: 0, minWidth: 0, flex: 1, fontFamily: "inherit",
+              }}
+            >
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>
+                {cart.length > 0 ? `${cart.length} ${cart.length > 1 ? "articles" : "article"}` : t("service.emptyCart")}
+              </span>
+              {cart.length > 0 && (
+                <>
+                  <span style={{ fontSize: "15px", fontWeight: 700, color: accent }}>{fmtPrice(total, currency)}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgb(107,117,111)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: stickyCartOpen ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}>
+                    <polyline points="18 15 12 9 6 15" />
+                  </svg>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleCheckoutClick}
+              disabled={!hasItems}
+              style={{
+                padding: "10px 24px",
+                borderRadius: "10px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "13px",
+                fontFamily: "inherit",
+                color: isYouTube ? "#fff" : "#000",
+                background: gradientBg,
+                opacity: hasItems ? 1 : 0.5,
+                flexShrink: 0,
+              }}
+            >
+              {t("service.checkout")} &rarr;
+            </button>
           </div>
-          <button
-            onClick={handleCheckoutClick}
-            disabled={!hasItems}
-            style={{
-              padding: "10px 24px",
-              borderRadius: "10px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: 700,
-              fontSize: "13px",
-              fontFamily: "inherit",
-              color: isYouTube ? "#fff" : "#000",
-              background: gradientBg,
-              opacity: hasItems ? 1 : 0.5,
-              flexShrink: 0,
-            }}
-          >
-            {t("service.checkout")} &rarr;
-          </button>
         </div>,
         document.body
       )}

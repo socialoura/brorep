@@ -12,7 +12,7 @@ export async function GET() {
       WHERE u.active = true
       ORDER BY u.sort_order, u.id
     `;
-    return NextResponse.json({ upsells: rows });
+    return NextResponse.json({ upsells: rows }, { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" } });
   } catch (err) {
     console.error("Upsells API error:", err);
     return NextResponse.json({ upsells: [] });

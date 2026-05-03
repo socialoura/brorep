@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import Image from "next/image";
 import { usePostHog } from "posthog-js/react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import CheckoutForm from "@/components/CheckoutForm";
@@ -216,7 +217,7 @@ function SpotifyPageInner() {
               onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.7"; }}
               title="Retour"
             >
-              <img src="/logo-green.png" alt="Fanovaly" style={{ height: "48px", objectFit: "contain" }} />
+              <Image src="/logo-green.png" alt="Fanovaly" width={120} height={48} style={{ height: "48px", width: "auto", objectFit: "contain" }} />
             </button>
           )}
           <div key={step} className="step-fade-in" style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -555,7 +556,7 @@ function SpotifyPageInner() {
 
           {/* Right: visual */}
           <div className="sp-hero-visual">
-            <img src="/logo-green.png" alt="Fanovaly" className="sp-hero-logo" />
+            <Image src="/logo-green.png" alt="Fanovaly" width={260} height={192} className="sp-hero-logo" priority />
 
             {/* Social proof */}
             <div style={{

@@ -68,7 +68,7 @@ export default function LiveSchedule({
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: "440px", padding: "0 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 14px", borderRadius: "12px", backgroundColor: accentBg, border: `1px solid ${accentBorder}`, marginBottom: "20px" }}>
         {profile.avatarUrl && (
-          <img src={profile.avatarUrl} alt={profile.username} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentBorderStrong}` }} />
+          <img src={profile.avatarUrl} alt={profile.username} width={32} height={32} loading="lazy" style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentBorderStrong}` }} />
         )}
         <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#fff" }}>@{profile.username}</p>
       </div>

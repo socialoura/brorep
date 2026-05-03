@@ -48,6 +48,17 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "cta.launch": { fr: "Lancer ma croissance →", en: "Start my growth →", es: "Impulsar mi crecimiento →", pt: "Iniciar meu crescimento →", de: "Mein Wachstum starten →" },
   "cta.from": { fr: "à partir de", en: "from", es: "desde", pt: "a partir de", de: "ab" },
 
+  // ===== Testimonials =====
+  "testimonials.title": { fr: "Ils nous font confiance", en: "They trust us", es: "Confían en nosotros", pt: "Eles confiam em nós", de: "Sie vertrauen uns" },
+  "testimonials.t1": { fr: "J'ai gagné 2 400 followers en 3 jours. Mon taux d'engagement a explosé et j'ai même eu des propositions de collab.", en: "I gained 2,400 followers in 3 days. My engagement rate skyrocketed and I even got collab offers.", es: "Gané 2.400 seguidores en 3 días. Mi tasa de engagement se disparó y hasta recibí propuestas de colaboración.", pt: "Ganhei 2.400 seguidores em 3 dias. Minha taxa de engajamento disparou e até recebi propostas de collab.", de: "Ich habe in 3 Tagen 2.400 Follower gewonnen. Meine Engagement-Rate ist explodiert und ich habe sogar Collab-Anfragen bekommen." },
+  "testimonials.t2": { fr: "Service ultra rapide, mes likes sont arrivés en moins de 10 min. Je recommande à 100%, c'est le meilleur site que j'ai testé.", en: "Ultra fast service, my likes arrived in less than 10 min. I recommend 100%, it's the best site I've tried.", es: "Servicio ultra rápido, mis likes llegaron en menos de 10 min. Recomiendo al 100%, es el mejor sitio que he probado.", pt: "Serviço ultra rápido, meus likes chegaram em menos de 10 min. Recomendo 100%, é o melhor site que testei.", de: "Ultra schneller Service, meine Likes kamen in weniger als 10 Min. Ich empfehle es zu 100%, die beste Seite, die ich getestet habe." },
+  "testimonials.t3": { fr: "J'avais peur au début mais tout est arrivé naturellement. Mon compte a pris un vrai boost et mes reels ont beaucoup plus de portée.", en: "I was scared at first but everything arrived naturally. My account got a real boost and my reels have much more reach.", es: "Tenía miedo al principio pero todo llegó de forma natural. Mi cuenta tuvo un verdadero impulso y mis reels tienen mucho más alcance.", pt: "Tinha medo no início mas tudo chegou naturalmente. Minha conta teve um verdadeiro impulso e meus reels têm muito mais alcance.", de: "Ich hatte anfangs Angst, aber alles kam natürlich an. Mein Account hat einen echten Boost bekommen und meine Reels haben viel mehr Reichweite." },
+
+  // ===== Guarantee Badges =====
+  "guarantee.fast": { fr: "Livraison en 10 min", en: "Delivery in 10 min", es: "Entrega en 10 min", pt: "Entrega em 10 min", de: "Lieferung in 10 Min" },
+  "guarantee.secure": { fr: "Paiement 100% sécurisé", en: "100% secure payment", es: "Pago 100% seguro", pt: "Pagamento 100% seguro", de: "100% sichere Zahlung" },
+  "guarantee.support": { fr: "Support 7j/7", en: "24/7 support", es: "Soporte 24/7", pt: "Suporte 24/7", de: "24/7-Support" },
+
   // ===== SocialProof =====
   "social.profilesAnalyzed": { fr: "packs vendus", en: "packs sold", es: "packs vendidos", pt: "packs vendidos", de: "Pakete verkauft" },
   "social.videosAnalyzed": { fr: "vidéos analysées", en: "videos analyzed", es: "videos analizados", pt: "vídeos analisados", de: "Videos analysiert" },
@@ -87,11 +98,11 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   // ===== Progress Steps =====
   "progress.platform": { fr: "Plateforme", en: "Platform", es: "Plataforma", pt: "Plataforma", de: "Plattform" },
   "progress.profile": { fr: "Profil", en: "Profile", es: "Perfil", pt: "Perfil", de: "Profil" },
-  "progress.services": { fr: "Services", en: "Services", es: "Servicios", pt: "Serviços", de: "Dienste" },
+  "progress.services": { fr: "Services", en: "Services", es: "Servicios", pt: "Serviços", de: "Services" },
   "progress.payment": { fr: "Paiement", en: "Payment", es: "Pago", pt: "Pagamento", de: "Zahlung" },
 
   // ===== PlatformSelect =====
-  "platform.title1": { fr: "Où veux-tu booster ta", en: "Where do you want to boost your", es: "¿Dónde quieres impulsar tu", pt: "Onde você quer impulsionar seu", de: "Wo willst du dein" },
+  "platform.title1": { fr: "Où veux-tu booster ta", en: "Where do you want to boost your", es: "¿Dónde quieres impulsar tu", pt: "Onde você quer impulsionar seu", de: "Wo möchtest du dein" },
   "platform.title2": { fr: "croissance", en: "growth", es: "crecimiento", pt: "crescimento", de: "Wachstum boosten" },
   "platform.subtitle": { fr: "Sélectionne la plateforme sur laquelle tu veux progresser", en: "Select the platform where you want to grow", es: "Selecciona la plataforma donde quieres crecer", pt: "Selecione a plataforma onde quer crescer", de: "Wähle die Plattform, auf der du wachsen willst" },
   "platform.popular": { fr: "Populaire", en: "Popular", es: "Popular", pt: "Popular", de: "Beliebt" },
@@ -132,9 +143,9 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "profile.goBack": { fr: "Non, revenir en arrière", en: "No, go back", es: "No, volver atrás", pt: "Não, voltar", de: "Nein, zurück" },
 
   // ===== ServiceSelect =====
-  "service.composeTitle": { fr: "Compose ton", en: "Build your", es: "Arma tu", pt: "Monte seu", de: "Stelle dein" },
+  "service.composeTitle": { fr: "Compose ton", en: "Build your", es: "Arma tu", pt: "Monte seu", de: "Stell dir dein" },
   "service.pack": { fr: "pack", en: "pack", es: "pack", pt: "pacote", de: "Paket" },
-  "service.composeSubtitle": { fr: "Choisis dans chaque catégorie — ou prends un combo", en: "Choose from each category — or pick a combo", es: "Elige en cada categoría — o toma un combo", pt: "Escolha em cada categoria — ou pegue um combo", de: "Wähle aus jeder Kategorie — oder nimm ein Combo" },
+  "service.composeSubtitle": { fr: "Choisis dans chaque catégorie — ou prends un combo", en: "Choose from each category — or pick a combo", es: "Elige en cada categoría — o toma un combo", pt: "Escolha em cada categoria — ou pegue um combo", de: "Wähle aus jeder Kategorie — oder nimm ein Kombi-Paket" },
   "service.combosSoon": { fr: "Nos packs combo arrivent bientôt !", en: "Combo packs coming soon!", es: "¡Nuestros combos llegan pronto!", pt: "Nossos combos chegam em breve!", de: "Unsere Combo-Pakete kommen bald!" },
   "service.orCompose": { fr: "ou compose toi-même", en: "or build your own", es: "o arma el tuyo", pt: "ou monte o seu", de: "oder stelle dein eigenes zusammen" },
   "service.top": { fr: "Top", en: "Top", es: "Top", pt: "Top", de: "Top" },
@@ -144,16 +155,16 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "service.emptyCart": { fr: "Choisis un pack", en: "Pick a pack", es: "Elige un pack", pt: "Escolha um pacote", de: "Wähle ein Paket" },
   "service.boostTip": { fr: "Booste tes résultats en combinant :", en: "Boost your results by combining:", es: "Potencia tus resultados combinando:", pt: "Potencialize seus resultados combinando:", de: "Verstärke deine Ergebnisse durch Kombination:" },
   "service.addAlso": { fr: "Ajoute aussi des", en: "Also add", es: "Agrega también", pt: "Adicione também", de: "Füge auch hinzu" },
-  "service.discountHint": { fr: "-10% automatique en ajoutant 2 services ou plus", en: "-10% automatic when adding 2+ services", es: "-10% automático al agregar 2+ servicios", pt: "-10% automático ao adicionar 2+ serviços", de: "-10% automatisch bei 2+ Diensten" },
-  "service.discountApplied": { fr: "-10% appliqué ! Tu combines 2+ services", en: "-10% applied! You're combining 2+ services", es: "¡-10% aplicado! Combinas 2+ servicios", pt: "-10% aplicado! Você combina 2+ serviços", de: "-10% angewendet! Du kombinierst 2+ Dienste" },
-  "service.toastMsg": { fr: "Les profils qui combinent avec des {service} grandissent 2x plus vite — et c'est -10% auto !", en: "Profiles that combine with {service} grow 2x faster — and it's -10% auto!", es: "Los perfiles que combinan con {service} crecen 2x más rápido — ¡y es -10% auto!", pt: "Perfis que combinam com {service} crescem 2x mais rápido — e é -10% auto!", de: "Profile, die mit {service} kombinieren, wachsen 2x schneller — und es gibt -10% automatisch!" },
+  "service.discountHint": { fr: "-10% automatique en ajoutant 2 services ou plus", en: "-10% automatic when adding 2+ services", es: "-10% automático al agregar 2+ servicios", pt: "-10% automático ao adicionar 2+ serviços", de: "-10% automatisch ab 2 Services" },
+  "service.discountApplied": { fr: "-10% appliqué ! Tu combines 2+ services", en: "-10% applied! You're combining 2+ services", es: "¡-10% aplicado! Combinas 2+ servicios", pt: "-10% aplicado! Você combina 2+ serviços", de: "-10% angewendet! Du kombinierst 2+ Services" },
+  "service.toastMsg": { fr: "Les profils qui combinent avec des {service} grandissent 2x plus vite — et c'est -10% auto !", en: "Profiles that combine with {service} grow 2x faster — and it's -10% auto!", es: "Los perfiles que combinan con {service} crecen 2x más rápido — ¡y es -10% auto!", pt: "Perfis que combinam com {service} crescem 2x mais rápido — e é -10% auto!", de: "Profile mit {service} wachsen 2x schneller — plus -10% automatisch!" },
   "service.toastCta": { fr: "Voir les", en: "See", es: "Ver", pt: "Ver", de: "Anzeigen" },
   "service.usernameRequired": { fr: "Entre ton @username pour continuer", en: "Enter your @username to continue", es: "Ingresa tu @usuario para continuar", pt: "Digite seu @usuário para continuar", de: "Gib deinen @Benutzernamen ein, um fortzufahren" },
   "service.selectAtLeast": { fr: "Sélectionne au moins un pack", en: "Select at least one pack", es: "Selecciona al menos un pack", pt: "Selecione pelo menos um pacote", de: "Wähle mindestens ein Paket" },
   "service.backToProfile": { fr: "Retour", en: "Back", es: "Volver", pt: "Voltar", de: "Zurück" },
   "service.usernamePlaceholder": { fr: "Ton nom d'utilisateur", en: "Your username", es: "Tu nombre de usuario", pt: "Seu nome de usuário", de: "Dein Benutzername" },
-  "service.usernameLabel": { fr: "Compte à booster", en: "Account to boost", es: "Cuenta a impulsar", pt: "Conta para impulsionar", de: "Konto zum Boosten" },
-  "service.igPublicHint": { fr: "⚠️ Ton compte Instagram doit être public", en: "⚠️ Your Instagram account must be public", es: "⚠️ Tu cuenta de Instagram debe ser pública", pt: "⚠️ Sua conta do Instagram deve ser pública", de: "⚠️ Dein Instagram-Konto muss öffentlich sein" },
+  "service.usernameLabel": { fr: "Compte à booster", en: "Account to boost", es: "Cuenta a impulsar", pt: "Conta para impulsionar", de: "Profil zum Boosten" },
+  "service.igPublicHint": { fr: "⚠️ Ton compte Instagram doit être public", en: "⚠️ Your Instagram account must be public", es: "⚠️ Tu cuenta de Instagram debe ser pública", pt: "⚠️ Sua conta do Instagram deve ser pública", de: "⚠️ Dein Instagram-Profil muss öffentlich sein" },
   "service.youtubeUrlLabel": { fr: "Vidéo YouTube à booster", en: "YouTube video to boost", es: "Video de YouTube a impulsar", pt: "Vídeo do YouTube para impulsionar", de: "YouTube-Video zum Boosten" },
   "service.youtubeUrlPlaceholder": { fr: "Colle l'URL de ta vidéo YouTube", en: "Paste your YouTube video URL", es: "Pega la URL de tu video de YouTube", pt: "Cole a URL do seu vídeo do YouTube", de: "Füge die URL deines YouTube-Videos ein" },
   "service.youtubeUrlInvalid": { fr: "Lien invalide ou vidéo introuvable", en: "Invalid link or video not found", es: "Enlace inválido o video no encontrado", pt: "Link inválido ou vídeo não encontrado", de: "Ungültiger Link oder Video nicht gefunden" },
@@ -164,8 +175,8 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "service.trustNoPassword": { fr: "Sans mot de passe", en: "No password needed", es: "Sin contraseña", pt: "Sem senha", de: "Kein Passwort nötig" },
   "service.guarantee": { fr: "Garanti 30j — Relivraison gratuite", en: "30-day guarantee — Free redelivery", es: "Garantía 30 días — Reenvío gratis", pt: "Garantia 30 dias — Reenvio grátis", de: "30-Tage-Garantie — Kostenlose Nachlieferung" },
   "service.aiReco": { fr: "Recommandation pour", en: "Recommendation for", es: "Recomendación para", pt: "Recomendação para", de: "Empfehlung für" },
-  "service.aiRecoFollowers": { fr: "Avec {count} followers, booste ta crédibilité avec un pack followers pour attirer plus d'engagement.", en: "With {count} followers, boost your credibility with a followers pack to attract more engagement.", es: "Con {count} seguidores, impulsa tu credibilidad con un pack de seguidores para atraer más interacciones.", pt: "Com {count} seguidores, aumente sua credibilidade com um pacote de seguidores para atrair mais engajamento.", de: "Mit {count} Followern, steigere deine Glaubwürdigkeit mit einem Follower-Paket für mehr Engagement." },
-  "service.aiRecoLikes": { fr: "Ton ratio likes/followers est faible — un boost de likes augmentera ton taux d'engagement.", en: "Your likes/followers ratio is low — a likes boost will increase your engagement rate.", es: "Tu ratio likes/seguidores es bajo — un boost de likes aumentará tu tasa de engagement.", pt: "Sua proporção likes/seguidores é baixa — um boost de likes aumentará sua taxa de engajamento.", de: "Dein Likes/Follower-Verhältnis ist niedrig — ein Likes-Boost erhöht deine Engagement-Rate." },
+  "service.aiRecoFollowers": { fr: "Avec {count} followers, booste ta crédibilité avec un pack followers pour attirer plus d'engagement.", en: "With {count} followers, boost your credibility with a followers pack to attract more engagement.", es: "Con {count} seguidores, impulsa tu credibilidad con un pack de seguidores para atraer más interacciones.", pt: "Com {count} seguidores, aumente sua credibilidade com um pacote de seguidores para atrair mais engajamento.", de: "Mit {count} Followern steigerst du deine Glaubwürdigkeit — hol dir ein Follower-Paket für mehr Engagement." },
+  "service.aiRecoLikes": { fr: "Ton ratio likes/followers est faible — un boost de likes augmentera ton taux d'engagement.", en: "Your likes/followers ratio is low — a likes boost will increase your engagement rate.", es: "Tu ratio likes/seguidores es bajo — un boost de likes aumentará tu tasa de engagement.", pt: "Sua proporção likes/seguidores é baixa — um boost de likes aumentará sua taxa de engajamento.", de: "Dein Like-Follower-Verhältnis ist niedrig — ein Like-Boost steigert deine Engagement-Rate." },
   "service.aiRecoCombo": { fr: "Ton profil est prêt pour un pack combo — followers + likes + vues pour un boost complet.", en: "Your profile is ready for a combo pack — followers + likes + views for a full boost.", es: "Tu perfil está listo para un pack combo — seguidores + likes + vistas para un impulso completo.", pt: "Seu perfil está pronto para um pacote combo — seguidores + likes + visualizações para um boost completo.", de: "Dein Profil ist bereit für ein Kombi-Paket — Follower + Likes + Views für einen kompletten Boost." },
   "service.aiRecoSelect": { fr: "Sélectionner ce pack", en: "Select this pack", es: "Seleccionar este pack", pt: "Selecionar este pacote", de: "Dieses Paket wählen" },
 
@@ -174,7 +185,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "spotify.heroTitle2": { fr: "streams", en: "streams", es: "streams", pt: "streams", de: "Streams" },
   "spotify.heroHighlight": { fr: "Spotify", en: "Spotify", es: "Spotify", pt: "Spotify", de: "Spotify" },
   "spotify.subtitle1": { fr: "Plus de streams = plus de royalties et un meilleur placement dans l'algorithme.", en: "More streams = more royalties and better algorithm placement.", es: "Más streams = más regalías y mejor posición en el algoritmo.", pt: "Mais streams = mais royalties e melhor posicionamento no algoritmo.", de: "Mehr Streams = mehr Einnahmen und bessere Platzierung im Algorithmus." },
-  "spotify.subtitle2": { fr: "Fais décoller ton morceau et commence à générer des revenus.", en: "Launch your track and start generating revenue.", es: "Haz despegar tu canción y empieza a generar ingresos.", pt: "Faça sua música decolar e comece a gerar receita.", de: "Starte deinen Track durch und verdiene Geld." },
+  "spotify.subtitle2": { fr: "Fais décoller ton morceau et commence à générer des revenus.", en: "Launch your track and start generating revenue.", es: "Haz despegar tu canción y empieza a generar ingresos.", pt: "Faça sua música decolar e comece a gerar receita.", de: "Starte deinen Track durch und generiere Einnahmen." },
   "spotify.delivery": { fr: "Livraison sous 24-72h", en: "Delivery within 24-72h", es: "Entrega en 24-72h", pt: "Entrega em 24-72h", de: "Lieferung in 24-72h" },
   "spotify.trackLabel": { fr: "Lien du morceau Spotify", en: "Spotify track link", es: "Enlace del tema en Spotify", pt: "Link da música no Spotify", de: "Spotify-Track-Link" },
   "spotify.trackPlaceholder": { fr: "https://open.spotify.com/track/...", en: "https://open.spotify.com/track/...", es: "https://open.spotify.com/track/...", pt: "https://open.spotify.com/track/...", de: "https://open.spotify.com/track/..." },
@@ -254,8 +265,8 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "checkout.trustSecure": { fr: "Paiement 100% sécurisé", en: "100% secure payment", es: "Pago 100% seguro", pt: "Pagamento 100% seguro", de: "100% sichere Zahlung" },
   "checkout.trustDelivery": { fr: "Livraison sous 24h", en: "Delivery within 24h", es: "Entrega en 24h", pt: "Entrega em 24h", de: "Lieferung in 24h" },
   "checkout.trustGuarantee": { fr: "Satisfait ou remboursé", en: "Satisfaction guaranteed", es: "Satisfecho o reembolsado", pt: "Satisfeito ou reembolsado", de: "Zufrieden oder Geld zurück" },
-  "checkout.trustSupport": { fr: "Support 7j/7", en: "24/7 support", es: "Soporte 24/7", pt: "Suporte 24/7", de: "24/7 Support" },
-  "checkout.urgencyOffer": { fr: "Offre spéciale expire dans", en: "Special offer expires in", es: "Oferta especial expira en", pt: "Oferta especial expira em", de: "Sonderangebot läuft ab in" },
+  "checkout.trustSupport": { fr: "Support 7j/7", en: "24/7 support", es: "Soporte 24/7", pt: "Suporte 24/7", de: "Support rund um die Uhr" },
+  "checkout.urgencyOffer": { fr: "Offre spéciale expire dans", en: "Special offer expires in", es: "Oferta especial expira en", pt: "Oferta especial expira em", de: "Sonderangebot endet in" },
 
   // ===== SuccessPage =====
   "success.title": { fr: "Paiement réussi !", en: "Payment successful!", es: "¡Pago exitoso!", pt: "Pagamento realizado!", de: "Zahlung erfolgreich!" },
@@ -272,8 +283,25 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "success.viewAllOrders": { fr: "Voir toutes mes commandes", en: "View all my orders", es: "Ver todos mis pedidos", pt: "Ver todos os meus pedidos", de: "Alle meine Bestellungen ansehen" },
   "success.newAnalysis": { fr: "Nouvelle analyse", en: "New analysis", es: "Nuevo análisis", pt: "Nova análise", de: "Neue Analyse" },
 
+  // ===== Post-purchase Upsell =====
+  "upsell.title": { fr: "Booste tes résultats", en: "Boost your results", es: "Potencia tus resultados", pt: "Potencialize seus resultados", de: "Verstärke deine Ergebnisse" },
+  "upsell.followers": { fr: "Followers", en: "Followers", es: "Seguidores", pt: "Seguidores", de: "Follower" },
+  "upsell.likes": { fr: "Likes", en: "Likes", es: "Likes", pt: "Curtidas", de: "Likes" },
+  "upsell.views": { fr: "Vues", en: "Views", es: "Vistas", pt: "Visualizações", de: "Aufrufe" },
+  "upsell.subscribers": { fr: "Abonnés", en: "Subscribers", es: "Suscriptores", pt: "Inscritos", de: "Abonnenten" },
+  "upsell.retweets": { fr: "Retweets", en: "Retweets", es: "Retweets", pt: "Retweets", de: "Retweets" },
+  "upsell.viewers": { fr: "Viewers live", en: "Live viewers", es: "Espectadores en vivo", pt: "Espectadores ao vivo", de: "Live-Zuschauer" },
+  "upsell.pitch.followers": { fr: "2x plus d'impact avec une audience plus large", en: "2x more impact with a bigger audience", es: "2x más impacto con una audiencia más grande", pt: "2x mais impacto com uma audiência maior", de: "2x mehr Impact mit einer größeren Audience" },
+  "upsell.pitch.likes": { fr: "Booste ton engagement et ta visibilité", en: "Boost your engagement and visibility", es: "Potencia tu engagement y visibilidad", pt: "Impulsione seu engajamento e visibilidade", de: "Steigere dein Engagement und deine Sichtbarkeit" },
+  "upsell.pitch.views": { fr: "Plus de vues = plus de portée algorithmique", en: "More views = more algorithmic reach", es: "Más vistas = más alcance algorítmico", pt: "Mais views = mais alcance algorítmico", de: "Mehr Aufrufe = mehr algorithmische Reichweite" },
+  "upsell.pitch.subscribers": { fr: "Plus d'abonnés pour une chaîne plus crédible", en: "More subscribers for a more credible channel", es: "Más suscriptores para un canal más creíble", pt: "Mais inscritos para um canal mais confiável", de: "Mehr Abonnenten für einen glaubwürdigeren Kanal" },
+  "upsell.pitch.ytLikes": { fr: "Les likes boostent le classement de ta vidéo", en: "Likes boost your video ranking", es: "Los likes impulsan el ranking de tu video", pt: "Curtidas impulsionam o ranking do seu vídeo", de: "Likes steigern das Ranking deines Videos" },
+  "upsell.pitch.ytViews": { fr: "Plus de vues = plus de recommandations YouTube", en: "More views = more YouTube recommendations", es: "Más vistas = más recomendaciones de YouTube", pt: "Mais views = mais recomendações do YouTube", de: "Mehr Aufrufe = mehr YouTube-Empfehlungen" },
+  "upsell.pitch.retweets": { fr: "Les retweets multiplient ta portée organique", en: "Retweets multiply your organic reach", es: "Los retweets multiplican tu alcance orgánico", pt: "Retweets multiplicam seu alcance orgânico", de: "Retweets vervielfachen deine organische Reichweite" },
+  "upsell.pitch.viewers": { fr: "Plus de viewers = meilleur classement sur Twitch", en: "More viewers = better Twitch ranking", es: "Más espectadores = mejor ranking en Twitch", pt: "Mais espectadores = melhor ranking na Twitch", de: "Mehr Zuschauer = besseres Twitch-Ranking" },
+
   // ===== YouTube HomePage =====
-  "yt.hero.title1": { fr: "Notre IA booste", en: "Our AI boosts", es: "Nuestra IA impulsa", pt: "Nossa IA impulsiona", de: "Unsere KI boosted" },
+  "yt.hero.title1": { fr: "Notre IA booste", en: "Our AI boosts", es: "Nuestra IA impulsa", pt: "Nossa IA impulsiona", de: "Unsere KI beschleunigt" },
   "yt.hero.title2": { fr: "la croissance de votre vidéo", en: "your video growth", es: "el crecimiento de tu video", pt: "o crescimento do seu vídeo", de: "das Wachstum deines Videos" },
   "yt.hero.subtitle1": { fr: "Notre IA scanne ta vidéo et te propose", en: "Our AI scans your video and suggests", es: "Nuestra IA escanea tu video y te propone", pt: "Nossa IA analisa seu vídeo e sugere", de: "Unsere KI scannt dein Video und schlägt vor" },
   "yt.hero.subtitle2": { fr: "une stratégie de croissance personnalisée", en: "a personalized growth strategy", es: "una estrategia de crecimiento personalizada", pt: "uma estratégia de crescimento personalizada", de: "eine personalisierte Wachstumsstrategie" },
@@ -303,7 +331,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "ig.hero.subtitle2": { fr: "tu te concentres sur ton contenu.", en: "you focus on your content.", es: "tú te concentras en tu contenido.", pt: "você foca no seu conteúdo.", de: "du dich auf deinen Content konzentrierst." },
   "ig.hero.cta": { fr: "Lancer ma croissance →", en: "Start my growth →", es: "Impulsar mi crecimiento →", pt: "Iniciar meu crescimento →", de: "Mein Wachstum starten →" },
   "ig.hero.morePercent": { fr: "30% plus", en: "30% more", es: "30% más", pt: "30% mais", de: "30% mehr" },
-  "ig.hero.moreProfiles": { fr: "de profils analysés par notre IA qu'hier", en: "profiles analyzed by our AI than yesterday", es: "perfiles analizados por nuestra IA que ayer", pt: "perfis analisados pela nossa IA que ontem", de: "Profile von unserer KI analysiert als gestern" },
+  "ig.hero.moreProfiles": { fr: "de profils analysés par notre IA qu'hier", en: "profiles analyzed by our AI than yesterday", es: "perfiles analizados por nuestra IA que ayer", pt: "perfis analisados pela nossa IA que ontem", de: "Profile heute von unserer KI analysiert als gestern" },
   "ig.howItWorks.step1.title": { fr: "L'IA scanne ton profil", en: "AI scans your profile", es: "La IA escanea tu perfil", pt: "A IA analisa seu perfil", de: "KI scannt dein Profil" },
   "ig.howItWorks.step1.desc": { fr: "Entre ton @ et notre IA analyse tes stats, posts et engagement en 30 secondes.", en: "Enter your @ and our AI analyzes your stats, posts and engagement in 30 seconds.", es: "Ingresa tu @ y nuestra IA analiza tus stats, posts y engagement en 30 segundos.", pt: "Digite seu @ e nossa IA analisa suas stats, posts e engajamento em 30 segundos.", de: "Gib deinen @ ein und unsere KI analysiert deine Stats, Posts und Engagement in 30 Sekunden." },
   "ig.howItWorks.step2.title": { fr: "Stratégie personnalisée", en: "Personalized strategy", es: "Estrategia personalizada", pt: "Estratégia personalizada", de: "Personalisierte Strategie" },
@@ -319,6 +347,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "ig.faq.q4": { fr: "Les résultats sont-ils durables ?", en: "Are results long-lasting?", es: "¿Los resultados son duraderos?", pt: "Os resultados são duradouros?", de: "Sind die Ergebnisse dauerhaft?" },
   "ig.faq.a4": { fr: "L'IA recommande une croissance progressive et naturelle. En cas de variation, on ajuste gratuitement pendant 30 jours.", en: "AI recommends progressive and natural growth. In case of variation, we adjust for free for 30 days.", es: "La IA recomienda un crecimiento progresivo y natural. En caso de variación, ajustamos gratis durante 30 días.", pt: "A IA recomenda crescimento progressivo e natural. Em caso de variação, ajustamos gratuitamente por 30 dias.", de: "Die KI empfiehlt progressives, natürliches Wachstum. Bei Schwankungen passen wir 30 Tage lang kostenlos an." },
   "ig.linkToTikTok": { fr: "Tu cherches TikTok ou YouTube ? C'est par ici", en: "Looking for TikTok or YouTube? Click here", es: "¿Buscas TikTok o YouTube? Haz clic aquí", pt: "Procurando TikTok ou YouTube? Clique aqui", de: "Suchst du TikTok oder YouTube? Hier klicken" },
+  "ig.otherPlatforms": { fr: "Nos autres plateformes", en: "Our other platforms", es: "Nuestras otras plataformas", pt: "Nossas outras plataformas", de: "Unsere anderen Plattformen" },
 
   // ===== YouTubeUrlInput =====
   "ytUrl.title1": { fr: "Colle le lien de ta", en: "Paste your", es: "Pega el enlace de tu", pt: "Cole o link do seu", de: "Füge den Link deines" },
@@ -364,7 +393,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "orderDetail.statusDelivered": { fr: "Commande livrée ✅", en: "Order delivered ✅", es: "Pedido entregado ✅", pt: "Pedido entregue ✅", de: "Bestellung geliefert ✅" },
   "orderDetail.statusProcessing": { fr: "En cours de traitement...", en: "Processing...", es: "En proceso...", pt: "Em processamento...", de: "Wird verarbeitet..." },
   "orderDetail.statusPaid": { fr: "Commande confirmée, traitement imminent", en: "Order confirmed, processing imminent", es: "Pedido confirmado, procesamiento inminente", pt: "Pedido confirmado, processamento iminente", de: "Bestellung bestätigt, Verarbeitung steht bevor" },
-  "orderDetail.statusPending": { fr: "En attente de confirmation", en: "Awaiting confirmation", es: "Esperando confirmación", pt: "Aguardando confirmação", de: "Warte auf Bestätigung" },
+  "orderDetail.statusPending": { fr: "En attente de confirmation", en: "Awaiting confirmation", es: "Esperando confirmación", pt: "Aguardando confirmação", de: "Bestätigung ausstehend" },
   "orderDetail.deliveredOn": { fr: "Livrée le", en: "Delivered on", es: "Entregado el", pt: "Entregue em", de: "Geliefert am" },
   "orderDetail.evolution": { fr: "Évolution de", en: "Evolution of", es: "Evolución de", pt: "Evolução de", de: "Entwicklung von" },
   "orderDetail.before": { fr: "Avant", en: "Before", es: "Antes", pt: "Antes", de: "Vorher" },
@@ -402,7 +431,7 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
 
   // ===== Twitch HomePage =====
   "tw.hero.title1": { fr: "Fais connaître ta", en: "Promote your", es: "Promociona tu", pt: "Divulgue seu", de: "Mach deinen" },
-  "tw.hero.title2": { fr: "chaîne ", en: "channel ", es: "canal ", pt: "canal ", de: "Kanal " },
+  "tw.hero.title2": { fr: "chaîne ", en: "channel ", es: "canal ", pt: "canal ", de: "Kanal bekannt " },
   "tw.hero.subtitle1": { fr: "Une visibilité accrue auprès d'une audience", en: "Reach a wider audience of gaming", es: "Mayor visibilidad ante una audiencia", pt: "Maior visibilidade junto a uma audiência", de: "Mehr Sichtbarkeit bei einem Publikum" },
   "tw.hero.subtitle2": { fr: "passionnée de gaming et de streaming.", en: "and streaming enthusiasts.", es: "apasionada por gaming y streaming.", pt: "apaixonada por gaming e streaming.", de: "das Gaming und Streaming liebt." },
   "tw.hero.cta": { fr: "Promouvoir ma chaîne →", en: "Promote my channel →", es: "Promocionar mi canal →", pt: "Promover meu canal →", de: "Meinen Kanal bewerben →" },
@@ -463,6 +492,23 @@ const dict: Record<string, Partial<Record<Lang, string>>> = {
   "svc.x_retweets": { fr: "Retweets", en: "Retweets", es: "Retweets", pt: "Retweets", de: "Retweets" },
   "svc.tw_followers": { fr: "Followers", en: "Followers", es: "Seguidores", pt: "Seguidores", de: "Follower" },
   "svc.tw_live_viewers": { fr: "Live Viewers", en: "Live Viewers", es: "Espectadores en vivo", pt: "Espectadores ao vivo", de: "Live-Zuschauer" },
+
+  // ===== Growth Calculator =====
+  "calc.title": { fr: "Calculateur de croissance Instagram", en: "Instagram Growth Calculator", es: "Calculadora de crecimiento de Instagram", pt: "Calculadora de crescimento do Instagram", de: "Instagram-Wachstumsrechner" },
+  "calc.subtitle": { fr: "Combien de followers veux-tu dans 30 jours ?", en: "How many followers do you want in 30 days?", es: "¿Cuántos seguidores quieres en 30 días?", pt: "Quantos seguidores você quer em 30 dias?", de: "Wie viele Follower willst du in 30 Tagen?" },
+  "calc.currentFollowers": { fr: "Tes followers actuels", en: "Your current followers", es: "Tus seguidores actuales", pt: "Seus seguidores atuais", de: "Deine aktuellen Follower" },
+  "calc.targetFollowers": { fr: "Ton objectif de followers", en: "Your target followers", es: "Tu objetivo de seguidores", pt: "Seu objetivo de seguidores", de: "Dein Follower-Ziel" },
+  "calc.followersNeeded": { fr: "Followers à gagner", en: "Followers to gain", es: "Seguidores a ganar", pt: "Seguidores a ganhar", de: "Follower zu gewinnen" },
+  "calc.growthRate": { fr: "Taux de croissance", en: "Growth rate", es: "Tasa de crecimiento", pt: "Taxa de crescimento", de: "Wachstumsrate" },
+  "calc.recommendedPack": { fr: "Pack recommandé", en: "Recommended pack", es: "Pack recomendado", pt: "Pacote recomendado", de: "Empfohlenes Paket" },
+  "calc.startNow": { fr: "Lancer ma croissance →", en: "Start my growth →", es: "Impulsar mi crecimiento →", pt: "Iniciar meu crescimento →", de: "Mein Wachstum starten →" },
+  "calc.perDay": { fr: "par jour", en: "per day", es: "por día", pt: "por dia", de: "pro Tag" },
+  "calc.in30days": { fr: "dans 30 jours", en: "in 30 days", es: "en 30 días", pt: "em 30 dias", de: "in 30 Tagen" },
+  "calc.organic": { fr: "Croissance organique estimée", en: "Estimated organic growth", es: "Crecimiento orgánico estimado", pt: "Crescimento orgânico estimado", de: "Geschätztes organisches Wachstum" },
+  "calc.boosted": { fr: "Avec Fanovaly", en: "With Fanovaly", es: "Con Fanovaly", pt: "Com Fanovaly", de: "Mit Fanovaly" },
+  "calc.freeToolTitle": { fr: "Outil gratuit", en: "Free tool", es: "Herramienta gratuita", pt: "Ferramenta gratuita", de: "Kostenloses Tool" },
+  "calc.metaTitle": { fr: "Calculateur de croissance Instagram gratuit | Fanovaly", en: "Free Instagram Growth Calculator | Fanovaly", es: "Calculadora de crecimiento de Instagram gratis | Fanovaly", pt: "Calculadora de crescimento do Instagram grátis | Fanovaly", de: "Kostenloser Instagram-Wachstumsrechner | Fanovaly" },
+  "calc.metaDesc": { fr: "Calcule combien de followers tu peux gagner en 30 jours et découvre le pack idéal pour booster ton profil Instagram.", en: "Calculate how many followers you can gain in 30 days and find the ideal pack to boost your Instagram profile.", es: "Calcula cuántos seguidores puedes ganar en 30 días y descubre el pack ideal para impulsar tu perfil de Instagram.", pt: "Calcule quantos seguidores você pode ganhar em 30 dias e descubra o pacote ideal para impulsionar seu perfil do Instagram.", de: "Berechne, wie viele Follower du in 30 Tagen gewinnen kannst, und finde das ideale Paket für dein Instagram-Profil." },
 };
 
 export const LANG_LOCALE: Record<Lang, string> = {

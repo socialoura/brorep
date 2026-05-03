@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Fanovaly — Analyse & croissance pour TikTok et Instagram";
+export const alt = "Fanovaly — Analyse & croissance Instagram avec IA";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -61,7 +61,7 @@ export default function OGImage() {
             textAlign: "center",
           }}
         >
-          Analyse & croissance pour TikTok et Instagram
+          Accélérez votre croissance Instagram avec l'IA
         </div>
 
         {/* Pills */}

@@ -2,12 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
+import dynamic from "next/dynamic";
 import PostHogProviderWrapper from "@/components/PostHogProvider";
 import { CurrencyProvider } from "@/components/CurrencyProvider";
 import Footer from "@/components/Footer";
-import ChatWidget from "@/components/ChatWidget";
 import type { Currency } from "@/lib/i18n";
 import "./globals.css";
+
+const ChatWidget = dynamic(() => import("@/components/ChatWidget"));
+const VisitTracker = dynamic(() => import("@/components/VisitTracker"));
 
 const VALID_CURRENCIES: Currency[] = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
 
@@ -177,9 +180,9 @@ export default async function RootLayout({
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ADS_ID}`}
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
-            <Script id="gtag-init" strategy="afterInteractive">
+            <Script id="gtag-init" strategy="lazyOnload">
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
@@ -212,6 +215,7 @@ export default async function RootLayout({
           </PostHogProviderWrapper>
           <Footer />
           <ChatWidget />
+          <VisitTracker />
         </CurrencyProvider>
       </body>
     </html>

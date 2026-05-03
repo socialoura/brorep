@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, fmtPrice, type Currency } from "@/lib/i18n";
 
 declare global {
   interface Window {
@@ -9,19 +9,72 @@ declare global {
   }
 }
 
+interface UpsellItem {
+  service: string;
+  labelKey: string;
+  icon: string;
+  pitchKey: string;
+}
+
+const INSTAGRAM_UPSELLS: UpsellItem[] = [
+  { service: "followers", labelKey: "upsell.followers", icon: "👥", pitchKey: "upsell.pitch.followers" },
+  { service: "likes", labelKey: "upsell.likes", icon: "❤️", pitchKey: "upsell.pitch.likes" },
+  { service: "views", labelKey: "upsell.views", icon: "👁️", pitchKey: "upsell.pitch.views" },
+];
+
+const TIKTOK_UPSELLS: UpsellItem[] = [
+  { service: "followers", labelKey: "upsell.followers", icon: "👥", pitchKey: "upsell.pitch.followers" },
+  { service: "likes", labelKey: "upsell.likes", icon: "❤️", pitchKey: "upsell.pitch.likes" },
+  { service: "views", labelKey: "upsell.views", icon: "👁️", pitchKey: "upsell.pitch.views" },
+];
+
+const YOUTUBE_UPSELLS: UpsellItem[] = [
+  { service: "yt_subscribers", labelKey: "upsell.subscribers", icon: "👥", pitchKey: "upsell.pitch.subscribers" },
+  { service: "yt_likes", labelKey: "upsell.likes", icon: "👍", pitchKey: "upsell.pitch.ytLikes" },
+  { service: "yt_views", labelKey: "upsell.views", icon: "👁️", pitchKey: "upsell.pitch.ytViews" },
+];
+
+const X_UPSELLS: UpsellItem[] = [
+  { service: "x_followers", labelKey: "upsell.followers", icon: "👥", pitchKey: "upsell.pitch.followers" },
+  { service: "x_likes", labelKey: "upsell.likes", icon: "❤️", pitchKey: "upsell.pitch.likes" },
+  { service: "x_retweets", labelKey: "upsell.retweets", icon: "🔁", pitchKey: "upsell.pitch.retweets" },
+];
+
+const TWITCH_UPSELLS: UpsellItem[] = [
+  { service: "tw_followers", labelKey: "upsell.followers", icon: "👥", pitchKey: "upsell.pitch.followers" },
+  { service: "tw_live_viewers", labelKey: "upsell.viewers", icon: "👁️", pitchKey: "upsell.pitch.viewers" },
+];
+
+const PLATFORM_UPSELLS: Record<string, UpsellItem[]> = {
+  instagram: INSTAGRAM_UPSELLS,
+  tiktok: TIKTOK_UPSELLS,
+  youtube: YOUTUBE_UPSELLS,
+  x: X_UPSELLS,
+  twitch: TWITCH_UPSELLS,
+};
+
 interface Props {
   username: string;
   orderId?: number;
-  cart?: { price: number }[];
+  cart?: { service?: string; price: number }[];
   onReset: () => void;
   platform?: string;
+  onUpsellClick?: (service: string) => void;
 }
 
-export default function SuccessPage({ username, orderId, cart, onReset, platform }: Props) {
+export default function SuccessPage({ username, orderId, cart, onReset, platform, onUpsellClick }: Props) {
   const { t, href } = useTranslation();
-  const yt = platform === "youtube";
-  const accent = yt ? "rgb(255, 0, 0)" : "rgb(105, 201, 208)";
-  const accentMid = yt ? "rgb(204, 0, 0)" : "rgb(105, 201, 208)";
+  const colors: Record<string, { accent: string; mid: string; bg: string; border: string; gradient: string; textOnGrad: string }> = {
+    youtube:   { accent: "rgb(255,0,0)",     mid: "rgb(204,0,0)",     bg: "rgba(255,0,0,0.1)",       border: "rgba(255,0,0,0.3)",       gradient: "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))",             textOnGrad: "#fff" },
+    instagram: { accent: "#E1306C",          mid: "#C1358C",          bg: "rgba(225,48,108,0.1)",     border: "rgba(225,48,108,0.3)",     gradient: "linear-gradient(135deg, #833AB4, #E1306C, #F77737)",              textOnGrad: "#fff" },
+    tiktok:    { accent: "rgb(105,201,208)", mid: "rgb(105,201,208)", bg: "rgba(105,201,208,0.1)",    border: "rgba(105,201,208,0.3)",    gradient: "linear-gradient(135deg, rgb(79,179,186), rgb(105,201,208))",      textOnGrad: "#000" },
+    x:         { accent: "#1D9BF0",          mid: "#1A8CD8",          bg: "rgba(29,155,240,0.1)",     border: "rgba(29,155,240,0.3)",     gradient: "linear-gradient(135deg, #1A8CD8, #1D9BF0)",                      textOnGrad: "#fff" },
+    twitch:    { accent: "rgb(145,71,255)",  mid: "rgb(110,50,200)",  bg: "rgba(145,71,255,0.1)",     border: "rgba(145,71,255,0.3)",     gradient: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))",       textOnGrad: "#fff" },
+    spotify:   { accent: "rgb(29,185,84)",   mid: "rgb(30,215,96)",   bg: "rgba(29,185,84,0.1)",      border: "rgba(29,185,84,0.3)",      gradient: "linear-gradient(135deg, rgb(22,140,63), rgb(30,215,96))",         textOnGrad: "#000" },
+  };
+  const c = colors[platform || "tiktok"] || colors.tiktok;
+  const accent = c.accent;
+  const accentMid = c.mid;
   const [promo, setPromo] = useState<{ code: string; percent: number; expiresAt: number } | null>(null);
   const [countdown, setCountdown] = useState("");
   const [copied, setCopied] = useState(false);
@@ -83,7 +136,7 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", padding: "0 16px", maxWidth: "440px", width: "100%" }}>
       {/* Check icon */}
-      <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: yt ? "rgba(255,0,0,0.1)" : "rgba(105, 201, 208, 0.1)", border: yt ? "2px solid rgba(255,0,0,0.3)" : "2px solid rgba(105, 201, 208, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: c.bg, border: `2px solid ${c.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
@@ -100,8 +153,8 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
           style={{
             marginTop: "8px",
             width: "100%",
-            background: yt ? "linear-gradient(135deg, rgba(255,0,0,0.08), rgba(255,0,0,0.03))" : "linear-gradient(135deg, rgba(79, 179, 186, 0.08), rgba(105, 201, 208, 0.03))",
-            border: yt ? "1px dashed rgba(255,0,0,0.3)" : "1px dashed rgba(105, 201, 208, 0.3)",
+            background: `linear-gradient(135deg, ${c.bg}, transparent)`,
+            border: `1px dashed ${c.border}`,
             borderRadius: "16px",
             padding: "24px 20px",
             textAlign: "center",
@@ -118,8 +171,8 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
               margin: "12px 0",
               padding: "12px 24px",
               borderRadius: "12px",
-              border: yt ? "1px solid rgba(255,0,0,0.3)" : "1px solid rgba(105, 201, 208, 0.3)",
-              backgroundColor: yt ? "rgba(255,0,0,0.06)" : "rgba(105, 201, 208, 0.06)",
+              border: `1px solid ${c.border}`,
+              backgroundColor: c.bg,
               cursor: "pointer",
               transition: "all 0.2s",
             }}
@@ -157,7 +210,7 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
             style={{
               width: "20px",
               height: "20px",
-              border: yt ? "2px solid rgba(255,0,0,0.2)" : "2px solid rgba(105, 201, 208, 0.2)",
+              border: `2px solid ${c.border}`,
               borderTopColor: accentMid,
               borderRadius: "50%",
               animation: "spin 0.8s linear infinite",
@@ -180,13 +233,13 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
             padding: "12px 28px",
             borderRadius: "12px",
             border: "none",
-            background: yt ? "linear-gradient(135deg, rgb(153,0,0), rgb(255,0,0))" : "linear-gradient(135deg, rgb(79, 179, 186), rgb(105, 201, 208))",
-            color: yt ? "#fff" : "#000",
+            background: c.gradient,
+            color: c.textOnGrad,
             fontSize: "14px",
             fontWeight: 700,
             textDecoration: "none",
             fontFamily: "inherit",
-            boxShadow: yt ? "0 8px 24px rgba(255,0,0,0.25)" : "0 8px 24px rgba(105, 201, 208, 0.25)",
+            boxShadow: `0 8px 24px ${c.border}`,
           }}
         >
           📦 {t("success.trackOrder")}
@@ -206,6 +259,58 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
         {t("success.viewAllOrders")}
       </a>
 
+      {/* Post-purchase upsell */}
+      {(() => {
+        const allUpsells = PLATFORM_UPSELLS[platform || "tiktok"] || [];
+        const boughtServices = new Set((cart || []).map((i) => i.service).filter(Boolean));
+        const suggestions = allUpsells.filter((u) => !boughtServices.has(u.service));
+        if (suggestions.length === 0) return null;
+        return (
+          <div style={{
+            marginTop: "12px", width: "100%", padding: "16px",
+            borderRadius: "14px", border: `1px solid ${c.border}`,
+            background: `linear-gradient(135deg, ${c.bg}, transparent)`,
+          }}>
+            <p style={{ margin: "0 0 12px 0", fontSize: "12px", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center" }}>
+              {t("upsell.title")}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {suggestions.map((item) => (
+                <button
+                  key={item.service}
+                  onClick={() => onUpsellClick?.(item.service)}
+                  className="pack-card"
+                  style={{
+                    display: "flex", alignItems: "center", gap: "10px",
+                    padding: "12px 14px", borderRadius: "12px",
+                    border: `1px solid ${c.border}`, backgroundColor: "rgba(255,255,255,0.02)",
+                    cursor: "pointer", fontFamily: "inherit", width: "100%",
+                    textAlign: "left",
+                  }}
+                >
+                  <span style={{ fontSize: "20px", flexShrink: 0 }}>{item.icon}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#fff" }}>
+                      {t(item.labelKey)}
+                    </p>
+                    <p style={{ margin: "2px 0 0", fontSize: "11px", color: "rgb(169,181,174)", lineHeight: 1.4 }}>
+                      {t(item.pitchKey)}
+                    </p>
+                  </div>
+                  <span style={{
+                    padding: "6px 12px", borderRadius: "8px",
+                    background: c.gradient, color: c.textOnGrad,
+                    fontSize: "11px", fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0,
+                  }}>
+                    + {t("upsell.addBtn")}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* New analysis button */}
       <button
         onClick={onReset}
@@ -213,8 +318,8 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
           marginTop: "4px",
           padding: "12px 28px",
           borderRadius: "12px",
-          border: yt ? "1px solid rgba(255,0,0,0.2)" : "1px solid rgba(105, 201, 208, 0.2)",
-          backgroundColor: yt ? "rgba(255,0,0,0.08)" : "rgba(79, 179, 186, 0.08)",
+          border: `1px solid ${c.border}`,
+          backgroundColor: c.bg,
           color: accent,
           fontSize: "13px",
           fontWeight: 600,

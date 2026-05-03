@@ -45,7 +45,11 @@ export async function initDb() {
   await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS name_en VARCHAR(100) DEFAULT ''`;
   await sql`ALTER TABLE combo_packs ADD COLUMN IF NOT EXISTS platform VARCHAR(20) DEFAULT 'tiktok'`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cost_cents INTEGER DEFAULT 0`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS country VARCHAR(2) DEFAULT NULL`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS smm_orders JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS lang VARCHAR(2) DEFAULT 'fr'`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS followup_day1_sent BOOLEAN DEFAULT false`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS followup_delivered_sent BOOLEAN DEFAULT false`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS smm_config (
@@ -166,6 +170,28 @@ export async function initDb() {
       label_en VARCHAR(100) NOT NULL DEFAULT '',
       active BOOLEAN DEFAULT true,
       sort_order INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  // Visits by country (for conversion rate analytics)
+  await sql`
+    CREATE TABLE IF NOT EXISTS visits_by_country (
+      id SERIAL PRIMARY KEY,
+      country VARCHAR(2) NOT NULL,
+      date DATE NOT NULL DEFAULT CURRENT_DATE,
+      count INTEGER NOT NULL DEFAULT 1,
+      UNIQUE(country, date)
+    )
+  `;
+
+  // Ad costs (Google Ads etc.) per day in EUR cents
+  await sql`
+    CREATE TABLE IF NOT EXISTS ad_costs (
+      id SERIAL PRIMARY KEY,
+      date DATE NOT NULL UNIQUE,
+      cost_cents INTEGER NOT NULL DEFAULT 0,
+      note VARCHAR(255) DEFAULT '',
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
@@ -347,9 +373,11 @@ export async function createOrder(params: {
   status?: string;
   followersBefore?: number;
   currency?: string;
+  country?: string;
+  lang?: string;
 }) {
   const result = await sql`
-    INSERT INTO orders (stripe_payment_intent_id, email, username, platform, cart, post_assignments, total_cents, status, followers_before, currency)
+    INSERT INTO orders (stripe_payment_intent_id, email, username, platform, cart, post_assignments, total_cents, status, followers_before, currency, country, lang)
     VALUES (
       ${params.stripePaymentIntentId},
       ${params.email},
@@ -360,7 +388,9 @@ export async function createOrder(params: {
       ${params.totalCents},
       ${params.status || "pending"},
       ${params.followersBefore || 0},
-      ${params.currency || "eur"}
+      ${params.currency || "eur"},
+      ${params.country || null},
+      ${params.lang || "fr"}
     )
     RETURNING id
   `;

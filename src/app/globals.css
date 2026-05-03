@@ -468,5 +468,98 @@ body {
   }
 }
 
+/* ── Pack card hover micro-animation ── */
+.pack-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.pack-card:hover {
+  transform: scale(1.04);
+}
+.pack-card:active {
+  transform: scale(0.97);
+}
+
+/* ── Desktop improvements (≥768px only — mobile untouched) ── */
+
+@media (min-width: 768px) {
+  /* Hero: horizontal 2-col layout on desktop — !important beats inline styles */
+  .hero-section {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: auto !important;
+    max-width: 1000px !important;
+    padding: 56px 48px 40px !important;
+    gap: 40px 56px !important;
+    text-align: left !important;
+  }
+  /* Left column: logo + title + subtitle */
+  .hero-left {
+    flex: 1 1 400px !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    max-width: 520px !important;
+  }
+  /* Right column: price + social proof + CTA */
+  .hero-right {
+    flex: 0 1 320px !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  /* Hide scroll hint arrow on desktop */
+  .scroll-hint-arrow {
+    display: none !important;
+  }
+
+  /* Hero title: bigger on desktop */
+  .hero-title-desktop {
+    font-size: clamp(3.2rem, 5vw, 4.8rem) !important;
+  }
+  .hero-subtitle-desktop {
+    font-size: 17px !important;
+    max-width: 480px !important;
+  }
+
+  /* Below-fold sections: wider + 2-col FAQ on desktop */
+  .below-fold {
+    max-width: 800px !important;
+    padding: 48px 32px 0 !important;
+    gap: 40px !important;
+  }
+  .faq-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .grid-steps {
+    gap: 16px;
+  }
+
+  /* Platform links grid: wider on desktop */
+  .platform-links-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 14px !important;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  /* Service select: wider container on desktop */
+  .service-container-desktop {
+    max-width: 640px !important;
+  }
+  .grid-packs {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* Checkout: wider on desktop */
+  .checkout-wrap {
+    max-width: 520px !important;
+    padding: 0 24px !important;
+  }
+}
+
 /* Force dark dropdown options in admin */
 select option { background-color: #000 !important; color: #fff !important; }

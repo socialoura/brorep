@@ -31,6 +31,7 @@ interface Order {
   total_cents: number;
   cost_cents: number;
   currency: string;
+  country: string | null;
   email_order_num: number | null;
   email_order_total: number | null;
   smm_orders: { service: string; qty: number; bulkfollows_order_id?: number; error?: string }[];
@@ -73,12 +74,23 @@ interface Analytics {
   byStatus: { status: string; count: string }[];
   totalRevenueCents: number;
   totalCostCents: number;
+  totalSmmCostCents: number;
+  totalAdCostCents: number;
   ordersToday: number;
   revenueTodayCents: number;
   costTodayCents: number;
+  marginPct: number;
   last7Days: { date: string; count: string; revenue: string }[];
+  last30Days: { date: string; count: string; revenue: string; cost: string; smm_cost: string; ad_cost: string }[];
   topServices: { service: string; count: string; revenue_cents: string }[];
+  servicePerformance: { service: string; total_purchases: string; unique_customers: string; revenue_per_customer_cents: string; purchases_per_customer: string }[];
   platforms: { platform: string; count: string }[];
+  revenueByPlatform: { platform: string; order_count: string; revenue_eur_cents: string; avg_cart_eur_cents: string }[];
+  revenueByCurrency: { currency: string; order_count: string; total_cents: string }[];
+  topCountries: { country: string; order_count: string; revenue_eur_cents: string; avg_cart_eur_cents: string }[];
+  countryConversion: { country: string; visits: string; orders: string; conversion_pct: string }[];
+  peakHours: { hour: number; count: string }[];
+  recurrence: { totalCustomers: number; returningCustomers: number; recurrencePct: number };
   uniqueCustomers: number;
   avgPerCustomerCents: number;
   avgOrderValueCents: number;
@@ -117,6 +129,9 @@ export default function AdminPage() {
   const [editingSmmValue, setEditingSmmValue] = useState("");
   const [retryingSmm, setRetryingSmm] = useState<{ orderId: number; index: number } | null>(null);
   const [runningSmm, setRunningSmm] = useState<number | null>(null);
+  const [adCostDate, setAdCostDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [adCostValue, setAdCostValue] = useState("");
+  const [adCostSaving, setAdCostSaving] = useState(false);
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
 
@@ -339,106 +354,247 @@ export default function AdminPage() {
       {/* Analytics Tab */}
       {tab === "analytics" && analytics && (
         <div>
-          {/* KPI cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "28px" }}>
-            <KpiCard label="Commandes totales" value={String(analytics.totalOrders)} />
-            <KpiCard label="Revenu total" value={`${(analytics.totalRevenueCents / 100).toFixed(2)}€`} />
-            <KpiCard label="Coût total" value={`${(analytics.totalCostCents / 100).toFixed(2)}€`} />
-            <KpiCard label="Profit total" value={`${((analytics.totalRevenueCents - analytics.totalCostCents) / 100).toFixed(2)}€`} />
-            <KpiCard label="Commandes aujourd'hui" value={String(analytics.ordersToday)} />
-            <KpiCard label="Revenu aujourd'hui" value={`${(analytics.revenueTodayCents / 100).toFixed(2)}€`} />
-            <KpiCard label="Coût aujourd'hui" value={`${(analytics.costTodayCents / 100).toFixed(2)}€`} />
-            <KpiCard label="Profit aujourd'hui" value={`${((analytics.revenueTodayCents - analytics.costTodayCents) / 100).toFixed(2)}€`} />
+          {/* ═══ ROW 1: Main KPIs ═══ */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "12px", marginBottom: "20px" }}>
+            <KpiCard label="Commandes" value={String(analytics.totalOrders)} sub={`${analytics.ordersToday} aujourd'hui`} />
+            <KpiCard label="Revenu" value={`${(analytics.totalRevenueCents / 100).toFixed(2)}€`} sub={`${(analytics.revenueTodayCents / 100).toFixed(2)}€ aujourd'hui`} />
+            <KpiCard label="Coût total" value={`${(analytics.totalCostCents / 100).toFixed(2)}€`} sub={`SMM: ${(analytics.totalSmmCostCents / 100).toFixed(2)}€ · Ads: ${(analytics.totalAdCostCents / 100).toFixed(2)}€`} accent="#ffb800" />
+            <KpiCard label="Profit" value={`${((analytics.totalRevenueCents - analytics.totalCostCents) / 100).toFixed(2)}€`} sub={`${((analytics.revenueTodayCents - analytics.costTodayCents) / 100).toFixed(2)}€ aujourd'hui`} />
+            <KpiCard label="Marge" value={`${analytics.marginPct}%`} sub="revenu − (SMM + Ads)" accent={analytics.marginPct >= 50 ? "rgb(0,210,106)" : analytics.marginPct >= 30 ? "#ffb800" : "#ef4444"} />
           </div>
 
-          {/* Customer KPIs */}
-          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Par client (email)</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "28px" }}>
-            <KpiCard label="Clients uniques" value={String(analytics.uniqueCustomers)} />
-            <KpiCard label="Dépense moyenne / client" value={`${(analytics.avgPerCustomerCents / 100).toFixed(2)}€`} />
-            <KpiCard label="Panier moyen" value={`${(analytics.avgOrderValueCents / 100).toFixed(2)}€`} />
-            <KpiCard label="Commandes / client" value={analytics.avgOrdersPerCustomer.toFixed(2)} />
+          {/* ═══ ROW 2: Customer KPIs ═══ */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "12px", marginBottom: "20px" }}>
+            <KpiCard label="Clients" value={String(analytics.uniqueCustomers)} accent="rgb(96,165,250)" />
+            <KpiCard label="Panier moyen" value={`${(analytics.avgOrderValueCents / 100).toFixed(2)}€`} accent="rgb(96,165,250)" />
+            <KpiCard label="Dépense / client" value={`${(analytics.avgPerCustomerCents / 100).toFixed(2)}€`} accent="rgb(96,165,250)" />
+            <KpiCard label="Cmd / client" value={analytics.avgOrdersPerCustomer.toFixed(2)} accent="rgb(96,165,250)" />
+            <KpiCard label="Récurrence" value={`${analytics.recurrence.recurrencePct}%`} sub={`${analytics.recurrence.returningCustomers} récurrents`} accent="rgb(168,85,247)" />
+            <KpiCard label="Statuts" value="" sub={analytics.byStatus.map((s) => `${s.status}: ${s.count}`).join(" · ")} accent="rgba(255,255,255,0.4)" />
           </div>
 
-          {/* Top spenders */}
-          {analytics.topSpenders.length > 0 && (
-            <>
-              <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Top 10 clients</h3>
-              <div style={{ overflowX: "auto", marginBottom: "24px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid rgba(0,210,106,0.1)" }}>
-                      <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Email</th>
-                      <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Commandes</th>
-                      <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Dépensé</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.topSpenders.map((c) => (
-                      <tr key={c.email} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                        <td style={{ padding: "8px" }}>{c.email}</td>
-                        <td style={{ padding: "8px", textAlign: "right" }}>{c.order_count}</td>
-                        <td style={{ padding: "8px", textAlign: "right", color: green }}>{(Number(c.total_eur_cents) / 100).toFixed(2)}€</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-
-          {/* Status breakdown */}
-          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Par statut</h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "24px" }}>
-            {analytics.byStatus.map((s) => (
-              <span key={s.status} style={{ padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, backgroundColor: s.status === "paid" ? "rgba(0,180,53,0.1)" : "rgba(255,255,255,0.04)", border: `1px solid ${s.status === "paid" ? "rgba(0,210,106,0.2)" : "rgba(255,255,255,0.08)"}`, color: s.status === "paid" ? green : "rgb(169,181,174)" }}>
-                {s.status}: {s.count}
-              </span>
-            ))}
-          </div>
-
-          {/* Last 7 days */}
-          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>7 derniers jours</h3>
-          <div style={{ overflowX: "auto", marginBottom: "24px" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid rgba(0,210,106,0.1)" }}>
-                  <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Date</th>
-                  <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Commandes</th>
-                  <th style={{ padding: "8px", textAlign: "right", color: "rgb(107,117,111)" }}>Revenu</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analytics.last7Days.map((d) => (
-                  <tr key={d.date} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                    <td style={{ padding: "8px" }}>{d.date}</td>
-                    <td style={{ padding: "8px", textAlign: "right" }}>{d.count}</td>
-                    <td style={{ padding: "8px", textAlign: "right", color: green }}>{(Number(d.revenue) / 100).toFixed(2)}€</td>
+          {/* ═══ ROW 3: Two-column panels ═══ */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+            {/* Revenue by platform */}
+            <SectionCard title="Revenu par plateforme">
+              <MiniTable headers={["Plateforme", "Cmd", "Revenu", "Panier moy."]}>
+                {analytics.revenueByPlatform.map((p) => (
+                  <tr key={p.platform} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                    <td style={{ padding: "8px 10px", fontWeight: 600, fontSize: "12px" }}>{p.platform}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{p.order_count}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: green, fontWeight: 600 }}>{(Number(p.revenue_eur_cents) / 100).toFixed(2)}€</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.35)" }}>{(Number(p.avg_cart_eur_cents) / 100).toFixed(2)}€</td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
+              </MiniTable>
+            </SectionCard>
+
+            {/* Revenue by currency */}
+            <SectionCard title="Revenu par devise">
+              <MiniTable headers={["Devise", "Cmd", "Montant"]}>
+                {analytics.revenueByCurrency.map((c) => (
+                  <tr key={c.currency} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                    <td style={{ padding: "8px 10px", fontWeight: 600, fontSize: "12px" }}>{c.currency.toUpperCase()}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{c.order_count}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: green, fontWeight: 600 }}>{(Number(c.total_cents) / 100).toFixed(2)} {CURRENCY_SYMBOLS[c.currency] || c.currency}</td>
+                  </tr>
+                ))}
+              </MiniTable>
+            </SectionCard>
           </div>
 
-          {/* Top services */}
-          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Services populaires</h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "24px" }}>
-            {analytics.topServices.map((s) => (
-              <span key={s.service} style={{ padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, backgroundColor: "rgba(0,180,53,0.06)", border: "1px solid rgba(0,210,106,0.12)", color: "#e8f7ed" }}>
-                {s.service}: {s.count} ventes — {(Number(s.revenue_cents) / 100).toFixed(2)}€
-              </span>
-            ))}
+          {/* ═══ ROW 4: Countries + Conversion ═══ */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+            {/* Top countries */}
+            <SectionCard title="Top pays (revenu)">
+              {analytics.topCountries.length > 0 ? (
+                <MiniTable headers={["Pays", "Cmd", "Revenu", "Panier moy."]}>
+                  {analytics.topCountries.map((c) => (
+                    <tr key={c.country} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                      <td style={{ padding: "8px 10px", fontSize: "12px" }}>
+                        <span style={{ fontSize: "14px", marginRight: "6px" }}>{c.country !== "??" ? String.fromCodePoint(...[...c.country.toUpperCase()].map(ch => 0x1F1E6 - 65 + ch.charCodeAt(0))) : "🌍"}</span>
+                        {c.country}
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{c.order_count}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: green, fontWeight: 600 }}>{(Number(c.revenue_eur_cents) / 100).toFixed(2)}€</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.35)" }}>{(Number(c.avg_cart_eur_cents) / 100).toFixed(2)}€</td>
+                    </tr>
+                  ))}
+                </MiniTable>
+              ) : (
+                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)" }}>Aucune donnée pays disponible</p>
+              )}
+            </SectionCard>
+
+            {/* Country conversion */}
+            <SectionCard title="Conversion par pays">
+              {analytics.countryConversion.length > 0 ? (
+                <MiniTable headers={["Pays", "Visites", "Cmd", "Taux"]}>
+                  {analytics.countryConversion.map((c) => {
+                    const pct = Number(c.conversion_pct);
+                    return (
+                      <tr key={c.country} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                        <td style={{ padding: "8px 10px", fontSize: "12px" }}>
+                          <span style={{ fontSize: "14px", marginRight: "6px" }}>{c.country !== "??" ? String.fromCodePoint(...[...c.country.toUpperCase()].map(ch => 0x1F1E6 - 65 + ch.charCodeAt(0))) : "🌍"}</span>
+                          {c.country}
+                        </td>
+                        <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{c.visits}</td>
+                        <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{c.orders}</td>
+                        <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", fontWeight: 700, color: pct >= 5 ? green : pct >= 1 ? "#ffb800" : "rgba(255,255,255,0.3)" }}>{c.conversion_pct}%</td>
+                      </tr>
+                    );
+                  })}
+                </MiniTable>
+              ) : (
+                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)" }}>Les données de visite s&apos;accumuleront avec le temps</p>
+              )}
+            </SectionCard>
           </div>
 
-          {/* Platforms */}
-          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "10px", color: "rgb(169,181,174)" }}>Plateformes</h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {analytics.platforms.map((p) => (
-              <span key={p.platform} style={{ padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, backgroundColor: "rgba(0,180,53,0.06)", border: "1px solid rgba(0,210,106,0.12)", color: "#e8f7ed" }}>
-                {p.platform}: {p.count}
-              </span>
-            ))}
+          {/* ═══ ROW 5: Peak hours + Services ═══ */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+            {/* Peak hours */}
+            <SectionCard title="Heures de pointe (UTC)">
+              <div style={{ display: "flex", gap: "2px", alignItems: "flex-end", height: "100px", padding: "0 2px" }}>
+                {(() => {
+                  const hours = Array.from({ length: 24 }, (_, h) => {
+                    const match = analytics.peakHours.find((p) => Number(p.hour) === h);
+                    return { hour: h, count: match ? Number(match.count) : 0 };
+                  });
+                  const max = Math.max(...hours.map((h) => h.count), 1);
+                  return hours.map((h) => (
+                    <div key={h.hour} title={`${h.hour}h: ${h.count} cmd`} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                      <div style={{ width: "100%", maxWidth: "18px", borderRadius: "4px 4px 0 0", background: h.count > 0 ? `linear-gradient(180deg, ${green}, rgba(0,210,106,0.3))` : "rgba(255,255,255,0.03)", height: `${Math.max((h.count / max) * 75, 2)}px`, opacity: h.count > 0 ? 0.5 + (h.count / max) * 0.5 : 0.15, transition: "height 0.3s" }} />
+                      <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.2)" }}>{h.hour}</span>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </SectionCard>
+
+            {/* Service performance */}
+            <SectionCard title="Performance par service">
+              {analytics.servicePerformance.length > 0 ? (
+                <MiniTable headers={["Service", "Ventes", "Clients", "Rev/client", "Fréquence"]}>
+                  {analytics.servicePerformance.map((s) => (
+                    <tr key={s.service} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                      <td style={{ padding: "8px 10px", fontWeight: 600, fontSize: "12px" }}>{s.service}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{s.total_purchases}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{s.unique_customers}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: green, fontWeight: 600 }}>{(Number(s.revenue_per_customer_cents) / 100).toFixed(2)}€</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgb(168,85,247)", fontWeight: 600 }}>×{s.purchases_per_customer}</td>
+                    </tr>
+                  ))}
+                </MiniTable>
+              ) : (
+                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)" }}>Aucune donnée</p>
+              )}
+            </SectionCard>
           </div>
+
+          {/* ═══ ROW 6: Top clients ═══ */}
+          {analytics.topSpenders.length > 0 && (
+            <SectionCard title="Top 10 clients">
+              <MiniTable headers={["Email", "Commandes", "Dépensé"]}>
+                {analytics.topSpenders.map((c, i) => (
+                  <tr key={c.email} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                    <td style={{ padding: "8px 10px", fontSize: "12px" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "20px", height: "20px", borderRadius: "50%", fontSize: "10px", fontWeight: 700, marginRight: "8px", background: i < 3 ? `linear-gradient(135deg, ${i === 0 ? "rgb(250,204,21)" : i === 1 ? "rgb(148,163,184)" : "rgb(180,83,9)"}, transparent)` : "rgba(255,255,255,0.05)", color: i < 3 ? "#000" : "rgba(255,255,255,0.4)" }}>{i + 1}</span>
+                      {c.email}
+                    </td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{c.order_count}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: "12px", color: green, fontWeight: 600 }}>{(Number(c.total_eur_cents) / 100).toFixed(2)}€</td>
+                  </tr>
+                ))}
+              </MiniTable>
+            </SectionCard>
+          )}
+
+          {/* ═══ ROW 7: Ad cost input + 30 days trend ═══ */}
+          <SectionCard title="Coûts Google Ads">
+            <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "16px", flexWrap: "wrap" }}>
+              <input
+                type="date"
+                value={adCostDate}
+                onChange={(e) => setAdCostDate(e.target.value)}
+                style={{ padding: "8px 12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", outline: "none" }}
+              />
+              <div style={{ position: "relative" }}>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Coût en €"
+                  value={adCostValue}
+                  onChange={(e) => setAdCostValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && adCostValue) {
+                      setAdCostSaving(true);
+                      fetch("/api/admin/ad-costs", { method: "POST", headers, body: JSON.stringify({ date: adCostDate, cost: adCostValue }) })
+                        .then(() => { setAdCostValue(""); fetchAnalytics(); })
+                        .finally(() => setAdCostSaving(false));
+                    }
+                  }}
+                  style={{ padding: "8px 12px", paddingRight: "28px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "#e8f7ed", fontSize: "12px", fontFamily: "inherit", width: "120px", outline: "none" }}
+                />
+                <span style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "11px", color: "rgba(255,255,255,0.25)", pointerEvents: "none" }}>€</span>
+              </div>
+              <button
+                disabled={adCostSaving || !adCostValue}
+                onClick={() => {
+                  if (!adCostValue) return;
+                  setAdCostSaving(true);
+                  fetch("/api/admin/ad-costs", { method: "POST", headers, body: JSON.stringify({ date: adCostDate, cost: adCostValue }) })
+                    .then(() => { setAdCostValue(""); fetchAnalytics(); })
+                    .finally(() => setAdCostSaving(false));
+                }}
+                style={{ padding: "8px 16px", borderRadius: "10px", border: "none", cursor: adCostSaving || !adCostValue ? "default" : "pointer", fontWeight: 600, fontSize: "12px", color: "#000", background: adCostSaving || !adCostValue ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, rgb(0,180,53), rgb(0,255,76))", fontFamily: "inherit", opacity: adCostSaving || !adCostValue ? 0.5 : 1 }}
+              >
+                {adCostSaving ? "..." : "Enregistrer"}
+              </button>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="30 derniers jours">
+            {/* Mini bar chart */}
+            {analytics.last30Days.length > 0 && (
+              <div style={{ display: "flex", gap: "2px", alignItems: "flex-end", height: "60px", marginBottom: "16px", padding: "0 2px" }}>
+                {(() => {
+                  const fmtD = (raw: string) => { const dt = new Date(raw); return `${dt.getUTCDate()} ${["jan","fév","mar","avr","mai","juin","juil","août","sep","oct","nov","déc"][dt.getUTCMonth()]}`; };
+                  const max = Math.max(...analytics.last30Days.map((d) => Number(d.revenue)), 1);
+                  return analytics.last30Days.map((d) => {
+                    const rev = Number(d.revenue);
+                    const cost = Number(d.cost);
+                    const profit = rev - cost;
+                    return (
+                      <div key={d.date} title={`${fmtD(d.date)}\nRevenu: ${(rev / 100).toFixed(2)}€\nSMM: ${(Number(d.smm_cost) / 100).toFixed(2)}€\nAds: ${(Number(d.ad_cost) / 100).toFixed(2)}€\nProfit: ${(profit / 100).toFixed(2)}€`} style={{ flex: 1, borderRadius: "3px 3px 0 0", background: profit >= 0 ? `linear-gradient(180deg, ${green}, rgba(0,210,106,0.2))` : `linear-gradient(180deg, #ef4444, rgba(239,68,68,0.2))`, height: `${Math.max((rev / max) * 50, 2)}px`, opacity: 0.5 + (rev / max) * 0.5 }} />
+                    );
+                  });
+                })()}
+              </div>
+            )}
+            <MiniTable headers={["Date", "Cmd", "Revenu", "SMM", "Ads", "Coût total", "Profit"]}>
+              {analytics.last30Days.map((d) => {
+                const rev = Number(d.revenue);
+                const smm = Number(d.smm_cost);
+                const ad = Number(d.ad_cost);
+                const cost = Number(d.cost);
+                const profit = rev - cost;
+                const dt = new Date(d.date);
+                const label = `${dt.getUTCDate()} ${["jan","fév","mar","avr","mai","juin","juil","août","sep","oct","nov","déc"][dt.getUTCMonth()]}`;
+                return (
+                  <tr key={d.date} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                    <td style={{ padding: "6px 10px", fontSize: "12px", color: "rgba(255,255,255,0.5)", whiteSpace: "nowrap" }}>{label}</td>
+                    <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{d.count}</td>
+                    <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "12px", color: green }}>{(rev / 100).toFixed(2)}€</td>
+                    <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "12px", color: "rgba(255,255,255,0.35)" }}>{(smm / 100).toFixed(2)}€</td>
+                    <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "12px", color: ad > 0 ? "#f97316" : "rgba(255,255,255,0.15)" }}>{(ad / 100).toFixed(2)}€</td>
+                    <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "12px", color: "#ffb800" }}>{(cost / 100).toFixed(2)}€</td>
+                    <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "12px", fontWeight: 700, color: profit >= 0 ? green : "#ef4444" }}>{(profit / 100).toFixed(2)}€</td>
+                  </tr>
+                );
+              })}
+            </MiniTable>
+          </SectionCard>
         </div>
       )}
 
@@ -476,6 +632,7 @@ export default function AdminPage() {
                 <tr style={{ borderBottom: "1px solid rgba(0,210,106,0.1)" }}>
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>ID</th>
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Date</th>
+                  <th style={{ padding: "8px", textAlign: "center", color: "rgb(107,117,111)" }}>Pays</th>
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>User</th>
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Email</th>
                   <th style={{ padding: "8px", textAlign: "left", color: "rgb(107,117,111)" }}>Platform</th>
@@ -492,6 +649,7 @@ export default function AdminPage() {
                   <tr style={{ borderBottom: Array.isArray(o.post_assignments) && o.post_assignments.length > 0 ? "none" : "1px solid rgba(255,255,255,0.03)" }}>
                     <td style={{ padding: "8px", color: "rgb(107,117,111)" }}>#{o.id}</td>
                     <td style={{ padding: "8px" }}>{new Date(o.created_at).toLocaleDateString("fr-FR")}</td>
+                    <td style={{ padding: "8px", textAlign: "center", fontSize: "18px" }} title={o.country || ""}>{o.country ? String.fromCodePoint(...[...o.country.toUpperCase()].map(c => 0x1F1E6 - 65 + c.charCodeAt(0))) : "—"}</td>
                     <td style={{ padding: "8px", fontWeight: 600 }}>
                       <a
                         href={o.platform === "youtube" ? `https://www.youtube.com/@${o.username}` : o.platform === "instagram" ? `https://www.instagram.com/${o.username}` : `https://www.tiktok.com/@${o.username}`}
@@ -1561,11 +1719,40 @@ export default function AdminPage() {
   );
 }
 
-function KpiCard({ label, value }: { label: string; value: string }) {
+function KpiCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: string }) {
+  const c = accent || "rgb(0,210,106)";
   return (
-    <div style={{ padding: "16px 20px", borderRadius: "14px", border: "1px solid rgba(0,210,106,0.12)", backgroundColor: "rgba(0,180,53,0.04)" }}>
-      <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "rgb(107,117,111)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
-      <p style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: "rgb(0, 255, 76)" }}>{value}</p>
+    <div style={{ padding: "18px 20px", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.06)", background: "linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))", backdropFilter: "blur(8px)", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${c}, transparent)`, opacity: 0.5 }} />
+      <p style={{ margin: "0 0 8px 0", fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>{label}</p>
+      <p style={{ margin: 0, fontSize: "24px", fontWeight: 700, color: c, lineHeight: 1.1 }}>{value}</p>
+      {sub && <p style={{ margin: "6px 0 0", fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>{sub}</p>}
+    </div>
+  );
+}
+
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ borderRadius: "16px", border: "1px solid rgba(255,255,255,0.06)", background: "linear-gradient(145deg, rgba(255,255,255,0.025), rgba(255,255,255,0.008))", padding: "20px", marginBottom: "20px" }}>
+      <h3 style={{ fontSize: "13px", fontWeight: 600, marginBottom: "16px", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function MiniTable({ headers, children }: { headers: string[]; children: React.ReactNode }) {
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+        <thead>
+          <tr>
+            {headers.map((h, i) => (
+              <th key={h} style={{ padding: "8px 10px", textAlign: i === 0 ? "left" : "right", color: "rgba(255,255,255,0.25)", fontWeight: 500, fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.06em", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
     </div>
   );
 }

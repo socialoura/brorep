@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { usePostHog } from "posthog-js/react";
 import FanovalyLogo from "@/components/FanovalyLogo";
 import SocialProof from "@/components/SocialProof";
+import GuaranteeBadges from "@/components/GuaranteeBadges";
+import Testimonials from "@/components/Testimonials";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import LiveOrderCounter from "@/components/LiveOrderCounter";
 import ServiceSelect from "@/components/ServiceSelect";
@@ -129,7 +131,7 @@ function InstagramHomePageInner() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("reset") === "1") {
       try { sessionStorage.clear(); } catch {}
-      window.history.replaceState({}, "", "/instagram");
+      window.history.replaceState({}, "", "/");
       setHydrated(true);
       return;
     }
@@ -174,11 +176,11 @@ function InstagramHomePageInner() {
         return (
           <>
             {/* Fullscreen hero */}
-            <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "32px 24px 40px", width: "100%", maxWidth: "672px", textAlign: "center", position: "relative" }}>
-              {/* Logo + Title group */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+            <div className="hero-section" style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "32px 24px 40px", width: "100%", maxWidth: "672px", textAlign: "center", position: "relative" }}>
+              {/* Left group: Logo + Title + Subtitle */}
+              <div className="hero-left" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
                 <FanovalyLogo variant="red" />
-                <h1 style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
+                <h1 className="hero-title-desktop" style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
                   {t("ig.hero.title1")}
                   <br />
                   <span style={{ background: "linear-gradient(135deg, #833AB4, #E1306C, #F77737)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -195,58 +197,63 @@ function InstagramHomePageInner() {
                     </svg>
                   </span>
                 </h1>
-              </div>
-
-              {/* Subtitle */}
-              <p style={{ fontSize: "15px", color: "rgb(169,181,174)", maxWidth: "380px", lineHeight: 1.5, margin: 0 }}>
-                {t("ig.hero.subtitle1")}
-                <br />
-                <span style={{ color: "rgb(107,117,111)" }}>{t("ig.hero.subtitle2")}</span>
-              </p>
-
-              {/* Price anchor + delivery */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-                <p style={{ margin: 0, fontSize: "14px", color: "rgb(169,181,174)" }}>
-                  {minPrice !== null && <>{t("hero.startingAt")} <span style={{ fontSize: "28px", fontWeight: 900, color: "#E1306C", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
+                <p className="hero-subtitle-desktop" style={{ fontSize: "15px", color: "rgb(169,181,174)", maxWidth: "380px", lineHeight: 1.5, margin: 0 }}>
+                  {t("ig.hero.subtitle1")}
+                  <br />
+                  <span style={{ color: "rgb(107,117,111)" }}>{t("ig.hero.subtitle2")}</span>
                 </p>
-                <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
-                  ⚡ {t("hero.delivery")}
-                </span>
               </div>
 
-              {/* Live order counter */}
-              <LiveOrderCounter platform="instagram" />
-
-              {/* Social proof */}
-              <SocialProof />
-
-              {/* CTA */}
-              <button
-                onClick={() => { posthog?.capture("cta_clicked", { platform: "instagram" }); setStep("shop"); }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "16px 36px",
-                  borderRadius: "14px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 700,
-                  fontSize: "15px",
-                  fontFamily: "inherit",
-                  color: "#fff",
-                  background: "linear-gradient(135deg, #833AB4, #E1306C, #F77737)",
-                  boxShadow: "0 10px 40px rgba(225, 48, 108, 0.25)",
-                  transition: "transform 0.15s, box-shadow 0.15s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.04)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
-                </svg>
-                {t("ig.hero.cta")}
-              </button>
+              {/* Right group: Price + Social + CTA + Status */}
+              <div className="hero-right" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                  <p style={{ margin: 0, fontSize: "14px", color: "rgb(169,181,174)" }}>
+                    {minPrice !== null && <>{t("hero.startingAt")} <span style={{ fontSize: "28px", fontWeight: 900, color: "#E1306C", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
+                  </p>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: "5px",
+                    fontSize: "12px", fontWeight: 700, color: "#E1306C",
+                    padding: "4px 12px", borderRadius: "999px",
+                    background: "rgba(225,48,108,0.1)", border: "1px solid rgba(225,48,108,0.25)",
+                  }}>
+                    ⚡ {t("hero.delivery")}
+                  </span>
+                </div>
+                <LiveOrderCounter platform="instagram" />
+                <SocialProof />
+                <GuaranteeBadges accent="#E1306C" />
+                <button
+                  onClick={() => { posthog?.capture("cta_clicked", { platform: "instagram" }); setStep("shop"); }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "16px 36px",
+                    borderRadius: "14px",
+                    border: "none",
+                    cursor: "pointer",
+                    fontWeight: 700,
+                    fontSize: "15px",
+                    fontFamily: "inherit",
+                    color: "#fff",
+                    background: "linear-gradient(135deg, #833AB4, #E1306C, #F77737)",
+                    boxShadow: "0 10px 40px rgba(225, 48, 108, 0.25)",
+                    transition: "transform 0.15s, box-shadow 0.15s",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.04)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
+                  </svg>
+                  {t("ig.hero.cta")}
+                </button>
+                <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "#E1306C", flexShrink: 0 }} />
+                  <span style={{ color: "#E1306C", fontWeight: 600 }}>{t("hero.operational")}</span>
+                  <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
+                </div>
+              </div>
 
               {/* Sticky mobile CTA */}
               <StickyMobileCTA
@@ -254,15 +261,8 @@ function InstagramHomePageInner() {
                 onClick={() => { posthog?.capture("cta_clicked", { source: "sticky_mobile", platform: "instagram" }); setStep("shop"); }}
               />
 
-              {/* Operational status */}
-              <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "#E1306C", flexShrink: 0 }} />
-                <span style={{ color: "#E1306C", fontWeight: 600 }}>{t("hero.operational")}</span>
-                <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
-              </div>
-
               {/* Scroll hint arrow */}
-              <div style={{ position: "absolute", bottom: "20px", left: "50%", transform: "translateX(-50%)", animation: "bounce 2s ease-in-out infinite" }}>
+              <div className="scroll-hint-arrow" style={{ position: "absolute", bottom: "20px", left: "50%", transform: "translateX(-50%)", animation: "bounce 2s ease-in-out infinite" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgb(107,117,111)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5v14M19 12l-7 7-7-7" />
                 </svg>
@@ -270,7 +270,43 @@ function InstagramHomePageInner() {
             </div>
 
             {/* Below-the-fold */}
-            <div style={{ width: "100%", maxWidth: "540px", padding: "48px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "32px" }}>
+            <div className="below-fold" style={{ width: "100%", maxWidth: "540px", padding: "48px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "32px" }}>
+              {/* Other platforms */}
+              <div style={{ width: "100%" }}>
+                <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#E1306C", marginBottom: "16px", textAlign: "center" }}>{t("ig.otherPlatforms")}</p>
+                <div className="platform-links-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  {[
+                    { name: "TikTok", path: "/tiktok", color: "#69C9D0", icon: <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.16 8.16 0 0 0 4.76 1.52V6.83a4.85 4.85 0 0 1-1-.14Z" /> },
+                    { name: "YouTube", path: "/youtube", color: "#FF0000", icon: <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81ZM9.75 15.02V8.98L15.5 12l-5.75 3.02Z" /> },
+                    { name: "X (Twitter)", path: "/x", color: "#1D9BF0", icon: <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /> },
+                    { name: "Twitch", path: "/twitch", color: "#9146FF", icon: <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" /> },
+                  ].map((p) => (
+                    <a
+                      key={p.name}
+                      href={href(p.path)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "10px",
+                        padding: "14px 16px", borderRadius: "12px",
+                        border: `1px solid ${p.color}22`,
+                        background: `${p.color}08`,
+                        textDecoration: "none",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${p.color}44`; e.currentTarget.style.background = `${p.color}14`; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${p.color}22`; e.currentTarget.style.background = `${p.color}08`; e.currentTarget.style.transform = "translateY(0)"; }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill={p.color} style={{ flexShrink: 0 }}>
+                        {p.icon}
+                      </svg>
+                      <span style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>{p.name}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(107,117,111)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto", flexShrink: 0 }}>
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
               {/* How it works */}
               <div style={{ width: "100%" }}>
                 <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#E1306C", marginBottom: "16px", textAlign: "center" }}>{t("howItWorks.title")}</p>
@@ -289,35 +325,50 @@ function InstagramHomePageInner() {
                 </div>
               </div>
 
-              {/* FAQ */}
-              <div style={{ width: "100%" }}>
-                <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#E1306C", marginBottom: "16px", textAlign: "center" }}>{t("faq.title")}</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {[
-                    { q: t("ig.faq.q1"), a: t("ig.faq.a1") },
-                    { q: t("ig.faq.q2"), a: t("ig.faq.a2") },
-                    { q: t("ig.faq.q3"), a: t("ig.faq.a3") },
-                    { q: t("ig.faq.q4"), a: t("ig.faq.a4") },
-                  ].map((faq) => (
-                    <details key={faq.q} onClick={() => posthog?.capture("faq_opened", { question: faq.q })} style={{ borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", overflow: "hidden" }}>
-                      <summary style={{ padding: "14px 16px", fontSize: "13px", fontWeight: 600, color: "#fff", cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        {faq.q}
-                        <span style={{ fontSize: "16px", color: "rgb(107, 117, 111)", marginLeft: "8px", flexShrink: 0 }}>+</span>
-                      </summary>
-                      <div style={{ padding: "0 16px 14px 16px", fontSize: "12px", lineHeight: 1.6, color: "rgb(107, 117, 111)" }}>
-                        {faq.a}
-                      </div>
-                    </details>
-                  ))}
-                </div>
-              </div>
+              {/* Testimonials */}
+              <Testimonials accent="#E1306C" />
 
-              {/* Link to TikTok/YouTube */}
-              <div style={{ marginTop: "32px" }}>
-                <a href={href("/")} style={{ fontSize: "12px", color: "rgb(107, 117, 111)", textDecoration: "underline" }}>
-                  {t("ig.linkToTikTok")}
-                </a>
-              </div>
+              {/* FAQ */}
+              {(() => {
+                const faqItems = [
+                  { q: t("ig.faq.q1"), a: t("ig.faq.a1") },
+                  { q: t("ig.faq.q2"), a: t("ig.faq.a2") },
+                  { q: t("ig.faq.q3"), a: t("ig.faq.a3") },
+                  { q: t("ig.faq.q4"), a: t("ig.faq.a4") },
+                ];
+                const faqSchema = {
+                  "@context": "https://schema.org",
+                  "@type": "FAQPage",
+                  mainEntity: faqItems.map((f) => ({
+                    "@type": "Question",
+                    name: f.q,
+                    acceptedAnswer: { "@type": "Answer", text: f.a },
+                  })),
+                };
+                return (
+                  <div style={{ width: "100%" }}>
+                    <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#E1306C", marginBottom: "16px", textAlign: "center" }}>{t("faq.title")}</p>
+                    <div className="faq-grid" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {faqItems.map((faq) => (
+                        <details key={faq.q} onClick={() => posthog?.capture("faq_opened", { question: faq.q })} style={{ borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.02)", overflow: "hidden" }}>
+                          <summary style={{ padding: "14px 16px", fontSize: "13px", fontWeight: 600, color: "#fff", cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            {faq.q}
+                            <span style={{ fontSize: "16px", color: "rgb(107, 117, 111)", marginLeft: "8px", flexShrink: 0 }}>+</span>
+                          </summary>
+                          <div style={{ padding: "0 16px 14px 16px", fontSize: "12px", lineHeight: 1.6, color: "rgb(107, 117, 111)" }}>
+                            {faq.a}
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+                    <script
+                      type="application/ld+json"
+                      dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+                    />
+                  </div>
+                );
+              })()}
+
             </div>
           </>
         );
@@ -394,10 +445,8 @@ function InstagramHomePageInner() {
                   console.error("Failed to fetch posts for pickPosts:", err);
                 }
                 setFetchingPosts(false);
-                // Posts fetch failed or empty — block payment to prevent paying for likes/views without post assignments
+                // Posts fetch failed or empty — skip post picker, go straight to payment
                 posthog?.capture("posts_fetch_failed", { platform, username });
-                alert(t("posts.fetchFailed"));
-                return;
               }
               setStep("payment");
             }}
@@ -494,15 +543,7 @@ function InstagramHomePageInner() {
                 console.error("Failed to fetch posts for upsell pickPosts:", err);
               }
               setFetchingPosts(false);
-              // Posts fetch failed — roll back cart addition and alert
-              setCart((prev) => {
-                const idx = prev.findIndex((c) => c.service === item.service && c.qty === item.qty && c.price === item.price);
-                if (idx === -1) return prev;
-                const copy = [...prev];
-                copy.splice(idx, 1);
-                return copy;
-              });
-              alert(t("posts.fetchFailed"));
+              // Posts fetch failed — keep item in cart, stay on payment
             }}
           />
         );
@@ -515,6 +556,7 @@ function InstagramHomePageInner() {
             cart={cart}
             platform={platform}
             onReset={() => { setStep("hero"); setUsername(""); setCart([]); setPostAssignments(undefined); setScanData(null); setOrderId(undefined); try { sessionStorage.clear(); } catch {} }}
+            onUpsellClick={() => { setCart([]); setPostAssignments(undefined); setOrderId(undefined); setStep("shop"); }}
           />
         );
 

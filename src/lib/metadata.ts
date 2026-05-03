@@ -26,7 +26,7 @@ interface PageMeta {
 }
 
 const pages: Record<string, PageMeta> = {
-  home: {
+  tiktok: {
     title: {
       fr: "Fanovaly — Boostez votre croissance TikTok & YouTube",
       en: "Fanovaly — Boost your TikTok, YouTube & Spotify growth",
@@ -76,7 +76,7 @@ const pages: Record<string, PageMeta> = {
       pt: "Aumente sua audiência no TikTok, YouTube e Spotify. Crescimento rápido e natural, pagamento seguro.",
       de: "Steigere deine Reichweite auf TikTok, YouTube und Spotify. Schnelles Wachstum, sichere Zahlung.",
     },
-    canonical: "https://fanovaly.com",
+    canonical: "https://fanovaly.com/tiktok",
   },
   instagram: {
     title: {
@@ -128,7 +128,7 @@ const pages: Record<string, PageMeta> = {
       pt: "Nossa IA analisa seu perfil e cria uma estratégia de crescimento personalizada para Instagram.",
       de: "Unsere KI analysiert dein Profil und erstellt eine personalisierte Instagram-Wachstumsstrategie.",
     },
-    canonical: "https://fanovaly.com/instagram",
+    canonical: "https://fanovaly.com",
   },
   youtube: {
     title: {

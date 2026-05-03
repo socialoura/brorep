@@ -12,7 +12,7 @@ export async function GET() {
     } catch {
       rows = await sql`SELECT service, qty, price, 0 as price_usd, 0 as price_gbp, 0 as price_cad, 0 as price_nzd, 0 as price_aud, 0 as price_chf, false as popular FROM pricing WHERE active = true ORDER BY service, qty`;
     }
-    return NextResponse.json({ pricing: rows });
+    return NextResponse.json({ pricing: rows }, { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" } });
   } catch (err) {
     console.error("Pricing API error:", err);
     return NextResponse.json({ error: "Failed to fetch pricing" }, { status: 500 });

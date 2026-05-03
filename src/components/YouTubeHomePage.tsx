@@ -155,9 +155,9 @@ function YouTubeHomePageInner() {
             </div>
 
             {/* Comment ça marche */}
-            <div style={{ width: "100%", maxWidth: "540px", marginTop: "48px" }}>
+            <div className="below-fold" style={{ width: "100%", maxWidth: "540px", marginTop: "48px" }}>
               <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#FF0000", marginBottom: "16px" }}>{t("howItWorks.title")}</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+              <div className="grid-steps" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
                 {[
                   { num: "1", title: t("yt.howItWorks.step1.title"), desc: t("yt.howItWorks.step1.desc") },
                   { num: "2", title: t("yt.howItWorks.step2.title"), desc: t("yt.howItWorks.step2.desc") },
@@ -173,9 +173,9 @@ function YouTubeHomePageInner() {
             </div>
 
             {/* FAQ */}
-            <div style={{ width: "100%", maxWidth: "540px", marginTop: "40px" }}>
+            <div className="below-fold" style={{ width: "100%", maxWidth: "540px", marginTop: "40px" }}>
               <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#FF0000", marginBottom: "16px" }}>{t("faq.title")}</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div className="faq-grid" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {[
                   { q: t("yt.faq.q1"), a: t("yt.faq.a1") },
                   { q: t("yt.faq.q2"), a: t("yt.faq.a2") },

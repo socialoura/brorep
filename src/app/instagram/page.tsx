@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
-import InstagramHomePage from "@/components/InstagramHomePage";
-import { generatePageMetadata } from "@/lib/metadata";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
-  return generatePageMetadata("instagram", await searchParams);
-}
-
-export default function InstagramPage() {
-  return <InstagramHomePage />;
+export default function InstagramRedirect({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+  const lang = typeof searchParams.lang === "string" ? searchParams.lang : undefined;
+  redirect(lang ? `/?lang=${lang}` : "/");
 }

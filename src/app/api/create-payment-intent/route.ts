@@ -6,9 +6,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
+    const country = req.headers.get("x-vercel-ip-country") || "";
     const body = await req.json();
     const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency, lang: reqLang } = body;
-    const lang = (["en","es","pt","de"].includes(reqLang)) ? reqLang : "fr";
+    const lang = (["fr","es","pt","de"].includes(reqLang)) ? reqLang : "en";
     const validCurrencies = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
     const currency = validCurrencies.includes(reqCurrency) ? reqCurrency : "eur";
 
@@ -58,11 +59,39 @@ export async function POST(req: NextRequest) {
         email: email || "",
         cart: JSON.stringify(cart.map((c: { service: string; label: string; qty: number; price: number; priceUsd?: number; liveStartAt?: string }) => ({ s: c.service, l: c.label, q: c.qty, p: c.price, pu: c.priceUsd || c.price, ...(c.liveStartAt ? { ls: c.liveStartAt } : {}) }))),
         currency,
-        postAssignments: postAssignments ? JSON.stringify(postAssignments.map((pa: { postId: string; likes: boolean; views: boolean }) => ({ id: pa.postId, l: pa.likes ? 1 : 0, v: pa.views ? 1 : 0 }))) : "[]",
+        postAssignments: (() => {
+          if (!postAssignments || postAssignments.length === 0) return "[]";
+          const compact = postAssignments.map((pa: { postId: string; likes: boolean; views: boolean }) => ({ id: pa.postId, l: pa.likes ? 1 : 0, v: pa.views ? 1 : 0 }));
+          // Extract common suffix (Instagram IDs: "mediaId_userId") to save space
+          const ids = compact.map((p: { id: string }) => p.id);
+          const parts = ids[0]?.split("_");
+          const suffix = parts?.length === 2 ? `_${parts[1]}` : "";
+          const allShareSuffix = suffix && ids.every((id: string) => id.endsWith(suffix));
+          let result: string;
+          if (allShareSuffix) {
+            const short = compact.map((p: { id: string; l: number; v: number }) => ({ id: p.id.replace(suffix, ""), l: p.l, v: p.v }));
+            result = JSON.stringify({ s: suffix, p: short });
+          } else {
+            result = JSON.stringify(compact);
+          }
+          // Truncate posts from the end if still over 500 chars
+          while (result.length > 500) {
+            compact.pop();
+            if (allShareSuffix) {
+              const short = compact.map((p: { id: string; l: number; v: number }) => ({ id: p.id.replace(suffix, ""), l: p.l, v: p.v }));
+              result = JSON.stringify({ s: suffix, p: short });
+            } else {
+              result = JSON.stringify(compact);
+            }
+            if (compact.length === 0) break;
+          }
+          return result;
+        })(),
         postsCount: postAssignments ? String(postAssignments.length) : "0",
         promoCode: appliedPromo,
         followersBefore: String(followersBefore || 0),
         lang,
+        country,
       },
       description: `Fanovaly: ${description} ${currency === "usd" ? "for" : "pour"} @${username}`,
     });

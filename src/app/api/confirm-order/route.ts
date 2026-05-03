@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
 
     // Cart: compact {s,l,q,p} → full {service,label,qty,price}
     const piCurrency = meta.currency || (pi.currency === "usd" ? "usd" : "eur");
-    const lang = (["en","es","pt","de"].includes(meta.lang)) ? meta.lang as "en"|"es"|"pt"|"de" : "fr" as const;
+    const country = meta.country || "";
+    const lang = (["fr","es","pt","de"].includes(meta.lang)) ? meta.lang as "fr"|"es"|"pt"|"de" : "en" as const;
 
     const rawCart = meta.cart ? JSON.parse(meta.cart) : [];
     const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; pu?: number; ls?: string; service?: string; label?: string; qty?: number; price?: number; priceUsd?: number; liveStartAt?: string }) =>
@@ -44,8 +45,18 @@ export async function POST(req: NextRequest) {
       if (plat === "youtube") return `https://www.youtube.com/watch?v=${postId}`;
       return "";
     }
-    const rawPosts = meta.postAssignments ? JSON.parse(meta.postAssignments) : null;
-    const postAssignments = rawPosts ? rawPosts.map((pa: { id?: string; l?: number; v?: number; postId?: string; likes?: boolean; views?: boolean }) =>
+    const rawPostsJson = meta.postAssignments ? JSON.parse(meta.postAssignments) : null;
+    // Decode compressed format: { s: "_userId", p: [{ id, l, v }] } or legacy array [{ id, l, v }]
+    let rawPosts: { id?: string; l?: number; v?: number; postId?: string; likes?: boolean; views?: boolean }[] | null = null;
+    if (rawPostsJson) {
+      if (Array.isArray(rawPostsJson)) {
+        rawPosts = rawPostsJson;
+      } else if (rawPostsJson.s && Array.isArray(rawPostsJson.p)) {
+        // Reconstruct full IDs from suffix
+        rawPosts = rawPostsJson.p.map((p: { id: string; l: number; v: number }) => ({ id: `${p.id}${rawPostsJson.s}`, l: p.l, v: p.v }));
+      }
+    }
+    const postAssignments = rawPosts ? rawPosts.map((pa) =>
       pa.postId ? pa : { postId: pa.id, postUrl: buildPostUrl(platform, username, pa.id || ""), imageUrl: "", likes: !!pa.l, views: !!pa.v }
     ) : null;
 
@@ -72,6 +83,8 @@ export async function POST(req: NextRequest) {
         status: "paid",
         followersBefore: Number(meta.followersBefore) || 0,
         currency: piCurrency,
+        country: country || undefined,
+        lang,
       });
     } catch (dbErr) {
       console.error("DB order creation error:", dbErr);

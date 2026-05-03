@@ -151,10 +151,11 @@ function TwitchHomePageInner() {
       case "hero":
         return (
           <>
-            <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "32px 24px 40px", width: "100%", maxWidth: "672px", textAlign: "center", position: "relative" }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+            <div className="hero-section" style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "32px 24px 40px", width: "100%", maxWidth: "672px", textAlign: "center", position: "relative" }}>
+              {/* Left group: Logo + Title + Subtitle */}
+              <div className="hero-left" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
                 <FanovalyLogo />
-                <h1 style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
+                <h1 className="hero-title-desktop" style={{ fontSize: "clamp(2.4rem, 9vw, 4.8rem)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
                   {t("tw.hero.title1")}
                   <br />
                   <span style={{ color: "#fff" }}>{t("tw.hero.title2")}</span>
@@ -165,50 +166,49 @@ function TwitchHomePageInner() {
                     </svg>
                   </span>
                 </h1>
-              </div>
-
-              <p style={{ fontSize: "15px", color: "rgb(169,181,174)", maxWidth: "380px", lineHeight: 1.5, margin: 0 }}>
-                {<>{t("tw.hero.subtitle1")}<br /><span style={{ color: "rgb(107,117,111)" }}>{t("tw.hero.subtitle2")}</span></>}
-              </p>
-
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-                <p style={{ margin: 0, fontSize: "14px", color: "rgb(169,181,174)" }}>
-                  {minPrice !== null && <>{t("hero.startingAt")} <span style={{ fontSize: "28px", fontWeight: 900, color: "rgb(145,71,255)", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
+                <p className="hero-subtitle-desktop" style={{ fontSize: "15px", color: "rgb(169,181,174)", maxWidth: "380px", lineHeight: 1.5, margin: 0 }}>
+                  {<>{t("tw.hero.subtitle1")}<br /><span style={{ color: "rgb(107,117,111)" }}>{t("tw.hero.subtitle2")}</span></>}
                 </p>
-                <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
-                  ⚡ {t("tw.hero.delivery")}
-                </span>
               </div>
 
-              <SocialProof />
-
-              <button
-                onClick={() => { posthog?.capture("twitch_cta_clicked"); setStep("shop"); }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                  padding: "14px 32px", borderRadius: "14px", border: "none", cursor: "pointer",
-                  fontSize: "15px", fontWeight: 700, fontFamily: "inherit",
-                  background: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))",
-                  color: "#fff", boxShadow: "0 4px 24px rgba(145,71,255,0.3)",
-                }}
-              >
-                {t("tw.hero.cta")}
-              </button>
-
-              <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "rgb(145,71,255)", flexShrink: 0 }} />
-                <span style={{ color: "rgb(145,71,255)", fontWeight: 600 }}>{t("hero.operational")}</span>
-                <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
+              {/* Right group: Price + Social + CTA + Status */}
+              <div className="hero-right" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                  <p style={{ margin: 0, fontSize: "14px", color: "rgb(169,181,174)" }}>
+                    {minPrice !== null && <>{t("hero.startingAt")} <span style={{ fontSize: "28px", fontWeight: 900, color: "rgb(145,71,255)", marginLeft: "4px" }}>{fmtPrice(currency === "usd" ? (minPriceUsd ?? minPrice) : minPrice, currency)}</span></>}
+                  </p>
+                  <span style={{ fontSize: "11px", color: "rgb(107,117,111)" }}>
+                    ⚡ {t("tw.hero.delivery")}
+                  </span>
+                </div>
+                <SocialProof />
+                <button
+                  onClick={() => { posthog?.capture("twitch_cta_clicked"); setStep("shop"); }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    padding: "14px 32px", borderRadius: "14px", border: "none", cursor: "pointer",
+                    fontSize: "15px", fontWeight: 700, fontFamily: "inherit",
+                    background: "linear-gradient(135deg, rgb(110,50,200), rgb(145,71,255))",
+                    color: "#fff", boxShadow: "0 4px 24px rgba(145,71,255,0.3)",
+                  }}
+                >
+                  {t("tw.hero.cta")}
+                </button>
+                <div className="flex items-center gap-1.5" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: "rgb(145,71,255)", flexShrink: 0 }} />
+                  <span style={{ color: "rgb(145,71,255)", fontWeight: 600 }}>{t("hero.operational")}</span>
+                  <span className="text-gray-500">({new Date().toLocaleDateString(LANG_LOCALE[lang], { day: "numeric", month: "long", year: "numeric" })})</span>
+                </div>
               </div>
 
-              <div style={{ position: "absolute", bottom: "20px", left: "50%", transform: "translateX(-50%)", animation: "bounce 2s ease-in-out infinite" }}>
+              <div className="scroll-hint-arrow" style={{ position: "absolute", bottom: "20px", left: "50%", transform: "translateX(-50%)", animation: "bounce 2s ease-in-out infinite" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgb(107,117,111)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5v14M19 12l-7 7-7-7" />
                 </svg>
               </div>
             </div>
 
-            <div style={{ width: "100%", maxWidth: "540px", padding: "48px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "32px" }}>
+            <div className="below-fold" style={{ width: "100%", maxWidth: "540px", padding: "48px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "32px" }}>
               <div style={{ width: "100%" }}>
                 <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)", marginBottom: "16px", textAlign: "center" }}>{t("howItWorks.title")}</p>
                 <div className="grid-steps">
@@ -228,7 +228,7 @@ function TwitchHomePageInner() {
 
               <div style={{ width: "100%" }}>
                 <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgb(145,71,255)", marginBottom: "16px", textAlign: "center" }}>{t("faq.title")}</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div className="faq-grid" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {[
                     { q: t("tw.faq.q1"), a: t("tw.faq.a1") },
                     { q: t("tw.faq.q2"), a: t("tw.faq.a2") },
