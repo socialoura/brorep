@@ -221,7 +221,6 @@ function InstagramHomePageInner() {
                 </div>
                 <LiveOrderCounter platform="instagram" />
                 <SocialProof />
-                <GuaranteeBadges accent="#E1306C" />
                 <button
                   onClick={() => { posthog?.capture("cta_clicked", { platform: "instagram" }); setStep("shop"); }}
                   style={{
