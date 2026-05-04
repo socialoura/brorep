@@ -6,6 +6,6 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   return generatePageMetadata("spotify", await searchParams);
 }
 
-export default function SpotifyRoutePage() {
+export default function SpotifyEnRoutePage() {
   return <SpotifyPage />;
 }

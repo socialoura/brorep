@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: base, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
     { url: `${base}/tiktok`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/youtube`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${base}/spotify`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/spotify-en`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/x`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/twitch`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/instagram`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },

@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/spotify",
+        destination: "/spotify-en",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
