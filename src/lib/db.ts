@@ -378,6 +378,17 @@ export async function initDb() {
   }
 }
 
+let variantColumnEnsured = false;
+async function ensureVariantColumn() {
+  if (variantColumnEnsured) return;
+  try {
+    await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS variant VARCHAR(1) DEFAULT NULL`;
+    variantColumnEnsured = true;
+  } catch (e) {
+    console.error("Failed to ensure variant column:", e);
+  }
+}
+
 export async function createOrder(params: {
   stripePaymentIntentId: string;
   email: string;
@@ -393,6 +404,7 @@ export async function createOrder(params: {
   lang?: string;
   variant?: string;
 }) {
+  await ensureVariantColumn();
   const result = await sql`
     INSERT INTO orders (stripe_payment_intent_id, email, username, platform, cart, post_assignments, total_cents, status, followers_before, currency, country, lang, variant)
     VALUES (
