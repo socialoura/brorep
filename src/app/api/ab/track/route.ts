@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
+let tableEnsured = false;
+
+async function ensureTable() {
+  if (tableEnsured) return;
+  await sql`
+    CREATE TABLE IF NOT EXISTS ab_visitors (
+      visitor_id VARCHAR(64) PRIMARY KEY,
+      variant VARCHAR(1) NOT NULL,
+      first_seen TIMESTAMPTZ DEFAULT NOW(),
+      last_seen TIMESTAMPTZ DEFAULT NOW(),
+      country VARCHAR(2),
+      lang VARCHAR(2),
+      visits INTEGER DEFAULT 1
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ab_visitors_variant ON ab_visitors(variant)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ab_visitors_first_seen ON ab_visitors(first_seen)`;
+  tableEnsured = true;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { visitorId, variant } = await req.json();
@@ -8,6 +28,8 @@ export async function POST(req: NextRequest) {
     if (!visitorId || (variant !== "A" && variant !== "B")) {
       return NextResponse.json({ error: "Invalid params" }, { status: 400 });
     }
+
+    await ensureTable();
 
     // Truncate visitor_id to 64 chars
     const id = String(visitorId).slice(0, 64);
@@ -32,6 +54,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, variant });
   } catch (err) {
     console.error("AB track error:", err);
-    return NextResponse.json({ error: "Failed to track" }, { status: 500 });
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
+let tableEnsured = false;
+
+async function ensureTables() {
+  if (tableEnsured) return;
+  await sql`
+    CREATE TABLE IF NOT EXISTS ab_visitors (
+      visitor_id VARCHAR(64) PRIMARY KEY,
+      variant VARCHAR(1) NOT NULL,
+      first_seen TIMESTAMPTZ DEFAULT NOW(),
+      last_seen TIMESTAMPTZ DEFAULT NOW(),
+      country VARCHAR(2),
+      lang VARCHAR(2),
+      visits INTEGER DEFAULT 1
+    )
+  `;
+  try { await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS variant VARCHAR(1) DEFAULT NULL`; } catch {}
+  tableEnsured = true;
+}
+
 function checkAuth(req: NextRequest): boolean {
   const auth = req.headers.get("authorization");
   if (!auth) return false;
@@ -64,6 +83,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    await ensureTables();
+
     // Fetch visitor counts per variant
     const visitorRows = await sql`
       SELECT variant, COUNT(*)::int as count
