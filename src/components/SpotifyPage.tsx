@@ -497,6 +497,22 @@ function SpotifyPageInner() {
         <div className="sp-hero">
           {/* Left: text content */}
           <div className="sp-hero-text">
+            {/* AI-Powered badge */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              padding: "6px 12px", borderRadius: "999px", alignSelf: "flex-start",
+              border: `1px solid ${G}`, backgroundColor: "rgba(29,185,84,0.08)",
+              fontSize: "11px", fontWeight: 700, color: G,
+              textTransform: "uppercase", letterSpacing: "0.05em",
+              boxShadow: "0 0 20px rgba(29,185,84,0.15)",
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={G} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+                <circle cx="12" cy="12" r="3" fill={G} />
+              </svg>
+              {t("spotify.aiBadge")}
+            </div>
+
             <h1 className="sp-hero-title" style={{ fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.1, textTransform: "uppercase", margin: 0, color: "#fff" }}>
               {t("spotify.heroTitle1")}
               <br />
