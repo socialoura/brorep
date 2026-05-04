@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
 
   const since = Math.floor(Date.now() / 1000) - hoursBack * 3600;
   const recovered: RecoveredOrder[] = [];
+  let totalListed = 0;
+  let totalSucceeded = 0;
+  let totalNonSucceeded = 0;
 
   try {
     let hasMore = true;
@@ -49,10 +52,15 @@ export async function POST(req: NextRequest) {
         ...(startingAfter ? { starting_after: startingAfter } : {}),
       });
 
+      totalListed += list.data.length;
+      console.log(`[recover-orders] iter=${iteration} listed=${list.data.length} hasMore=${list.has_more}`);
+
       for (const pi of list.data) {
         if (pi.status !== "succeeded") {
+          totalNonSucceeded++;
           continue;
         }
+        totalSucceeded++;
 
         const existing = await getOrderByPaymentIntent(pi.id).catch(() => null);
         if (existing) {
@@ -295,6 +303,12 @@ export async function POST(req: NextRequest) {
       skippedCount: recovered.filter((r) => r.status === "skipped").length,
       failedCount: recovered.filter((r) => r.status === "failed").length,
       totalScanned: recovered.length,
+      totalListedFromStripe: totalListed,
+      totalSucceeded,
+      totalNonSucceeded,
+      sinceTimestamp: since,
+      sinceDate: new Date(since * 1000).toISOString(),
+      currentDate: new Date().toISOString(),
       hoursBack,
       dryRun,
       placeSmm,

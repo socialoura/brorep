@@ -132,8 +132,44 @@ export default function AdminPage() {
   const [adCostDate, setAdCostDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [adCostValue, setAdCostValue] = useState("");
   const [adCostSaving, setAdCostSaving] = useState(false);
+  const [recoveringOrders, setRecoveringOrders] = useState(false);
+  const [recoverResult, setRecoverResult] = useState<string | null>(null);
 
   const headers = { Authorization: `Bearer ${password}`, "Content-Type": "application/json" };
+
+  const recoverOrders = async () => {
+    if (!confirm("Récupérer les commandes Stripe payées mais non créées en DB (7 derniers jours) ?")) return;
+    setRecoveringOrders(true);
+    setRecoverResult(null);
+    try {
+      const res = await fetch("/api/admin/recover-orders", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ hoursBack: 168 }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        setRecoverResult(`❌ Erreur : ${data.error}`);
+      } else {
+        const r = data.recoveredCount || 0;
+        const s = data.skippedCount || 0;
+        const f = data.failedCount || 0;
+        const listed = data.totalListedFromStripe ?? 0;
+        const succ = data.totalSucceeded ?? 0;
+        const nonsucc = data.totalNonSucceeded ?? 0;
+        const sinceDate = data.sinceDate ? new Date(data.sinceDate).toLocaleString("fr-FR") : "?";
+        setRecoverResult(
+          `✅ ${r} récupérée(s) | ${s} déjà en DB | ${f} échouée(s)\n` +
+          `🔍 Stripe: ${listed} PaymentIntents listés depuis ${sinceDate} (${succ} succeeded, ${nonsucc} non-succeeded)`
+        );
+        if (r > 0) fetchOrders(1, ordersEmailSearch);
+      }
+    } catch (e) {
+      setRecoverResult(`❌ Erreur réseau : ${String(e)}`);
+    } finally {
+      setRecoveringOrders(false);
+    }
+  };
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
@@ -642,7 +678,32 @@ export default function AdminPage() {
                 Effacer
               </button>
             )}
+            <div style={{ flex: 1 }} />
+            <button
+              onClick={recoverOrders}
+              disabled={recoveringOrders}
+              title="Récupère les commandes Stripe payées mais non créées en DB"
+              style={{
+                padding: "8px 14px",
+                borderRadius: "8px",
+                border: "1px solid rgba(245,158,11,0.4)",
+                backgroundColor: "rgba(245,158,11,0.1)",
+                color: "#f59e0b",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: recoveringOrders ? "wait" : "pointer",
+                fontFamily: "inherit",
+                opacity: recoveringOrders ? 0.6 : 1,
+              }}
+            >
+              {recoveringOrders ? "Récupération..." : "🔧 Recover orders"}
+            </button>
           </div>
+          {recoverResult && (
+            <div style={{ marginBottom: "12px", padding: "10px 14px", borderRadius: "8px", backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", color: "#f59e0b", fontSize: "13px", whiteSpace: "pre-wrap" }}>
+              {recoverResult}
+            </div>
+          )}
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
