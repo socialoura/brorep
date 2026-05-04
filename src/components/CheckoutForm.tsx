@@ -562,7 +562,7 @@ function PayForm({
       <CartRecap cart={cart} discount={discount} promoPercent={promoPercent} finalTotal={finalTotal} platform={platform} currency={currency} />
 
       {/* 3. Upsell suggestions */}
-      {onAddToCart && <UpsellSuggestions cart={cart} platform={platform} onAdd={onAddToCart} />}
+      {onAddToCart && platform !== "spotify" && <UpsellSuggestions cart={cart} platform={platform} onAdd={onAddToCart} />}
 
       {/* 4. Payment methods — only visible when email is valid */}
       {emailValid ? (
