@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useTranslation, fmtPrice, type Currency } from "@/lib/i18n";
 
 declare global {
@@ -74,12 +74,6 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
   };
   const c = colors[platform || "tiktok"] || colors.tiktok;
   const accent = c.accent;
-  const accentMid = c.mid;
-  const [promo, setPromo] = useState<{ code: string; percent: number; expiresAt: number } | null>(null);
-  const [countdown, setCountdown] = useState("");
-  const [copied, setCopied] = useState(false);
-  const fetched = useRef(false);
-
   // Fire Google Ads conversion once
   useEffect(() => {
     if (typeof window !== "undefined" && window.gtag && process.env.NEXT_PUBLIC_GOOGLE_ADS_ID && process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL) {
@@ -92,44 +86,6 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
       });
     }
   }, []);
-
-  // Fetch promo code once (only if we have a valid order)
-  useEffect(() => {
-    if (fetched.current || !orderId) return;
-    fetched.current = true;
-    fetch("/api/generate-promo", { method: "POST" })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.code) setPromo(data);
-      })
-      .catch(() => {});
-  }, [orderId]);
-
-  // Countdown timer
-  useEffect(() => {
-    if (!promo) return;
-    const update = () => {
-      const diff = promo.expiresAt * 1000 - Date.now();
-      if (diff <= 0) {
-        setCountdown(t("success.expired"));
-        return;
-      }
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setCountdown(`${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`);
-    };
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, [promo]);
-
-  function copyCode() {
-    if (!promo) return;
-    navigator.clipboard.writeText(promo.code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
 
   const green = accent;
 
@@ -147,79 +103,6 @@ export default function SuccessPage({ username, orderId, cart, onReset, platform
         {t("success.orderRegistered")} <span style={{ color: green, fontWeight: 600 }}>@{username}</span> {t("success.orderRegistered2")}
       </p>
 
-      {/* Promo code block */}
-      {promo && (
-        <div
-          style={{
-            marginTop: "8px",
-            width: "100%",
-            background: `linear-gradient(135deg, ${c.bg}, transparent)`,
-            border: `1px dashed ${c.border}`,
-            borderRadius: "16px",
-            padding: "24px 20px",
-            textAlign: "center",
-          }}
-        >
-          <p style={{ margin: "0 0 4px 0", fontSize: "11px", fontWeight: 600, color: "rgb(169, 181, 174)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            🎁 {t("success.giftTitle")}
-          </p>
-
-          {/* Code */}
-          <button
-            onClick={copyCode}
-            style={{
-              margin: "12px 0",
-              padding: "12px 24px",
-              borderRadius: "12px",
-              border: `1px solid ${c.border}`,
-              backgroundColor: c.bg,
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            <span className="promo-code-text" style={{ fontWeight: 800, color: green, fontFamily: "monospace" }}>
-              {promo.code}
-            </span>
-          </button>
-
-          <p style={{ margin: "0 0 6px 0", fontSize: "15px", fontWeight: 600, color: "#fff" }}>
-            -{promo.percent}% {t("success.offNextOrder")}
-          </p>
-
-          {/* Countdown */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "8px" }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(169, 181, 174)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-            </svg>
-            <span style={{ fontSize: "13px", color: "rgb(169, 181, 174)" }}>
-              {t("success.expiresIn")} <strong style={{ color: "#ffb800" }}>{countdown}</strong>
-            </span>
-          </div>
-
-          {/* Copy feedback */}
-          <p style={{ margin: "8px 0 0 0", fontSize: "11px", color: copied ? green : "rgb(107, 117, 111)", transition: "color 0.2s" }}>
-            {copied ? `✓ ${t("success.codeCopied")}` : t("success.clickToCopy")}
-          </p>
-        </div>
-      )}
-
-      {/* Loading state for promo */}
-      {!promo && (
-        <div style={{ marginTop: "8px", padding: "16px", textAlign: "center" }}>
-          <div
-            style={{
-              width: "20px",
-              height: "20px",
-              border: `2px solid ${c.border}`,
-              borderTopColor: accentMid,
-              borderRadius: "50%",
-              animation: "spin 0.8s linear infinite",
-              margin: "0 auto 8px auto",
-            }}
-          />
-          <p style={{ fontSize: "12px", color: "rgb(107, 117, 111)", margin: 0 }}>{t("success.generatingPromo")}</p>
-        </div>
-      )}
 
       {/* Order tracking link */}
       {orderId && (
