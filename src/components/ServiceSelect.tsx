@@ -6,6 +6,7 @@ import posthog from "posthog-js";
 import type { ScanResult } from "@/components/ScanLoading";
 import type { YouTubeVideoInfo } from "@/components/YouTubeUrlInput";
 import { useTranslation, fmtPrice, type Currency } from "@/lib/i18n";
+import { useAbVariant } from "@/lib/useAbVariant";
 
 type ServiceType = "followers" | "likes" | "views" | "yt_subscribers" | "yt_likes" | "yt_views" | "sp_streams" | "x_followers" | "x_likes" | "x_retweets" | "tw_followers" | "tw_live_viewers";
 
@@ -314,6 +315,7 @@ export default function ServiceSelect({
   onVideoInfoChange?: (info: YouTubeVideoInfo | null) => void;
 }) {
   const { t, lang, currency } = useTranslation();
+  const { variant: abVariant, ready: abReady } = useAbVariant();
   const svcLabel = (key: string) => t(`svc.${key}` as Parameters<typeof t>[0]) || key;
   const isYouTube = platform === "youtube";
   const isInstagram = platform === "instagram";
@@ -357,8 +359,13 @@ export default function ServiceSelect({
       .then((data) => { if (data.combos) setCombos(data.combos); })
       .catch(() => {})
       .finally(() => setCombosLoading(false));
+  }, [platform]);
 
-    fetch("/api/pricing")
+  // Fetch pricing — re-runs once A/B variant is determined.
+  useEffect(() => {
+    if (!abReady) return; // wait for variant to be resolved client-side
+
+    fetch(`/api/pricing?variant=${abVariant}`)
       .then((r) => r.json())
       .then((data) => {
         if (!data.pricing || !Array.isArray(data.pricing)) return;
@@ -387,7 +394,7 @@ export default function ServiceSelect({
       })
       .catch(() => {})
       .finally(() => setPricingLoaded(true));
-  }, []);
+  }, [abReady, abVariant, activeKeys]);
 
   // Debounced lookup for profile (or YouTube video) preview based on the input value.
   useEffect(() => {

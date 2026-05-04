@@ -50,6 +50,22 @@ export async function initDb() {
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS lang VARCHAR(2) DEFAULT 'fr'`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS followup_day1_sent BOOLEAN DEFAULT false`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS followup_delivered_sent BOOLEAN DEFAULT false`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS variant VARCHAR(1) DEFAULT NULL`;
+
+  // A/B test visitors tracking
+  await sql`
+    CREATE TABLE IF NOT EXISTS ab_visitors (
+      visitor_id VARCHAR(64) PRIMARY KEY,
+      variant VARCHAR(1) NOT NULL,
+      first_seen TIMESTAMPTZ DEFAULT NOW(),
+      last_seen TIMESTAMPTZ DEFAULT NOW(),
+      country VARCHAR(2),
+      lang VARCHAR(2),
+      visits INTEGER DEFAULT 1
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ab_visitors_variant ON ab_visitors(variant)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ab_visitors_first_seen ON ab_visitors(first_seen)`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS smm_config (
@@ -375,9 +391,10 @@ export async function createOrder(params: {
   currency?: string;
   country?: string;
   lang?: string;
+  variant?: string;
 }) {
   const result = await sql`
-    INSERT INTO orders (stripe_payment_intent_id, email, username, platform, cart, post_assignments, total_cents, status, followers_before, currency, country, lang)
+    INSERT INTO orders (stripe_payment_intent_id, email, username, platform, cart, post_assignments, total_cents, status, followers_before, currency, country, lang, variant)
     VALUES (
       ${params.stripePaymentIntentId},
       ${params.email},
@@ -390,7 +407,8 @@ export async function createOrder(params: {
       ${params.followersBefore || 0},
       ${params.currency || "eur"},
       ${params.country || null},
-      ${params.lang || "fr"}
+      ${params.lang || "fr"},
+      ${params.variant || null}
     )
     RETURNING id
   `;

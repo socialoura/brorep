@@ -11,6 +11,7 @@ import "./globals.css";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"));
 const VisitTracker = dynamic(() => import("@/components/VisitTracker"));
+const AbTracker = dynamic(() => import("@/components/AbTracker"));
 
 const VALID_CURRENCIES: Currency[] = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
 
@@ -216,6 +217,7 @@ export default async function RootLayout({
           <Footer />
           <ChatWidget />
           <VisitTracker />
+          <AbTracker />
         </CurrencyProvider>
       </body>
     </html>

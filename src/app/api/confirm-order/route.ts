@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const piCurrency = meta.currency || (pi.currency === "usd" ? "usd" : "eur");
     const country = meta.country || "";
     const lang = (["fr","es","pt","de"].includes(meta.lang)) ? meta.lang as "fr"|"es"|"pt"|"de" : "en" as const;
+    const variant = (meta.variant === "A" || meta.variant === "B") ? meta.variant : null;
 
     const rawCart = meta.cart ? JSON.parse(meta.cart) : [];
     const cart = rawCart.map((c: { s?: string; l?: string; q?: number; p?: number; pu?: number; ls?: string; service?: string; label?: string; qty?: number; price?: number; priceUsd?: number; liveStartAt?: string }) =>
@@ -85,6 +86,7 @@ export async function POST(req: NextRequest) {
         currency: piCurrency,
         country: country || undefined,
         lang,
+        variant: variant || undefined,
       });
     } catch (dbErr) {
       console.error("DB order creation error:", dbErr);

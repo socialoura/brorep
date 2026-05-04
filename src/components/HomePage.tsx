@@ -21,6 +21,7 @@ import type { PostAssignment } from "@/components/PostPicker";
 import CheckoutForm from "@/components/CheckoutForm";
 import SuccessPage from "@/components/SuccessPage";
 import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
+import { useAbVariant } from "@/lib/useAbVariant";
 
 type Step = "hero" | "platform" | "username" | "scanning" | "results" | "shop" | "pickPosts" | "payment" | "success";
 
@@ -106,12 +107,14 @@ function HomePageInner() {
   const [hydrated, setHydrated] = useState(false);
   const posthog = usePostHog();
   const { t, lang, currency } = useTranslation();
+  const { variant: abVariant, ready: abReady } = useAbVariant();
 
   // Compute minimum price across all TikTok/IG services
   const [minPrice, setMinPrice] = useState<number | null>(null);
   const [minPriceUsd, setMinPriceUsd] = useState<number | null>(null);
   useEffect(() => {
-    fetch("/api/pricing")
+    if (!abReady) return;
+    fetch(`/api/pricing?variant=${abVariant}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.pricing && Array.isArray(data.pricing) && data.pricing.length > 0) {
@@ -124,7 +127,7 @@ function HomePageInner() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [abReady, abVariant]);
 
   // Restore from sessionStorage after hydration (client-only)
   useEffect(() => {

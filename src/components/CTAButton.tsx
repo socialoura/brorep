@@ -2,14 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation, fmtPrice } from "@/lib/i18n";
+import { useAbVariant } from "@/lib/useAbVariant";
 
 export default function CTAButton({ onClick }: { onClick?: () => void }) {
   const [hovered, setHovered] = useState(false);
   const { t, currency } = useTranslation();
+  const { variant: abVariant, ready: abReady } = useAbVariant();
   const [minPrice, setMinPrice] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/api/pricing")
+    if (!abReady) return;
+    fetch(`/api/pricing?variant=${abVariant}`)
       .then((r) => r.json())
       .then((data) => {
         if (!data.pricing) return;
@@ -18,7 +21,7 @@ export default function CTAButton({ onClick }: { onClick?: () => void }) {
         if (prices.length > 0) setMinPrice(Math.min(...prices));
       })
       .catch(() => {});
-  }, [currency]);
+  }, [currency, abReady, abVariant]);
 
   return (
     <button

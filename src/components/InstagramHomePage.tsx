@@ -17,6 +17,7 @@ import SuccessPage from "@/components/SuccessPage";
 import type { ScanResult } from "@/components/ScanLoading";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { useTranslation, fmtPrice, LANG_LOCALE } from "@/lib/i18n";
+import { useAbVariant } from "@/lib/useAbVariant";
 
 type Step = "hero" | "shop" | "pickPosts" | "payment" | "success";
 
@@ -98,6 +99,7 @@ function InstagramHomePageInner() {
   const [hydrated, setHydrated] = useState(false);
   const posthog = usePostHog();
   const { t, lang, href, currency } = useTranslation();
+  const { variant: abVariant, ready: abReady } = useAbVariant();
 
   const platform = "instagram";
 
@@ -111,7 +113,8 @@ function InstagramHomePageInner() {
   const [minPrice, setMinPrice] = useState<number | null>(null);
   const [minPriceUsd, setMinPriceUsd] = useState<number | null>(null);
   useEffect(() => {
-    fetch("/api/pricing")
+    if (!abReady) return;
+    fetch(`/api/pricing?variant=${abVariant}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.pricing && Array.isArray(data.pricing) && data.pricing.length > 0) {
@@ -124,7 +127,7 @@ function InstagramHomePageInner() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [abReady, abVariant]);
 
   // Restore from sessionStorage after hydration
   useEffect(() => {

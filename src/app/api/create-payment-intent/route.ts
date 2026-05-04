@@ -8,8 +8,9 @@ export async function POST(req: NextRequest) {
   try {
     const country = req.headers.get("x-vercel-ip-country") || "";
     const body = await req.json();
-    const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency, lang: reqLang } = body;
+    const { cart, username, platform, postAssignments, email, promoCode, followersBefore, loyaltyDiscountCents, currency: reqCurrency, lang: reqLang, variant: reqVariant } = body;
     const lang = (["fr","es","pt","de"].includes(reqLang)) ? reqLang : "en";
+    const variant = (reqVariant === "A" || reqVariant === "B") ? reqVariant : "A";
     const validCurrencies = ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"];
     const currency = validCurrencies.includes(reqCurrency) ? reqCurrency : "eur";
 
@@ -92,6 +93,7 @@ export async function POST(req: NextRequest) {
         followersBefore: String(followersBefore || 0),
         lang,
         country,
+        variant,
       },
       description: `Fanovaly: ${description} ${currency === "usd" ? "for" : "pour"} @${username}`,
     });

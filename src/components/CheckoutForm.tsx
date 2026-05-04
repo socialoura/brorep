@@ -13,6 +13,7 @@ import type { CartItem } from "@/components/ServiceSelect";
 import RecentDeliveries from "@/components/RecentDeliveries";
 import type { PostAssignment } from "@/components/PostPicker";
 import type { YouTubeVideoInfo } from "@/components/YouTubeUrlInput";
+import { useAbVariant } from "@/lib/useAbVariant";
 
 function priceFor(item: CartItem, c: Currency): number {
   let v: number;
@@ -752,6 +753,7 @@ export default function CheckoutForm({
   videoInfo?: YouTubeVideoInfo | null;
 }) {
   const { t, lang, currency } = useTranslation();
+  const { variant: abVariant } = useAbVariant();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [appliedPromo, setAppliedPromo] = useState<string>("");
@@ -767,7 +769,7 @@ export default function CheckoutForm({
       const res = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart, username, platform, postAssignments, email: "", promoCode, followersBefore: followersBefore || 0, loyaltyDiscountCents: loyaltyCents, currency, lang }),
+        body: JSON.stringify({ cart, username, platform, postAssignments, email: "", promoCode, followersBefore: followersBefore || 0, loyaltyDiscountCents: loyaltyCents, currency, lang, variant: abVariant }),
       });
       const data = await res.json();
       if (data.error) {
@@ -778,7 +780,7 @@ export default function CheckoutForm({
     } catch {
       setError(t("checkout.serverError"));
     }
-  }, [cart, username, platform, postAssignments, followersBefore]);
+  }, [cart, username, platform, postAssignments, followersBefore, currency, lang, abVariant, t]);
 
   useEffect(() => {
     setIntentKey((k) => k + 1);

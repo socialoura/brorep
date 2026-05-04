@@ -323,9 +323,26 @@ export default function AdminPage() {
     <div style={{ minHeight: "100vh", background: "#050505", color: "#e8f7ed", fontFamily: "inherit", padding: "24px" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
-        <h1 style={{ fontSize: "24px", fontWeight: 700, margin: 0 }}>
-          Admin <span style={{ color: green }}>Fanovaly</span>
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <h1 style={{ fontSize: "24px", fontWeight: 700, margin: 0 }}>
+            Admin <span style={{ color: green }}>Fanovaly</span>
+          </h1>
+          <a
+            href="/admin/ab-test"
+            style={{
+              padding: "6px 12px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              color: "#fff",
+              background: "rgba(59,130,246,0.15)",
+              border: "1px solid rgba(59,130,246,0.3)",
+              textDecoration: "none",
+              fontWeight: 600,
+            }}
+          >
+            🧪 A/B Test
+          </a>
+        </div>
         <div style={{ display: "flex", gap: "4px", padding: "4px", borderRadius: "10px", backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
           {(["analytics", "orders", "pricing", "combos", "upsells", "smm"] as Tab[]).map((t) => (
             <button
