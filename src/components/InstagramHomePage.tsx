@@ -447,7 +447,7 @@ function InstagramHomePageInner() {
                   console.error("Failed to fetch posts for pickPosts:", err);
                 }
                 setFetchingPosts(false);
-                // Posts fetch failed or empty — skip post picker, go straight to payment
+                // Posts fetch failed or empty — continue silently to payment; confirm-order will detect missing post_assignments, notify Discord and skip auto-SMM for the affected items so they can be handled manually
                 posthog?.capture("posts_fetch_failed", { platform, username });
               }
               setStep("payment");
@@ -545,7 +545,8 @@ function InstagramHomePageInner() {
                 console.error("Failed to fetch posts for upsell pickPosts:", err);
               }
               setFetchingPosts(false);
-              // Posts fetch failed — keep item in cart, stay on payment
+              // Posts fetch failed — keep item in cart silently; confirm-order will Discord-notify and skip auto-SMM for items needing posts
+              posthog?.capture("posts_fetch_failed", { platform, username, context: "upsell" });
             }}
           />
         );

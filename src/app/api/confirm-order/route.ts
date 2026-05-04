@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createOrder, getOrderByPaymentIntent, addLoyaltyPoints, sql } from "@/lib/db";
 import { sendOrderConfirmationEmail } from "@/lib/email";
-import { sendDiscordOrderNotification } from "@/lib/discord";
+import { sendDiscordOrderNotification, sendDiscordManualActionNotification } from "@/lib/discord";
 import { placeOrder as placeSmmOrder, getOrderStatus as getSmmStatus } from "@/lib/bulkfollows";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -123,6 +123,29 @@ export async function POST(req: NextRequest) {
       console.error("Failed to send Discord notification:", discordErr);
     }
 
+    // Detect orders that need manual post assignment (scraper failed during checkout)
+    const NEEDS_POST_SERVICES = ["likes", "views", "yt_likes", "yt_views", "x_likes", "x_retweets"];
+    const hasPosts = Array.isArray(postAssignments) && postAssignments.length > 0;
+    const itemsNeedingPosts = (cart as { service: string; label: string; qty: number }[]).filter(
+      (i) => NEEDS_POST_SERVICES.includes(i.service)
+    );
+    const needsManualPostAssignment = !hasPosts && itemsNeedingPosts.length > 0;
+
+    if (needsManualPostAssignment && orderId) {
+      try {
+        await sendDiscordManualActionNotification({
+          orderId,
+          username,
+          platform: platform || "tiktok",
+          email: email || "",
+          reason: "Posts non récupérés au checkout (profil privé, rate-limit ou scraper bloqué). Contacter le client pour obtenir les URLs, remplir post_assignments en DB, puis lancer le SMM manuellement.",
+          affectedServices: itemsNeedingPosts.map((i) => ({ label: i.label, qty: i.qty })),
+        });
+      } catch (discordErr) {
+        console.error("Failed to send manual-action Discord notification:", discordErr);
+      }
+    }
+
     // Credit loyalty points (1€ = 10 pts, so cents / 10)
     if (email) {
       try {
@@ -188,6 +211,16 @@ export async function POST(req: NextRequest) {
             if (!svcId) continue;
 
             const needsPostUrl = ["likes", "views", "yt_likes", "yt_views", "x_likes", "x_retweets"].includes(item.service);
+
+            // Skip auto-SMM for items needing posts when no post_assignments were captured — admin handles manually after filling post_assignments
+            if (needsPostUrl && !hasPosts) {
+              smmResults.push({
+                service: item.service,
+                qty: item.qty,
+                error: "skipped: missing post_assignments — manual SMM required",
+              });
+              continue;
+            }
 
             // Collect all links to send orders to
             let links: { url: string; qty: number }[] = [];

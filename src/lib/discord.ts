@@ -77,3 +77,59 @@ export async function sendDiscordOrderNotification(params: OrderNotifParams) {
     console.error("Discord webhook error:", err);
   }
 }
+
+interface ManualActionNotifParams {
+  orderId: number;
+  username: string;
+  platform: string;
+  email: string;
+  reason: string;
+  affectedServices: { label: string; qty: number }[];
+  adminUrl?: string;
+}
+
+export async function sendDiscordManualActionNotification(params: ManualActionNotifParams) {
+  if (!DISCORD_WEBHOOK_URL) {
+    console.warn("DISCORD_WEBHOOK_URL not set, skipping manual-action notification");
+    return;
+  }
+
+  const { orderId, username, platform, email, reason, affectedServices, adminUrl } = params;
+  const platformLabel = platform === "youtube" ? "YouTube"
+    : platform === "tiktok" ? "TikTok"
+    : platform === "instagram" ? "Instagram"
+    : platform === "spotify" ? "Spotify"
+    : platform === "x" ? "X (Twitter)"
+    : platform === "twitch" ? "Twitch"
+    : platform;
+
+  const servicesLines = affectedServices
+    .map((s) => `> ${fmtQty(s.qty)} ${s.label}`)
+    .join("\n");
+
+  const embed = {
+    title: "\u26A0\uFE0F Action manuelle requise",
+    color: 0xffae00,
+    fields: [
+      { name: "#\uFE0F\u20E3 Commande", value: `#${orderId}`, inline: true },
+      { name: "\uD83D\uDC64 Utilisateur", value: `@${username}`, inline: true },
+      { name: "\uD83D\uDCF1 Plateforme", value: platformLabel, inline: true },
+      { name: "\uD83D\uDCE7 Email", value: email || "Non renseigné", inline: false },
+      { name: "\uD83D\uDEA8 Motif", value: reason, inline: false },
+      { name: "\uD83D\uDD27 Services en attente (auto-SMM skipped)", value: servicesLines || "-", inline: false },
+      ...(adminUrl ? [{ name: "\uD83D\uDD17 Admin", value: adminUrl, inline: false }] : []),
+    ],
+    timestamp: new Date().toISOString(),
+    footer: { text: "Fanovaly — nécessite intervention" },
+  };
+
+  try {
+    await fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds: [embed] }),
+    });
+  } catch (err) {
+    console.error("Discord manual-action webhook error:", err);
+  }
+}
