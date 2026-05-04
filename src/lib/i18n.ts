@@ -543,11 +543,14 @@ export function useTranslation() {
 
   const detectedCurrency = useDetectedCurrency();
   const currencyParam = searchParams.get("currency") as Currency | null;
-  const currency: Currency = currencyParam && ["eur", "usd", "gbp", "cad", "nzd", "chf"].includes(currencyParam)
+  const currency: Currency = currencyParam && ["eur", "usd", "gbp", "cad", "nzd", "aud", "chf"].includes(currencyParam)
     ? currencyParam
-    : detectedCurrency
-      ? detectedCurrency
-      : lang === "en" ? "usd" : lang === "de" ? "eur" : lang === "pt" ? "eur" : lang === "es" ? "usd" : "eur";
+    // lang=en => usd by default (overrides geo detection), unless user picked a currency explicitly via ?currency=
+    : lang === "en"
+      ? "usd"
+      : detectedCurrency
+        ? detectedCurrency
+        : lang === "de" ? "eur" : lang === "pt" ? "eur" : lang === "es" ? "usd" : "eur";
 
   return { t, lang, href, currency };
 }

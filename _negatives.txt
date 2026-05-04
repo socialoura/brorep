@@ -1,0 +1,149 @@
+﻿Rapport sur les mots clés à exclure
+Toute la période
+Mot clé à exclure	Mot clé ou liste	Campagne	Groupe d'annonces	Niveau	Type de correspondance
+1$	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""reddit"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+"""freer"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+f4f	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+apk	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""subscribers"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+"""how to"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+bot	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+template	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+meaning	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+cheat	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+gratis	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[buy tiktok engagement]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[buy 1000 tiktok followers]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+smm panel	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""hack"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+"""how do i"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+ways	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+step by step	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+mod	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""bumbumapp"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+[tiktok cheap likes]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+"""go viral"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+"""download"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+"""engagement"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+"""generator"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+way	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+trial	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+unlimited	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[tikfans bumbumapp]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+"""apk"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+"""app"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+no pay	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+fake	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""gratuit"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+canva	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+glitch	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+wiki	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+for beginners	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+generate	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+android	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+why	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+free trial	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+templates	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+# Bloquer le close-variant matching sur les termes pourris	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+capcut	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[freer tiktok]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[tiktok followers]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+zero cost	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+apps	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+methods	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+edit	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[tiktok likes buy cheap]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[buy cheap tiktok likes]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+ios	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+where	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+exchange	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+hack	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+how to	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+tutorial	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[buy 10000 tiktok followers cheap]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+"""tikfans"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+hashtags	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+step-by-step	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+tactic	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+script	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+hacking	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+viral sounds	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[cheapest tiktok followers]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+best time to post	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+youtube	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+strategy	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+hacker	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+definition	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+cheats	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+guide	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+book	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[buy tiktok subscribers]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[buy tiktok followers safe]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[best place to buy tiktok likes]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[tiktok likes buy]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+content ideas	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+botting	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+smm	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+strategies	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+tool	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+sub4sub	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""cheapest"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+beginners	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+method	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+panel	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+class	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+download	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+software	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[buy 10000 tiktok followers]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+trending audio	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""free"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+bots	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+what is	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+pdf	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+article	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+generator	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+tips	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+forum	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""tokupgrade"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+[buy legit tiktok followers]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[buy tiktok likes cheap]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+"""bot"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+tactics	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+earn	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+who	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+hacks	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+training	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[buy tiktok likes]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+quora	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+reddit	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""likes"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+wikipedia	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+masterclass	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+"""viral"""	Mot clé	Fanovaly [EN - US]	 --	Campagne	Expression exacte
+Editing	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+caption	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+blog	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+extension	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+explain	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+tricks	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+course	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+classes	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+rules	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[tokupgrade]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+when to post	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+app	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+ebook	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+ideas	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+schedule	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+secret	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+secrets	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+study	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+tools	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+[buy cheapest tiktok followers]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+[make my tiktok go viral]	Mot clé	Fanovaly [EN - US]	 --	Campagne	Mot clé exact
+follow for follow	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+$1	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+learn	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+learning	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large
+free	Mot clé	Fanovaly [EN - US]	 --	Campagne	Requête large

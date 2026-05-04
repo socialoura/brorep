@@ -1,0 +1,19 @@
+﻿Rapport sur les mots clés pour le Réseau de Recherche
+Toute la période
+État des mots clés	Mot clé	Type de correspondance	État	Motifs de l'état	URL finale	Clics	Impr.	CTR	Code de la devise	CPC moy.	Coût	Valeur de conv.	Taux de conv.	Conversions	Coût/conv.
+Activé	[instagram follower buy]	Mot clé exact	Éligible			34	289	"11,76%"	EUR	"1,13"	"38,50"	"26,87"	"38,24%"	"13,00"	"2,96"
+Activé	[buy instagram followers cheap 10k]	Mot clé exact	Éligible			0	0	 --	EUR	0	"0,00"	"0,00"	"0,00%"	"0,00"	"0,00"
+Activé	[get instagram followers]	Mot clé exact	Éligible			31	274	"11,31%"	EUR	"1,12"	"34,83"	"89,95"	"16,13%"	"5,00"	"6,97"
+Activé	"""instagram followers cheap"""	Expression exacte	Éligible			115	353	"32,58%"	EUR	"1,12"	"128,43"	"111,84"	"21,74%"	"25,00"	"5,14"
+Activé	[buy instagram followers]	Mot clé exact	Éligible			17	106	"16,04%"	EUR	"1,13"	"19,22"	"3,97"	"17,65%"	"3,00"	"6,41"
+Activé	[buy instagram followers real]	Mot clé exact	Éligible			13	105	"12,38%"	EUR	"1,13"	"14,70"	"119,93"	"53,85%"	"7,00"	"2,10"
+Activé	[instagram followers buy]	Mot clé exact	Éligible			0	0	 --	EUR	0	"0,00"	"0,00"	"0,00%"	"0,00"	"0,00"
+Activé	[how can you buy instagram followers]	Mot clé exact	Éligible			0	0	 --	EUR	0	"0,00"	"0,00"	"0,00%"	"0,00"	"0,00"
+ --		"Total : Tous les mots clés, sauf ceux supprimés"	 --			210	1 127	"18,63%"	EUR	"1,12"	"235,68"	"352,56"	"25,24%"	"53,00"	"4,45"
+		Total : Mots clés dans votre groupe d'annonces				210	1 127	"18,63%"	EUR	"1,12"	"235,68"	"352,56"	"25,24%"	"53,00"	"4,45"
+		Total : Vos mots clés				210	1 127	"18,63%"	EUR	"1,12"	"235,68"	"352,56"	"25,24%"	"53,00"	"4,45"
+		Total : Correspondances étendues AI Max				0	0	 --	EUR	0	"0,00"	"0,00"	"0,00%"	"0,00"	"0,00"
+		Total : Correspondances de pages de destination AI Max				0	0	 --	EUR	0	"0,00"	"0,00"	"0,00%"	"0,00"	"0,00"
+		Total : Inclusions d'URL dans votre groupe d'annonces				0	0	 --	EUR	0	"0,00"	"0,00"	"0,00%"	"0,00"	"0,00"
+		Total : Tests				0	0	 --	EUR	0	"0,00"	"0,00"	"0,00%"	"0,00"	"0,00"
+		Total : Groupe d'annonces				210	1 127	"18,63%"	EUR	"1,12"	"235,68"	"352,56"	"25,24%"	"53,00"	"4,45"

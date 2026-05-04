@@ -1,0 +1,10 @@
+﻿Rapport sur les zones géographiques correspondantes
+Toute la période
+Zone géographique correspondante	Ajust. des enchères	Ajoutée/Exclue	Clics	Impr.	CTR	Code de la devise	CPC moy.	Coût	Valeur de conv.	Valeur de conv./coût	Valeur de conv./clic	Taux de conv.	Conversions	Coût/conv.
+Australie	 --	Ajouté	19	130	"14,62%"	EUR	"1,15"	"21,94"	"10,47"	"0,48"	"0,55"	"15,79%"	"3,00"	"7,31"
+Royaume-Uni	 --	Ajouté	134	945	"14,18%"	EUR	"1,16"	"154,98"	"107,62"	"0,69"	"0,80"	"18,66%"	"25,00"	"6,20"
+Nouvelle-Zélande	 --	Ajouté	2	29	"6,90%"	EUR	"1,15"	"2,29"	"0,99"	"0,43"	"0,50"	"50,00%"	"1,00"	"2,29"
+Canada	 --	Ajouté	30	172	"17,44%"	EUR	"1,14"	"34,21"	"14,94"	"0,44"	"0,50"	"20,00%"	"6,00"	"5,70"
+États-Unis	 --	Ajouté	533	3 662	"14,55%"	EUR	"1,17"	"623,85"	"818,78"	"1,31"	"1,54"	"25,52%"	"136,00"	"4,59"
+Total : Zones géographiques			718	4 938	"14,54%"	EUR	"1,17"	"837,27"	"952,80"	"1,14"	"1,33"	"23,82%"	"171,00"	"4,90"
+Total : Campagne			718	4 938	"14,54%"	EUR	"1,17"	"837,27"	"952,80"	"1,14"	"1,33"	"23,82%"	"171,00"	"4,90"
