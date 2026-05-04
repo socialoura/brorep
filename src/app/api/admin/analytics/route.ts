@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         WHEN currency = 'chf' THEN ROUND(total_cents * ${rChf}::numeric)
         ELSE total_cents
       END
-    ), 0) as total FROM orders WHERE status = 'paid'`;
+    ), 0) as total FROM orders WHERE status IN ('paid', 'processing', 'delivered')`;
 
   // Orders today
   const today = await sql`SELECT COUNT(*) as count FROM orders WHERE created_at >= CURRENT_DATE`;
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         WHEN currency = 'chf' THEN ROUND(total_cents * ${rChf}::numeric)
         ELSE total_cents
       END
-    ), 0) as total FROM orders WHERE status = 'paid' AND created_at >= CURRENT_DATE`;
+    ), 0) as total FROM orders WHERE status IN ('paid', 'processing', 'delivered') AND created_at >= CURRENT_DATE`;
 
   // Orders last 7 days (per day) — convert all currencies to EUR
   const last7Days = await sql`
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
         END
       ) as revenue_cents
     FROM orders o, jsonb_array_elements(o.cart) as item
-    WHERE o.status = 'paid'
+    WHERE o.status IN ('paid', 'processing', 'delivered')
     GROUP BY item->>'service'
     ORDER BY revenue_cents DESC
   `;
@@ -132,7 +132,7 @@ export async function GET(req: NextRequest) {
           ELSE total_cents
         END AS eur_cents
       FROM orders
-      WHERE status = 'paid' AND email IS NOT NULL AND TRIM(email) <> ''
+      WHERE status IN ('paid', 'processing', 'delivered') AND email IS NOT NULL AND TRIM(email) <> ''
     ),
     per_customer AS (
       SELECT email_norm, SUM(eur_cents) AS total_eur_cents, COUNT(*) AS order_count
@@ -162,7 +162,7 @@ export async function GET(req: NextRequest) {
         END
       ) AS total_eur_cents
     FROM orders
-    WHERE status = 'paid' AND email IS NOT NULL AND TRIM(email) <> ''
+    WHERE status IN ('paid', 'processing', 'delivered') AND email IS NOT NULL AND TRIM(email) <> ''
     GROUP BY LOWER(TRIM(email))
     ORDER BY total_eur_cents DESC
     LIMIT 10
@@ -197,7 +197,7 @@ export async function GET(req: NextRequest) {
           END
         )) AS avg_cart_eur_cents
       FROM orders
-      WHERE status = 'paid'
+      WHERE status IN ('paid', 'processing', 'delivered')
       GROUP BY COALESCE(country, '??')
       ORDER BY revenue_eur_cents DESC
       LIMIT 20
@@ -211,7 +211,7 @@ export async function GET(req: NextRequest) {
       COUNT(*) AS order_count,
       SUM(total_cents) AS total_cents
     FROM orders
-    WHERE status = 'paid'
+    WHERE status IN ('paid', 'processing', 'delivered')
     GROUP BY COALESCE(currency, 'eur')
     ORDER BY total_cents DESC
   `;
@@ -232,7 +232,7 @@ export async function GET(req: NextRequest) {
         ), 0) as revenue,
         COALESCE(SUM(ROUND(cost_cents * ${rUsd}::numeric)), 0) as smm_cost
       FROM orders
-      WHERE status = 'paid' AND created_at >= CURRENT_DATE - INTERVAL '30 days'
+      WHERE status IN ('paid', 'processing', 'delivered') AND created_at >= CURRENT_DATE - INTERVAL '30 days'
       GROUP BY DATE(created_at)
     ),
     ad_days AS (
@@ -257,7 +257,7 @@ export async function GET(req: NextRequest) {
     WITH customer_orders AS (
       SELECT LOWER(TRIM(email)) AS email_norm, COUNT(*) AS cnt
       FROM orders
-      WHERE status = 'paid' AND email IS NOT NULL AND TRIM(email) <> ''
+      WHERE status IN ('paid', 'processing', 'delivered') AND email IS NOT NULL AND TRIM(email) <> ''
       GROUP BY LOWER(TRIM(email))
     )
     SELECT
@@ -293,7 +293,7 @@ export async function GET(req: NextRequest) {
         END
       )) AS avg_cart_eur_cents
     FROM orders
-    WHERE status = 'paid'
+    WHERE status IN ('paid', 'processing', 'delivered')
     GROUP BY platform
     ORDER BY revenue_eur_cents DESC
   `;
@@ -302,7 +302,7 @@ export async function GET(req: NextRequest) {
   const peakHours = await sql`
     SELECT EXTRACT(HOUR FROM created_at)::int AS hour, COUNT(*) AS count
     FROM orders
-    WHERE status = 'paid'
+    WHERE status IN ('paid', 'processing', 'delivered')
     GROUP BY EXTRACT(HOUR FROM created_at)::int
     ORDER BY hour
   `;
@@ -322,7 +322,7 @@ export async function GET(req: NextRequest) {
           ELSE (item->>'price')::numeric * 100
         END AS eur_cents
       FROM orders o, jsonb_array_elements(o.cart) AS item
-      WHERE o.status = 'paid' AND o.email IS NOT NULL AND TRIM(o.email) <> ''
+      WHERE o.status IN ('paid', 'processing', 'delivered') AND o.email IS NOT NULL AND TRIM(o.email) <> ''
     )
     SELECT
       service,
@@ -355,7 +355,7 @@ export async function GET(req: NextRequest) {
       ) v
       LEFT JOIN (
         SELECT COALESCE(country, '??') AS country, COUNT(*) AS order_count
-        FROM orders WHERE status = 'paid'
+        FROM orders WHERE status IN ('paid', 'processing', 'delivered')
         GROUP BY COALESCE(country, '??')
       ) o ON o.country = v.country
       ORDER BY conversion_pct DESC
